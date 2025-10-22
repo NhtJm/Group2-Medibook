@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/../config/config.php';
 session_start();
 
 /* ---- Helpers ---- */
@@ -77,6 +77,8 @@ $labels = [
 ];
 $title = 'MEDIBOOK — ' . ($labels[$page] ?? 'MediBook');
 $css = [STYLE_PATH . '/base.css', STYLE_PATH . '/header.css'];
+
+// Page-specific CSS
 if ($page === 'clinics')
   $css[] = STYLE_PATH . '/clinics.css';
 elseif ($page === 'clinic')
@@ -92,23 +94,25 @@ elseif ($page === 'home' || $page === 'dashboard')
 else
   $css[] = STYLE_PATH . '/login.css';
 
+
 /* Views map */
 $views = [
-  'home' => __DIR__ . '/app/views/home.php',
-  'login' => __DIR__ . '/app/views/auth/login.php',
-  'register' => __DIR__ . '/app/views/auth/register.php',
-  'register2' => __DIR__ . '/app/views/auth/register2.php',
-  'dashboard' => __DIR__ . '/app/views/user/dashboard.php',
-  'appointments' => __DIR__ . '/app/views/user/appointments.php',
-  'profile' => __DIR__ . '/app/views/user/profile.php',
-  'clinics' => __DIR__ . '/app/views/search/clinics.php',
-  'clinic' => __DIR__ . '/app/views/search/clinic.php',
-  'doctor' => __DIR__ . '/app/views/search/doctor.php',
-  'confirm' => __DIR__ . '/app/views/booking/confirm.php',
+  'home' => __DIR__ . '/../app/views/home.php',
+  'login' => __DIR__ . '/../app/views/auth/login.php',
+  'register' => __DIR__ . '/../app/views/auth/register.php',
+  'register2' => __DIR__ . '/../app/views/auth/register2.php',
+  'dashboard' => __DIR__ . '/../app/views/user/dashboard.php',
+  'appointments' => __DIR__ . '/../app/views/user/appointments.php',
+  'profile' => __DIR__ . '/../app/views/user/profile.php',
+  'clinics' => __DIR__ . '/../app/views/search/clinics.php',
+  'clinic' => __DIR__ . '/../app/views/search/clinic.php',
+  'doctor' => __DIR__ . '/../app/views/search/doctor.php',
+  'confirm' => __DIR__ . '/../app/views/booking/confirm.php',
 ];
 
 $brandTarget = current_user() ? 'dashboard' : 'home';
 ?>
+<!-- HTML TEMPLATE -->
 <!doctype html>
 <html lang="en">
 

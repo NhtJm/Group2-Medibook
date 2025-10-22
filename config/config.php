@@ -1,14 +1,17 @@
 <?php
-$https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-      || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
-$scheme = $https ? 'https://' : 'http://';
-$host   = $_SERVER['HTTP_HOST'] ?? 'localhost';
-$dir    = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/'), '/\\');  // "" or "/subdir"
+// --- (base URL) ---
+$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$dir  = rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/\\');
 
-define('BASE_URL',  rtrim($scheme.$host.$dir, '/') . '/');       // always ends with '/'
-define('ASSET_URL', BASE_URL . 'public/assets/');                // ends with '/'
+// BASE_URL point to public
+define('BASE_URL', 'http://' . $host . $dir . '/public' . '/');
 
-function asset($path){ return ASSET_URL . ltrim($path, '/'); }   // safe join
-define('STYLE_PATH', ASSET_URL . '/css');    // .../public/assets/css
-define('SCRIPT_PATH', ASSET_URL . '/js');    // .../public/assets/js
-define('IMAGE_PATH', ASSET_URL . '/images'); // .../public/assets/images
+// --- Resource paths ---
+define('ASSET_URL', BASE_URL . 'assets/');     // public/assets/
+define('STYLE_PATH',  BASE_URL . 'css/');     // public/assets/css/
+define('SCRIPT_PATH', BASE_URL . 'js/');      // public/assets/js/
+define('IMAGE_PATH',  BASE_URL . 'images/');  // public/assets/images/
+
+function asset($path) {
+    return rtrim(ASSET_URL, '/') . '/' . ltrim($path, '/');
+}
