@@ -172,6 +172,9 @@ $brandTarget = current_user() ? 'dashboard' : 'home';
       if (btn) { menu.classList.toggle('show'); return; }
       if (!box && menu) menu.classList.remove('show');
     });
+
+
+    
   </script>
 </body>
 
