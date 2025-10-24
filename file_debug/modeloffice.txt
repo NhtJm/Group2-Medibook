@@ -1,0 +1,132 @@
+<?php
+require_once __DIR__ . '/../app/model/OfficeModel.php';
+
+$officeModel = new OfficeModel();
+
+echo "<h2>=== TEST OFFICE MODEL ===</h2>";
+
+// =============================
+// TEST 1: Thêm office mới
+// =============================
+echo "<h3>== Test 1: Add Office ==</h3>";
+$officeRes = $officeModel->addOffice(
+    "Test Office ABC",
+    "123 Test Street",
+    "https://testoffice.com",
+    "logo.png",
+    "This is a test office",
+    "pending"
+);
+print_r($officeRes);
+
+$office_id = $officeRes['office_id'] ?? null;
+if (!$office_id) {
+    die("Cannot create office. Stop testing.");
+}
+
+// =============================
+// TEST 2: Lấy thông tin office theo ID
+// =============================
+echo "<h3>== Test 2: Get Office By ID ==</h3>";
+$office = $officeModel->getOfficeById($office_id);
+print_r($office);
+
+// =============================
+// TEST 3: Lấy tất cả office
+// =============================
+echo "<h3>== Test 3: Get All Offices ==</h3>";
+$allOffices = $officeModel->getAllOffices();
+print_r($allOffices);
+
+// =============================
+// TEST 4: Cập nhật office
+// =============================
+echo "<h3>== Test 4: Update Office ==</h3>";
+$updateOffice = $officeModel->updateOffice($office_id, [
+    "name" => "Updated Office ABC",
+    "address" => "456 Updated Street",
+    "website" => "https://updatedoffice.com"
+]);
+print_r($updateOffice);
+
+// =============================
+// TEST 5: Thêm số điện thoại cho office
+// =============================
+echo "<h3>== Test 5: Add Office Phone ==</h3>";
+$phoneRes = $officeModel->addPhone($office_id, "0988123456");
+print_r($phoneRes);
+
+// =============================
+// TEST 6: Lấy danh sách số điện thoại
+// =============================
+echo "<h3>== Test 6: Get Phones By Office ==</h3>";
+$phones = $officeModel->getPhonesByOffice($office_id);
+print_r($phones);
+
+// =============================
+// TEST 7: Cập nhật số điện thoại
+// =============================
+echo "<h3>== Test 7: Update Phone ==</h3>";
+$updatePhone = $officeModel->updatePhone($office_id, "0988123456", "0999888777");
+print_r($updatePhone);
+
+// Kiểm tra lại danh sách sau update
+$phones = $officeModel->getPhonesByOffice($office_id);
+echo "Updated Phones: ";
+print_r($phones);
+
+// =============================
+// TEST 8: Xóa số điện thoại
+// =============================
+echo "<h3>== Test 8: Delete Phone ==</h3>";
+$deletedPhone = $officeModel->deletePhone($office_id, "0999888777");
+print_r($deletedPhone);
+
+$phones = $officeModel->getPhonesByOffice($office_id);
+echo "Phones after deletion: ";
+print_r($phones);
+
+// =============================
+// TEST 9: Thêm slot (lịch trống) cho doctor (giả sử doctor_id = 1)
+// =============================
+echo "<h3>== Test 9: Add Slot ==</h3>";
+$slotRes = $officeModel->addSlot($office_id, 1, "2025-10-24 09:00:00", "2025-10-24 10:00:00");
+print_r($slotRes);
+$slot_id = $slotRes['slot_id'] ?? null;
+
+// =============================
+// TEST 10: Lấy slot theo ID
+// =============================
+echo "<h3>== Test 10: Get Slot By ID ==</h3>";
+if ($slot_id) {
+    $slot = $officeModel->getSlotById($slot_id);
+    print_r($slot);
+}
+
+// =============================
+// TEST 11: Cập nhật trạng thái slot
+// =============================
+echo "<h3>== Test 11: Update Slot Status ==</h3>";
+if ($slot_id) {
+    $updateSlot = $officeModel->updateSlotStatus($slot_id, "booked");
+    print_r($updateSlot);
+}
+
+// =============================
+// TEST 12: Xóa slot
+// =============================
+echo "<h3>== Test 12: Delete Slot ==</h3>";
+if ($slot_id) {
+    $deletedSlot = $officeModel->deleteSlot($slot_id);
+    print_r($deletedSlot);
+}
+
+// =============================
+// TEST 13: Xóa office
+// =============================
+echo "<h3>== Test 13: Delete Office ==</h3>";
+$deletedOffice = $officeModel->deleteOffice($office_id);
+print_r($deletedOffice);
+
+echo "<h3>All tests completed.</h3>";
+?>

@@ -1,0 +1,281 @@
+-- ==========================
+INSERT INTO Users (username, password_hash, name)
+VALUES
+('admin01', 'hash_pw1', 'Nguyen Van Admin'),
+('support01', 'hash_pw2', 'Tran Thi Support'),
+('dev01', 'hash_pw3', 'John Doe'),
+('design01', 'hash_pw4', 'Emma Brown'),
+
+-- ==========================
+
+('patient01', 'hash_pw5', 'Nguyen Van An'),
+('patient02', 'hash_pw6', 'Tran Thi Bich'),
+('patient03', 'hash_pw7', 'Le Van Cuong'),
+('patient04', 'hash_pw8', 'Pham Thi Dao'),
+('patient05', 'hash_pw9', 'Hoang Van Duc'),
+('patient06', 'hash_pw10', 'Do Thi Lan'),
+('patient07', 'hash_pw11', 'Bui Van Hung'),
+('patient08', 'hash_pw12', 'Dang Thi Mai'),
+('patient09', 'hash_pw13', 'Nguyen Van Nam'),
+('patient10', 'hash_pw14', 'Tran Thi Oanh'),
+('patient11', 'hash_pw15', 'Oliver Smith'),
+('patient12', 'hash_pw16', 'Sophia Johnson'),
+('patient13', 'hash_pw17', 'James Miller'),
+('patient14', 'hash_pw18', 'Isabella Davis'),
+('patient15', 'hash_pw19', 'William Wilson'),
+('patient16', 'hash_pw20', 'Mia Taylor'),
+('patient17', 'hash_pw21', 'Benjamin Anderson'),
+('patient18', 'hash_pw22', 'Charlotte Thomas'),
+('patient19', 'hash_pw23', 'Lucas Martinez'),
+('patient20', 'hash_pw24', 'Amelia Garcia'),
+
+-- ==========================
+
+('doctor01', 'hash_pw25', 'BS. Nguyen Van Bao'),
+('doctor02', 'hash_pw26', 'BS. Tran Thi Cam'),
+('doctor03', 'hash_pw27', 'BS. Le Van Dung'),
+('doctor04', 'hash_pw28', 'BS. Pham Thi Ha'),
+('doctor05', 'hash_pw29', 'BS. Hoang Van Hieu'),
+('doctor06', 'hash_pw30', 'BS. Do Thi Khanh'),
+('doctor07', 'hash_pw31', 'BS. Bui Van Long'),
+('doctor08', 'hash_pw32', 'BS. Dang Thi Minh'),
+('doctor09', 'hash_pw33', 'BS. Nguyen Van Phuc'),
+('doctor10', 'hash_pw34', 'BS. Tran Thi Quyen'),
+('doctor11', 'hash_pw35', 'Dr. Michael Scott'),
+('doctor12', 'hash_pw36', 'Dr. Emily Clark'),
+('doctor13', 'hash_pw37', 'Dr. David Lee'),
+('doctor14', 'hash_pw38', 'Dr. Sarah Adams'),
+('doctor15', 'hash_pw39', 'Dr. Daniel White'),
+('doctor16', 'hash_pw40', 'Dr. Emma Harris'),
+('doctor17', 'hash_pw41', 'Dr. Matthew Lewis'),
+('doctor18', 'hash_pw42', 'Dr. Olivia Hall'),
+('doctor19', 'hash_pw43', 'Dr. Christopher Young'),
+('doctor20', 'hash_pw44', 'Dr. Grace King');
+
+-- ==========================
+
+INSERT INTO User_phone (user_id, phone)
+VALUES
+(1,'0901111111'), (2,'0902222222'), (3,'0903333333'), (4,'0904444444'),
+(5,'0905555555'), (6,'0906666666'), (7,'0907777777'), (8,'0908888888'),
+(9,'0909999999'), (10,'0910000000'), (11,'0911111111'), (12,'0912222222'),
+(13,'0913333333'), (14,'0914444444'), (15,'0915555555'), (16,'0916666666'),
+(17,'0917777777'), (18,'0918888888'), (19,'0919999999'), (20,'0920000000'),
+(21,'0921111111'), (22,'0922222222'), (23,'0923333333'), (24,'0924444444'),
+(25,'0925555555'), (26,'0926666666'), (27,'0927777777'), (28,'0928888888'),
+(29,'0929999999'), (30,'0930000000'), (31,'0931111111'), (32,'0932222222'),
+(33,'0933333333'), (34,'0934444444'), (35,'0935555555'), (36,'0936666666'),
+(37,'0937777777'), (38,'0938888888'), (39,'0939999999'), (40,'0940000000'),
+(41,'0941111111'), (42,'0942222222'), (43,'0943333333'), (44,'0944444444');
+
+-- ==========================
+
+INSERT INTO Medical_specialty (name, description)
+VALUES
+('Cardiology','Heart and blood vessel care'),
+('Neurology','Brain and nervous system'),
+('Pediatrics','Child healthcare'),
+('Dermatology','Skin and hair treatment'),
+('Orthopedics','Bone and joint care'),
+('Psychiatry','Mental health treatment');
+
+-- ==========================
+
+INSERT INTO Office (name, address, website, logo, description, status)
+VALUES
+('Hanoi Central Hospital','123 Pho Hue, Hanoi','www.hch.vn','logo1.png','Top hospital in Hanoi','approved'),
+('Saigon Clinic','456 Le Loi, HCMC','www.sgclinic.vn','logo2.png','Private clinic in Saigon','approved'),
+('EuroCare Medical Center','12 Oxford St, London','www.eurocare.uk','logo3.png','European medical center','approved'),
+('New York General Hospital','789 Broadway, NYC','www.nygh.com','logo4.png','US based hospital','approved');
+
+-- ==========================
+
+INSERT INTO Office_phone (office_id, phone)
+VALUES
+(1,'0241111111'),(2,'0282222222'),(3,'+442033333333'),(4,'+12124444444');
+
+-- ==========================
+
+INSERT INTO Doctor (user_id, photo, degree, graduate, specialty_id)
+VALUES
+(25,'photo1.jpg','MD','Hanoi Medical University',1),
+(26,'photo2.jpg','MD','Hue Medical College',2),
+(27,'photo3.jpg','PhD','HCMC University of Medicine',3),
+(28,'photo4.jpg','MD','Thai Binh Medical University',4),
+(29,'photo5.jpg','MD','Can Tho Medical University',5),
+(30,'photo6.jpg','MD','Hanoi Medical University',6),
+(31,'photo7.jpg','PhD','University of Tokyo',1),
+(32,'photo8.jpg','MD','Seoul National University',2),
+(33,'photo9.jpg','MD','Harvard Medical School',3),
+(34,'photo10.jpg','MD','Oxford University',4),
+(35,'photo11.jpg','MD','Cambridge University',5),
+(36,'photo12.jpg','PhD','Stanford University',6),
+(37,'photo13.jpg','MD','University of Toronto',1),
+(38,'photo14.jpg','MD','University of Sydney',2),
+(39,'photo15.jpg','MD','Yale University',3),
+(40,'photo16.jpg','MD','Columbia University',4),
+(41,'photo17.jpg','PhD','MIT',5),
+(42,'photo18.jpg','MD','Imperial College London',6),
+(43,'photo19.jpg','MD','Paris University',1),
+(44,'photo20.jpg','PhD','Munich Medical School',2);
+
+-- ==========================
+
+INSERT INTO Patient (user_id, date_of_birth, status, payment)
+VALUES
+(5,'1990-01-10','active','insurance'),
+(6,'1985-02-15','active','cash'),
+(7,'2000-03-20','inactive','insurance'),
+(8,'1995-04-25','active','credit card'),
+(9,'1988-05-30','active','cash'),
+(10,'1992-06-05','inactive','insurance'),
+(11,'1991-07-12','active','insurance'),
+(12,'1987-08-18','active','cash'),
+(13,'1993-09-24','active','credit card'),
+(14,'1994-10-02','inactive','insurance'),
+(15,'1996-11-11','active','insurance'),
+(16,'1989-12-19','active','cash'),
+(17,'1997-01-21','active','credit card'),
+(18,'1998-02-28','inactive','insurance'),
+(19,'1990-03-15','active','insurance'),
+(20,'1992-04-07','active','cash'),
+(21,'1986-05-22','active','credit card'),
+(22,'1999-06-14','inactive','insurance'),
+(23,'1995-07-09','active','insurance'),
+(24,'1993-08-01','active','cash');
+
+-- ==========================
+
+INSERT INTO Web_staff (user_id, role, status)
+VALUES
+(1,'admin','online'),
+(2,'support','offline'),
+(3,'developer','online'),
+(4,'designer','offline');
+
+-- ==========================
+
+INSERT INTO Doctor_office (doctor_id, office_id)
+VALUES
+(1,1),(1,2),
+(2,1),(3,2),
+(4,1),(5,2),
+(6,1),(7,3),
+(8,3),(9,4),
+(10,4),(11,3),
+(12,3),(13,2),
+(14,2),(15,4),
+(16,4),(17,1),
+(18,1),(19,2),
+(20,3);
+
+-- ==========================
+
+INSERT INTO Slots_free (office_id, doctor_id, start, end, status)
+VALUES
+(1,1,'2025-10-01 09:00:00','2025-10-01 09:30:00','available'),
+(1,1,'2025-10-01 10:00:00','2025-10-01 10:30:00','available'),
+(2,2,'2025-10-01 09:00:00','2025-10-01 09:30:00','available'),
+(2,2,'2025-10-01 10:00:00','2025-10-01 10:30:00','available'),
+(2,3,'2025-10-02 09:00:00','2025-10-02 09:30:00','available'),
+(2,3,'2025-10-02 10:00:00','2025-10-02 10:30:00','unavailable'),
+(1,4,'2025-10-02 09:00:00','2025-10-02 09:30:00','available'),
+(1,4,'2025-10-02 10:00:00','2025-10-02 10:30:00','available'),
+(3,7,'2025-10-03 09:00:00','2025-10-03 09:30:00','available'),
+(3,7,'2025-10-03 10:00:00','2025-10-03 10:30:00','available'),
+(4,9,'2025-10-04 09:00:00','2025-10-04 09:30:00','available'),
+(4,9,'2025-10-04 10:00:00','2025-10-04 10:30:00','unavailable'),
+(3,11,'2025-10-05 09:00:00','2025-10-05 09:30:00','available'),
+(3,11,'2025-10-05 10:00:00','2025-10-05 10:30:00','available'),
+(3,12,'2025-10-05 11:00:00','2025-10-05 11:30:00','available'),
+(2,13,'2025-10-06 09:00:00','2025-10-06 09:30:00','available'),
+(2,14,'2025-10-06 10:00:00','2025-10-06 10:30:00','available'),
+(4,15,'2025-10-06 09:00:00','2025-10-06 09:30:00','available'),
+(4,16,'2025-10-06 10:00:00','2025-10-06 10:30:00','available'),
+(1,17,'2025-10-07 09:00:00','2025-10-07 09:30:00','available'),
+(1,17,'2025-10-07 10:00:00','2025-10-07 10:30:00','available'),
+(1,18,'2025-10-07 11:00:00','2025-10-07 11:30:00','available'),
+(2,19,'2025-10-08 09:00:00','2025-10-08 09:30:00','available'),
+(2,19,'2025-10-08 10:00:00','2025-10-08 10:30:00','available'),
+(3,20,'2025-10-08 09:00:00','2025-10-08 09:30:00','available'),
+(3,20,'2025-10-08 10:00:00','2025-10-08 10:30:00','available'),
+(3,20,'2025-10-08 11:00:00','2025-10-08 11:30:00','available'),
+(4,15,'2025-10-09 09:00:00','2025-10-09 09:30:00','available'),
+(4,16,'2025-10-09 10:00:00','2025-10-09 10:30:00','available'),
+(4,16,'2025-10-09 11:00:00','2025-10-09 11:30:00','unavailable');
+
+-- ==========================
+
+INSERT INTO Appointment (patient_id, slot_id, status)
+VALUES
+(1,1,'booked'),
+(2,2,'booked'),
+(3,3,'completed'),
+(4,4,'canceled'),
+(5,5,'booked'),
+(6,6,'no-show'),
+(7,7,'booked'),
+(8,8,'completed'),
+(9,9,'booked'),
+(10,10,'booked'),
+(11,11,'booked'),
+(12,12,'canceled'),
+(13,13,'booked'),
+(14,14,'booked'),
+(15,15,'completed'),
+(16,16,'booked'),
+(17,17,'booked'),
+(18,18,'no-show'),
+(19,19,'booked'),
+(20,20,'booked');
+
+-- ==========================
+
+INSERT INTO Problem_report (description, patient_id, doctor_id, office_id)
+VALUES
+('Late appointment',1,NULL,NULL),
+('Doctor absent',NULL,1,NULL),
+('Office closed without notice',NULL,NULL,1),
+('Billing issue',2,NULL,NULL),
+('Rude staff',NULL,NULL,2),
+('Doctor misdiagnosis',NULL,5,NULL),
+('Insurance rejected',3,NULL,NULL),
+('System error booking',4,NULL,NULL),
+('Doctor delay',NULL,6,NULL),
+('Office too crowded',NULL,NULL,3),
+('Wrong prescription',NULL,7,NULL),
+('App crash',5,NULL,NULL),
+('Doctor forgot record',NULL,8,NULL),
+('Payment double charged',6,NULL,NULL),
+('Office dirty',NULL,NULL,4),
+('Doctor not available',NULL,9,NULL),
+('Appointment canceled without reason',7,NULL,NULL),
+('Doctor rude',NULL,10,NULL),
+('Office address wrong',NULL,NULL,2),
+('Long wait time',8,NULL,NULL);
+
+-- ==========================
+
+INSERT INTO Handled (staff_id, report_id, description_action, status)
+VALUES
+(1,1,'Checked with doctor','resolved'),
+(1,2,'Updated schedule','resolved'),
+(2,3,'Fixed office info','resolved'),
+(2,4,'Escalated billing','open'),
+(3,5,'Investigated staff report','dismissed'),
+(3,6,'Requested re-evaluation','open'),
+(4,7,'Contacted insurance','open'),
+(4,8,'Restarted booking system','resolved'),
+(1,9,'Notified doctor','open'),
+(1,10,'Office warned','open'),
+(2,11,'Corrected prescription','resolved'),
+(2,12,'Bug logged to dev team','open'),
+(3,13,'Doctor reminded','open'),
+(3,14,'Refund processed','resolved'),
+(4,15,'Office cleaned','resolved'),
+(4,16,'Doctor verified available','dismissed'),
+(1,17,'Rescheduled appointment','open'),
+(2,18,'Doctor behavior reviewed','open'),
+(3,19,'Office address fixed','resolved'),
+(4,20,'Staff assigned to reduce wait','open');
+-- ==========================

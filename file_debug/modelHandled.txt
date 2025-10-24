@@ -1,0 +1,80 @@
+<?php
+require_once __DIR__ . '/../app/model/HandledModel.php';
+
+$handledModel = new HandledModel();
+
+echo "<h2>=== TESTING HandledModel ===</h2>";
+
+// ⚠️ Giả định bạn đã có sẵn 1 staff_id = 1 và 1 report_id = 1 trong database
+$staff_id = 1;
+$report_id = 1;
+
+// =============================
+// TEST 1: Thêm handled mới
+// =============================
+echo "<h3>== Test 1: Add Handled ==</h3>";
+$add = $handledModel->addHandled($staff_id, $report_id, "Investigating the reported issue");
+print_r($add);
+
+// =============================
+// TEST 2: Lấy tất cả handled
+// =============================
+echo "<h3>== Test 2: Get All Handled ==</h3>";
+$allHandled = $handledModel->getAllHandled();
+print_r($allHandled);
+
+// =============================
+// TEST 3: Lấy handled cụ thể theo staff_id + report_id
+// =============================
+echo "<h3>== Test 3: Get One Handled ==</h3>";
+$handledRecord = $handledModel->getHandled($staff_id, $report_id);
+print_r($handledRecord);
+
+// =============================
+// TEST 4: Cập nhật description_action
+// =============================
+echo "<h3>== Test 4: Update Description ==</h3>";
+$update1 = $handledModel->updateHandled($staff_id, $report_id, [
+    "description_action" => "Reviewed and escalated to admin"
+]);
+print_r($update1);
+
+// =============================
+// TEST 5: Cập nhật status
+// =============================
+echo "<h3>== Test 5: Update Status ==</h3>";
+$update2 = $handledModel->updateHandled($staff_id, $report_id, [
+    "status" => "resolved"
+]);
+print_r($update2);
+
+// =============================
+// TEST 6: Lấy tất cả report được handled bởi 1 staff
+// =============================
+echo "<h3>== Test 6: Get Handled Reports By Staff ==</h3>";
+$handledReports = $handledModel->getHandledReportsByStaff($staff_id);
+print_r($handledReports);
+
+// =============================
+// TEST 7: Lấy staff xử lý report cụ thể
+// =============================
+echo "<h3>== Test 7: Get Staff Handling Report ==</h3>";
+$staffForReport = $handledModel->getStaffHandledReport($report_id);
+print_r($staffForReport);
+
+// =============================
+// TEST 8: Xóa handled record
+// =============================
+echo "<h3>== Test 8: Delete Handled ==</h3>";
+$delete = $handledModel->deleteHandled($staff_id, $report_id);
+print_r($delete);
+
+// =============================
+// TEST 9: Kiểm tra lại tất cả handled sau khi xóa
+// =============================
+echo "<h3>== Test 9: Get All After Delete ==</h3>";
+$afterDelete = $handledModel->getAllHandled();
+print_r($afterDelete);
+
+echo "<h3>All HandledModel tests completed.</h3>";
+?>

@@ -1,0 +1,102 @@
+<?php
+require_once __DIR__ . '/../app/model/ProblemReportModel.php';
+
+$reportModel = new ProblemReportModel();
+
+echo "<h2>=== TESTING ProblemReportModel ===</h2>";
+
+// =============================
+// TEST 1: Thêm report (theo patient)
+// =============================
+echo "<h3>== Test 1: Add Report (Patient) ==</h3>";
+$report1 = $reportModel->addReport("Test report from patient", 1, null, null);
+print_r($report1);
+$report_id1 = $report1['report_id'] ?? null;
+
+// =============================
+// TEST 2: Thêm report (theo doctor)
+// =============================
+echo "<h3>== Test 2: Add Report (Doctor) ==</h3>";
+$report2 = $reportModel->addReport("Doctor report example", null, 1, null);
+print_r($report2);
+$report_id2 = $report2['report_id'] ?? null;
+
+// =============================
+// TEST 3: Thêm report (theo office)
+// =============================
+echo "<h3>== Test 3: Add Report (Office) ==</h3>";
+$report3 = $reportModel->addReport("Office report example", null, null, 1);
+print_r($report3);
+$report_id3 = $report3['report_id'] ?? null;
+
+// =============================
+// TEST 4: Lấy tất cả report
+// =============================
+echo "<h3>== Test 4: Get All Reports ==</h3>";
+$allReports = $reportModel->getAllReports();
+print_r($allReports);
+
+// =============================
+// TEST 5: Lấy report theo ID
+// =============================
+echo "<h3>== Test 5: Get Report by ID ==</h3>";
+if ($report_id1) {
+    $singleReport = $reportModel->getReportById($report_id1);
+    print_r($singleReport);
+} else {
+    echo "Report ID không tồn tại.<br>";
+}
+
+// =============================
+// TEST 6: Lấy report theo patient_id
+// =============================
+echo "<h3>== Test 6: Get Reports by Patient ==</h3>";
+$patientReports = $reportModel->getReportsByPatient(1);
+print_r($patientReports);
+
+// =============================
+// TEST 7: Lấy report theo doctor_id
+// =============================
+echo "<h3>== Test 7: Get Reports by Doctor ==</h3>";
+$doctorReports = $reportModel->getReportsByDoctor(1);
+print_r($doctorReports);
+
+// =============================
+// TEST 8: Lấy report theo office_id
+// =============================
+echo "<h3>== Test 8: Get Reports by Office ==</h3>";
+$officeReports = $reportModel->getReportsByOffice(1);
+print_r($officeReports);
+
+// =============================
+// TEST 9: Cập nhật nội dung report
+// =============================
+echo "<h3>== Test 9: Update Report Description ==</h3>";
+if ($report_id1) {
+    $update = $reportModel->updateReportDescription($report_id1, "Updated description for patient report");
+    print_r($update);
+    $updatedData = $reportModel->getReportById($report_id1);
+    print_r($updatedData);
+} else {
+    echo "Không có report để update.<br>";
+}
+
+// =============================
+// TEST 10: Xóa report
+// =============================
+echo "<h3>== Test 10: Delete Reports ==</h3>";
+if ($report_id1) {
+    echo "Deleting report_id = $report_id1<br>";
+    print_r($reportModel->deleteReport($report_id1));
+}
+if ($report_id2) {
+    echo "Deleting report_id = $report_id2<br>";
+    print_r($reportModel->deleteReport($report_id2));
+}
+if ($report_id3) {
+    echo "Deleting report_id = $report_id3<br>";
+    print_r($reportModel->deleteReport($report_id3));
+}
+
+echo "<h3>All ProblemReportModel tests completed.</h3>";
+?>
