@@ -22,6 +22,12 @@ class HomeController
             case 'contact':
                 $this->contact();
                 break;
+            case 'doctors': //CHANGE HERE
+                $this->doctors(); //CHANGE HERE
+                break;
+            case 'offices': //CHANGE HERE
+                $this->offices(); //CHANGE HERE
+                break;
             default:
                 $this->homepage();
                 break;
@@ -32,19 +38,29 @@ class HomeController
     {
         $popularSpecialties = $this->doctorModel->getAllSpecialties();
         $featuredOffices = $this->officeModel->getAllOffices();
-        
+
         $data = [
             'specialties' => $popularSpecialties,
             'offices' => $featuredOffices,
         ];
 
         extract($data);
+        //Already have
         require_once __DIR__ . "/../views/home.php";
     }
 
     private function about()
     {
         //*******MISSING**************
+        $teamMembers = [ //CHANGE HERE
+            ['name' => 'Dr. John Smith', 'role' => 'Founder & Chief Doctor', 'bio' => 'Over 20 years of experience in healthcare.'], //CHANGE HERE
+            ['name' => 'Anna Nguyen', 'role' => 'Lead Web Developer', 'bio' => 'Responsible for platform development and UI/UX.'], //CHANGE HERE
+            ['name' => 'David Tran', 'role' => 'Marketing Manager', 'bio' => 'Handles brand communication and outreach.'], //CHANGE HERE
+        ]; //CHANGE HERE
+
+        $data = ['team' => $teamMembers]; //CHANGE HERE
+        extract($data); //CHANGE HERE
+        //MISSING*************************
         require_once __DIR__ . "/../views/about.php";
     }
 
@@ -76,6 +92,41 @@ class HomeController
         }
 
         //*******MISSING**************
+        $contactList = $contactModel->getAllContacts(); //CHANGE HERE
+        $data['contacts'] = $contactList; //CHANGE HERE
+        extract($data); //CHANGE HERE
+        //MISSING*************************
         require_once __DIR__ . "/../views/contact.php";
     }
+
+    private function doctors() //CHANGE HERE
+    {
+        $doctors = $this->doctorModel->getAllDoctors(); //CHANGE HERE
+        $specialties = $this->doctorModel->getAllSpecialties(); //CHANGE HERE
+
+        $data = [
+            'doctors' => $doctors,
+            'specialties' => $specialties,
+        ]; //CHANGE HERE
+
+        extract($data); //CHANGE HERE
+        //MISSING*************************
+        require_once __DIR__ . "/../views/doctors.php"; //CHANGE HERE
+    }
+
+    private function offices() //CHANGE HERE
+    {
+        $offices = $this->officeModel->getAllOffices(); //CHANGE HERE
+
+        foreach ($offices as &$office) { //CHANGE HERE
+            $office['specialties'] = $this->officeModel->getSpecialtiesByOffice($office['office_id']); //CHANGE HERE
+            $office['phones'] = $this->officeModel->getPhonesByOffice($office['office_id']); //CHANGE HERE
+        } //CHANGE HERE
+
+        $data = ['offices' => $offices]; //CHANGE HERE
+        extract($data); //CHANGE HERE
+        //MISSING*******************
+        require_once __DIR__ . "/../views/offices.php"; //CHANGE HERE
+    }
 }
+?>

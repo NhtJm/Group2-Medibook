@@ -1,16 +1,19 @@
 <?php
 require_once __DIR__ . "/../model/DoctorModel.php";
 require_once __DIR__ . "/../model/OfficeModel.php";
+require_once __DIR__ . "/../model/AppointmentModel.php"; // CHANGE HERE
 
 class DoctorController
 {
     private $doctorModel;
     private $officeModel;
+    private $appointmentModel; // CHANGE HERE
 
     public function __construct()
     {
         $this->doctorModel = new DoctorModel();
         $this->officeModel = new OfficeModel();
+        $this->appointmentModel = new AppointmentModel(); // CHANGE HERE
     }
 
     public function index($action)
@@ -25,8 +28,12 @@ class DoctorController
             case 'featured':
                 $this->getFeaturedDoctors();
                 break;
+            case 'list': // CHANGE HERE
+                $this->listAllDoctors(); // CHANGE HERE
+                break;
             default:
                 // Handle default or not found action
+                $this->listAllDoctors(); // CHANGE HERE
                 break;
         }
     }
@@ -49,7 +56,20 @@ class DoctorController
         $query = $_GET['q'] ?? '';
         $location = $_GET['loc'] ?? '';
 
-        $results = $this->doctorModel->searchDoctors($query, $location);
+        $results = $this->doctorModel->getAllDoctors(); // CHANGE HERE
+
+        // Giả lập lọc theo tên chuyên khoa hoặc địa chỉ phòng khám // CHANGE HERE
+        if (!empty($query)) {
+            $results = array_filter($results, function ($d) use ($query) {
+                return stripos($d['specialty_name'], $query) !== false
+                    || stripos($d['degree'], $query) !== false;
+            });
+        }
+        if (!empty($location)) {
+            $results = array_filter($results, function ($d) use ($location) {
+                return stripos($d['office_name'], $location) !== false;
+            });
+        }
 
         $data = [
             'query' => $query,
@@ -64,7 +84,8 @@ class DoctorController
 
     private function getFeaturedDoctors()
     {
-        $featured = $this->doctorModel->getFeaturedDoctors(3);
+        $featured = $this->doctorModel->getAllDoctors(); // CHANGE HERE
+        $featured = array_slice($featured, 0, 3); // CHANGE HERE
 
         $data = [
             'featured' => $featured,
@@ -73,6 +94,15 @@ class DoctorController
         extract($data);
         //*******MISSING**************
         require_once __DIR__ . "/../views/doctor/featured.php";
+    }
+
+    private function listAllDoctors() // CHANGE HERE
+    {
+        $doctors = $this->doctorModel->getAllDoctors(); // CHANGE HERE
+        $data = ['doctors' => $doctors]; // CHANGE HERE
+        extract($data); // CHANGE HERE
+        //*******MISSING**************
+        require_once __DIR__ . "/../views/doctor/list.php"; // CHANGE HERE
     }
 
     public function editProfile($doctor_id)
@@ -90,13 +120,16 @@ class DoctorController
         }
 
         $allSpecialties = $this->doctorModel->getAllSpecialties();
+        $allOffices = $this->officeModel->getAllOffices(); // CHANGE HERE
 
         $data = [
             'doctor' => $doctorProfile,
             'specialties' => $allSpecialties,
+            'offices' => $allOffices, // CHANGE HERE
         ];
 
         extract($data);
+        //*******MISSING**************
         require_once __DIR__ . "/../views/doctor/edit_profile.php";
     }
 
@@ -114,29 +147,22 @@ class DoctorController
             exit;
         }
 
-        $userId = $doctor['user_id'];
-
-        $userData = [
-            'name' => $_POST['full_name'] ?? null,
-            'username' => $_POST['email'] ?? null,
-        ];
-        
+        // Doctor không phải là user, nên chỉ cập nhật trong Doctor table // CHANGE HERE
         $doctorData = [
             'specialty_id' => $_POST['specialty_id'] ?? null,
             'degree' => $_POST['degree'] ?? null,
             'graduate' => $_POST['graduate_year'] ?? null,
             'photo' => $_POST['current_photo'] ?? null,
+            'office_id' => $_POST['office_id'] ?? null, // CHANGE HERE
         ];
 
-        $userUpdateResult = $this->userModel->updateUser($userId, $userData);
-        $doctorUpdateResult = $this->doctorModel->updateDoctor($doctor_id, $doctorData);
+        $doctorUpdateResult = $this->doctorModel->updateDoctor($doctor_id, $doctorData); // CHANGE HERE
 
-        if ($userUpdateResult['status'] === 'success' || $doctorUpdateResult['status'] === 'success') {
-            session_start();
-            $_SESSION['message'] = 'Profile updated successfully.';
+        session_start(); // CHANGE HERE
+        if ($doctorUpdateResult['status'] === 'success') {
+            $_SESSION['message'] = 'Profile updated successfully.'; // CHANGE HERE
         } else {
-            session_start();
-            $_SESSION['error'] = 'Failed to update profile. Please check the logs.';
+            $_SESSION['error'] = 'Failed to update profile. Please check the logs.'; // CHANGE HERE
         }
 
         header("Location: " . BASE_URL . "index.php?page=doctor&action=edit&id=" . $doctor_id);
@@ -150,12 +176,17 @@ class DoctorController
         $summary = [];
         foreach ($appointments as $appt) {
             $summary[] = [
-                'date' => (new DateTime($appt['start']))->format('Y-m-d'),
-                'time' => (new DateTime($appt['start']))->format('H:i'),
+                'date' => (new DateTime($appt['start_time']))->format('Y-m-d'), // CHANGE HERE
+                'time' => (new DateTime($appt['start_time']))->format('H:i'), // CHANGE HERE
                 'patient_name' => $appt['patient_name'],
                 'status' => $appt['status']
             ];
         }
-        return $summary;
-    }   
+
+        $data = ['summary' => $summary]; // CHANGE HERE
+        extract($data); // CHANGE HERE
+        //*******MISSING**************
+        require_once __DIR__ . "/../views/doctor/appointment_summary.php"; // CHANGE HERE
+    }
 }
+?>

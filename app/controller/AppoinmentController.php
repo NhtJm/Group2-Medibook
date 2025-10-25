@@ -3,6 +3,8 @@ require_once __DIR__ . "/../model/AppointmentModel.php";
 require_once __DIR__ . "/../model/DoctorModel.php";
 require_once __DIR__ . "/../model/OfficeModel.php";
 require_once __DIR__ . "/../model/UserModel.php";
+//CHANGE HERE
+require_once __DIR__ . "/../model/ProblemReportModel.php"; //CHANGE HERE
 
 class AppointmentController
 {
@@ -10,6 +12,8 @@ class AppointmentController
     private $doctorModel;
     private $officeModel;
     private $userModel;
+    //CHANGE HERE
+    private $problemReportModel; //CHANGE HERE
 
     public function __construct()
     {
@@ -17,6 +21,8 @@ class AppointmentController
         $this->doctorModel = new DoctorModel();
         $this->officeModel = new OfficeModel();
         $this->userModel = new UserModel();
+        //CHANGE HERE
+        $this->problemReportModel = new ProblemReportModel(); //CHANGE HERE
     }
 
     private function getUserId()
@@ -49,6 +55,10 @@ class AppointmentController
             case 'list':
                 $this->listAppointments();
                 break;
+            //CHANGE HERE
+            case 'report': //CHANGE HERE
+                $this->reportProblem($_POST['appointment_id'] ?? null, $_POST['description'] ?? ''); //CHANGE HERE
+                break; //CHANGE HERE
             default:
                 $this->listAppointments();
                 break;
@@ -94,7 +104,8 @@ class AppointmentController
             exit;
         }
 
-        $result = $this->appointmentModel->deleteAppointment($appointment_id);
+        //CHANGE HERE
+        $result = $this->appointmentModel->updateAppointmentStatus($appointment_id, 'canceled'); //CHANGE HERE
 
         if ($result['status'] === 'success') {
             $_SESSION['message'] = 'Appointment successfully cancelled.';
@@ -116,7 +127,8 @@ class AppointmentController
             }
 
             // Lấy thông tin chi tiết của slot, doctor và office để hiển thị xác nhận
-            $slot = $this->officeModel->getSlotById($slotId);
+            //CHANGE HERE
+            $slot = $this->officeModel->getSlotById($slotId) ?? null; //CHANGE HERE
             if (!$slot) {
                 $_SESSION['error'] = 'Invalid slot ID.';
                 header("Location: " . BASE_URL . "index.php?page=dashboard");
@@ -133,6 +145,7 @@ class AppointmentController
             ];
 
             extract($data);
+            //Already have
             require_once __DIR__ . "/../views/confirm.php";
             return;
         }
@@ -154,7 +167,7 @@ class AppointmentController
                 header("Location: " . BASE_URL . "index.php?page=appointments");
             } else {
                 $_SESSION['error'] = 'Booking failed: ' . $result['message'];
-                header("Location: " . BASE_URL . "index.php?page=doctor&id=" . $_POST['doctor_id']);
+                header("Location: " . BASE_URL . "index.php?page=doctor&id=" . ($_POST['doctor_id'] ?? ''));
             }
             exit;
         }
@@ -169,7 +182,8 @@ class AppointmentController
             exit;
         }
 
-        $slotDetails = $this->officeModel->getSlotById($slot_id);
+        //CHANGE HERE
+        $slotDetails = $this->officeModel->getSlotById($slot_id); //CHANGE HERE
         $patient = $this->userModel->getUserById($patientId);
 
         if (!$slotDetails || $slotDetails['status'] !== 'available') {
@@ -184,6 +198,36 @@ class AppointmentController
         ];
         
         extract($data);
+        //already have
         require_once __DIR__ . "/../views/confirm.php";
     }
+
+    //CHANGE HERE
+    private function reportProblem($appointment_id, $description) //CHANGE HERE
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($appointment_id) || empty(trim($description))) { //CHANGE HERE
+            $_SESSION['error'] = 'Invalid report submission.'; //CHANGE HERE
+            header("Location: " . BASE_URL . "index.php?page=appointments"); //CHANGE HERE
+            exit; //CHANGE HERE
+        } //CHANGE HERE
+
+        $userId = $this->getUserId(); //CHANGE HERE
+        $appointment = $this->appointmentModel->getAppointmentById($appointment_id); //CHANGE HERE
+        if (!$appointment) { //CHANGE HERE
+            $_SESSION['error'] = 'Appointment not found.'; //CHANGE HERE
+            header("Location: " . BASE_URL . "index.php?page=appointments"); //CHANGE HERE
+            exit; //CHANGE HERE
+        } //CHANGE HERE
+
+        $result = $this->problemReportModel->addReport($description, $userId, null, null); //CHANGE HERE
+        if ($result['status'] === 'success') { //CHANGE HERE
+            $_SESSION['message'] = 'Report successfully submitted!'; //CHANGE HERE
+        } else { //CHANGE HERE
+            $_SESSION['error'] = 'Report failed: ' . $result['message']; //CHANGE HERE
+        } //CHANGE HERE
+
+        header("Location: " . BASE_URL . "index.php?page=appointments"); //CHANGE HERE
+        exit; //CHANGE HERE
+    } //CHANGE HERE
 }
+?>
