@@ -10,7 +10,15 @@ class OfficeModel {
 
     /* ===================== OFFICE ===================== */
 
-    public function addOffice($name, $address, $website, $logo, $description, $status = 'pending') {
+    public function addOffice($user_id, $name, $address, $website, $logo, $description, $status = 'pending') { // CHANGE HERE
+        // Check if user exists // CHANGE HERE
+        $checkUser = $this->conn->prepare("SELECT user_id FROM Users WHERE user_id = ?"); // CHANGE HERE
+        $checkUser->bind_param("i", $user_id); // CHANGE HERE
+        $checkUser->execute(); // CHANGE HERE
+        if ($checkUser->get_result()->num_rows === 0) { // CHANGE HERE
+            return ["status" => "fail", "message" => "User not found"]; // CHANGE HERE
+        }
+
         // Check for duplicate office by name or address
         $check = $this->conn->prepare("SELECT * FROM Office WHERE name = ? OR address = ?");
         $check->bind_param("ss", $name, $address);
@@ -20,10 +28,10 @@ class OfficeModel {
         }
 
         $stmt = $this->conn->prepare("
-            INSERT INTO Office (name, address, website, logo, description, status)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO Office (user_id, name, address, website, logo, description, status)  -- CHANGE HERE
+            VALUES (?, ?, ?, ?, ?, ?, ?)  -- CHANGE HERE
         ");
-        $stmt->bind_param("ssssss", $name, $address, $website, $logo, $description, $status);
+        $stmt->bind_param("issssss", $user_id, $name, $address, $website, $logo, $description, $status); // CHANGE HERE
         $stmt->execute();
 
         return $stmt->affected_rows > 0
@@ -32,14 +40,23 @@ class OfficeModel {
     }
 
     public function getOfficeById($office_id) {
-        $stmt = $this->conn->prepare("SELECT * FROM Office WHERE office_id = ?");
+        $stmt = $this->conn->prepare("
+            SELECT o.*, u.username, u.email  -- CHANGE HERE
+            FROM Office o
+            JOIN Users u ON o.user_id = u.user_id  -- CHANGE HERE
+            WHERE o.office_id = ?  -- CHANGE HERE
+        ");
         $stmt->bind_param("i", $office_id);
         $stmt->execute();
         return $stmt->get_result()->fetch_assoc();
     }
 
     public function getAllOffices() {
-        $query = "SELECT * FROM Office";
+        $query = "
+            SELECT o.office_id, o.name, o.address, o.status, u.username, u.email  -- CHANGE HERE
+            FROM Office o
+            JOIN Users u ON o.user_id = u.user_id  -- CHANGE HERE
+        ";
         return $this->conn->query($query)->fetch_all(MYSQLI_ASSOC);
     }
 
@@ -54,11 +71,30 @@ class OfficeModel {
         $types = '';
         $values = [];
 
+        // Allow updating user_id if provided // CHANGE HERE
+        if (isset($data['user_id'])) { // CHANGE HERE
+            $checkUser = $this->conn->prepare("SELECT user_id FROM Users WHERE user_id = ?"); // CHANGE HERE
+            $checkUser->bind_param("i", $data['user_id']); // CHANGE HERE
+            $checkUser->execute(); // CHANGE HERE
+            if ($checkUser->get_result()->num_rows === 0) { // CHANGE HERE
+                return ["status" => "fail", "message" => "Invalid user_id"]; // CHANGE HERE
+            }
+            $fields[] = "user_id = ?"; // CHANGE HERE
+            $types .= 'i'; // CHANGE HERE
+            $values[] = $data['user_id']; // CHANGE HERE
+        }
+
         foreach ($data as $key => $value) {
+            if ($key === 'user_id') continue; // CHANGE HERE
             $fields[] = "$key = ?";
-            $types .= 's'; // assuming all fields are strings for simplicity
+            $types .= 's';
             $values[] = $value;
         }
+
+        if (empty($fields)) {
+            return ["status" => "fail", "message" => "No data to update"];
+        }
+
         $values[] = $office_id;
         $types .= 'i';
 
@@ -73,14 +109,6 @@ class OfficeModel {
     }
 
     public function deleteOffice($office_id) {
-        // Check if office has related slots or doctors
-        $check = $this->conn->prepare("SELECT * FROM Doctor_office WHERE office_id = ?");
-        $check->bind_param("i", $office_id);
-        $check->execute();
-        if ($check->get_result()->num_rows > 0) {
-            return ["status" => "fail", "message" => "Cannot delete office with assigned doctors"];
-        }
-
         $stmt = $this->conn->prepare("DELETE FROM Office WHERE office_id = ?");
         $stmt->bind_param("i", $office_id);
         $stmt->execute();
@@ -109,7 +137,7 @@ class OfficeModel {
         $stmt->execute();
 
         return $stmt->affected_rows > 0
-            ? ["status" => "success", "office_id" => $office_id, "phone_id" => $stmt->insert_id]
+            ? ["status" => "success", "office_id" => $office_id]
             : ["status" => "fail"];
     }
 
@@ -154,82 +182,42 @@ class OfficeModel {
             : ["status" => "fail"," message" => "Delete failed"];
     }
 
-    /* ===================== SLOTS FREE ===================== */
+    /* ===================== OFFICE HAS SPECIALTY ===================== */ // CHANGE HERE
 
-    public function addSlot($office_id, $doctor_id, $start, $end, $status = 'available') {
-        // check for duplicate slot by time overlap
-        $check = $this->conn->prepare("
-            SELECT * FROM Slots_free 
-            WHERE doctor_id = ? AND office_id = ? 
-            AND ((start <= ? AND end > ?) OR (start < ? AND end >= ?))
-        ");
-        $check->bind_param("iissss", $doctor_id, $office_id, $start, $start, $end, $end);
-        $check->execute();
-        if ($check->get_result()->num_rows > 0) {
-            return ["status" => "fail", "message" => "Time slot overlaps with existing one"];
-        }
-
-        $status_array = ['available', 'unavailable'];
-        if (!in_array($status, $status_array)) {
-            return ["status" => "fail", "message" => "Invalid status value"];
-        }
-
+    public function addOfficeSpecialty($office_id, $specialty_id) { // CHANGE HERE
         $stmt = $this->conn->prepare("
-            INSERT INTO Slots_free (office_id, doctor_id, start, end, status)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO Office_has_specialty (office_id, specialty_id)
+            VALUES (?, ?)  -- CHANGE HERE
         ");
-        $stmt->bind_param("iisss", $office_id, $doctor_id, $start, $end, $status);
-        $stmt->execute();
-
-        return $stmt->affected_rows > 0
-            ? ["status" => "success", "slot_id" => $stmt->insert_id]
-            : ["status" => "fail"];
-    }
-
-    public function getSlotById($slot_id) {
-        $stmt = $this->conn->prepare("
-            SELECT s.*, o.name AS office_name, d.doctor_id
-            FROM Slots_free s
-            JOIN Office o ON s.office_id = o.office_id
-            JOIN Doctor d ON s.doctor_id = d.doctor_id
-            WHERE s.slot_id = ?
-        ");
-        $stmt->bind_param("i", $slot_id);
-        $stmt->execute();
-        return $stmt->get_result()->fetch_assoc();
-    }
-
-    public function getSlotsByDoctor($doctor_id) {
-        $stmt = $this->conn->prepare("
-            SELECT s.*, o.name AS office_name
-            FROM Slots_free s
-            JOIN Office o ON s.office_id = o.office_id
-            WHERE s.doctor_id = ?
-            ORDER BY s.start
-        ");
-        $stmt->bind_param("i", $doctor_id);
-        $stmt->execute();
-        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-    }
-
-    public function updateSlotStatus($slot_id, $status) {
-        $stmt = $this->conn->prepare("
-            UPDATE Slots_free SET status = ? WHERE slot_id = ?
-        ");
-        $stmt->bind_param("si", $status, $slot_id);
+        $stmt->bind_param("ii", $office_id, $specialty_id); // CHANGE HERE
         $stmt->execute();
         return $stmt->affected_rows > 0
-            ? ["status" => "success", "slot_id" => $slot_id]
-            : ["status" => "fail", "message" => "Update failed"];
+            ? ["status" => "success"]
+            : ["status" => "fail", "message" => "Insert failed"];
     }
 
-    public function deleteSlot($slot_id) {
-        $stmt = $this->conn->prepare("DELETE FROM Slots_free WHERE slot_id = ?");
-        $stmt->bind_param("i", $slot_id);
+    public function deleteOfficeSpecialty($office_id, $specialty_id) { // CHANGE HERE
+        $stmt = $this->conn->prepare("
+            DELETE FROM Office_has_specialty
+            WHERE office_id = ? AND specialty_id = ?  -- CHANGE HERE
+        ");
+        $stmt->bind_param("ii", $office_id, $specialty_id); // CHANGE HERE
         $stmt->execute();
         return $stmt->affected_rows > 0
             ? ["status" => "success"]
             : ["status" => "fail", "message" => "Delete failed"];
+    }
+
+    public function getSpecialtiesByOffice($office_id) { // CHANGE HERE
+        $stmt = $this->conn->prepare("
+            SELECT s.specialty_id, s.name
+            FROM Office_has_specialty ohs
+            JOIN Medical_specialty s ON ohs.specialty_id = s.specialty_id
+            WHERE ohs.office_id = ?  -- CHANGE HERE
+        ");
+        $stmt->bind_param("i", $office_id);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 }
 ?>

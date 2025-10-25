@@ -10,21 +10,13 @@ class DoctorModel {
 
     /* ===================== DOCTOR ===================== */
 
-    public function addDoctor($user_id, $photo, $degree, $graduate, $specialty_id = null) {
-        // Check if user exists:
-        $checkUser = $this->conn->prepare("SELECT user_id FROM Users WHERE user_id = ?");
-        $checkUser->bind_param("i", $user_id);
-        $checkUser->execute();
-        if ($checkUser->get_result()->num_rows === 0) {
-            return ["status" => "fail", "message" => "User does not exist"];
-        }
-
-        // Check if user is already a doctor
-        $checkDoctor = $this->conn->prepare("SELECT doctor_id FROM Doctor WHERE user_id = ?");
-        $checkDoctor->bind_param("i", $user_id);
-        $checkDoctor->execute();
-        if ($checkDoctor->get_result()->num_rows > 0) {
-            return ["status" => "fail", "message" => "User is already a doctor"];
+    public function addDoctor($office_id, $photo, $degree, $graduate, $specialty_id = null) { // CHANGE HERE
+        // Check if office exists: // CHANGE HERE
+        $checkOffice = $this->conn->prepare("SELECT office_id FROM Office WHERE office_id = ?"); // CHANGE HERE
+        $checkOffice->bind_param("i", $office_id); // CHANGE HERE
+        $checkOffice->execute();
+        if ($checkOffice->get_result()->num_rows === 0) {
+            return ["status" => "fail", "message" => "Office does not exist"]; // CHANGE HERE
         }
 
         // Check if specialty exists (if provided)
@@ -37,12 +29,12 @@ class DoctorModel {
             }
         }
 
-        // Add doctor   
+        // Add doctor
         $stmt = $this->conn->prepare("
-            INSERT INTO Doctor (user_id, photo, degree, graduate, specialty_id)
+            INSERT INTO Doctor (office_id, photo, degree, graduate, specialty_id)  -- CHANGE HERE
             VALUES (?, ?, ?, ?, ?)
         ");
-        $stmt->bind_param("isssi", $user_id, $photo, $degree, $graduate, $specialty_id);
+        $stmt->bind_param("isssi", $office_id, $photo, $degree, $graduate, $specialty_id); // CHANGE HERE
         $stmt->execute();
 
         if ($stmt->affected_rows > 0) {
@@ -54,11 +46,10 @@ class DoctorModel {
     public function getDoctorById($doctor_id) {
         $stmt = $this->conn->prepare("
             SELECT d.*, 
-                   u.name AS user_name, 
-                   u.username, 
+                   o.name AS office_name,  -- CHANGE HERE
                    s.name AS specialty_name
             FROM Doctor d
-            JOIN Users u ON d.user_id = u.user_id
+            JOIN Office o ON d.office_id = o.office_id  -- CHANGE HERE
             LEFT JOIN Medical_specialty s ON d.specialty_id = s.specialty_id
             WHERE d.doctor_id = ?
         ");
@@ -69,10 +60,10 @@ class DoctorModel {
 
     public function getAllDoctors() {
         $query = "
-            SELECT d.doctor_id, u.name AS user_name, d.degree, d.graduate, 
+            SELECT d.doctor_id, o.name AS office_name, d.degree, d.graduate,  -- CHANGE HERE
                    d.photo, s.name AS specialty_name
             FROM Doctor d
-            JOIN Users u ON d.user_id = u.user_id
+            JOIN Office o ON d.office_id = o.office_id  -- CHANGE HERE
             LEFT JOIN Medical_specialty s ON d.specialty_id = s.specialty_id
         ";
         return $this->conn->query($query)->fetch_all(MYSQLI_ASSOC);
@@ -130,6 +121,19 @@ class DoctorModel {
             $values[] = $data['specialty_id'];
         }
 
+        // Office (optional update) // CHANGE HERE
+        if (isset($data['office_id'])) { // CHANGE HERE
+            $checkOffice = $this->conn->prepare("SELECT office_id FROM Office WHERE office_id = ?"); // CHANGE HERE
+            $checkOffice->bind_param("i", $data['office_id']); // CHANGE HERE
+            $checkOffice->execute(); // CHANGE HERE
+            if ($checkOffice->get_result()->num_rows === 0) { // CHANGE HERE
+                return ["status" => "fail", "message" => "Invalid office"]; // CHANGE HERE
+            }
+            $fields[] = "office_id = ?"; // CHANGE HERE
+            $types .= 'i'; // CHANGE HERE
+            $values[] = $data['office_id']; // CHANGE HERE
+        }
+
         if (empty($fields)) {
             return ["status" => "fail", "message" => "No data to update"];
         }
@@ -156,73 +160,8 @@ class DoctorModel {
         return $stmt->affected_rows > 0
             ? ["status" => "success"]
             : ["status" => "fail", "message" => "Doctor not found"];
-        }
-
-    /* ===================== DOCTOR_OFFICE ===================== */
-
-    public function assignOffice($doctor_id, $office_id) {
-        // Check if doctor exists
-        $checkDoc = $this->conn->prepare("SELECT doctor_id FROM Doctor WHERE doctor_id = ?");
-        $checkDoc->bind_param("i", $doctor_id);
-        $checkDoc->execute();
-        if ($checkDoc->get_result()->num_rows === 0) {
-            return ["status" => "fail", "message" => "Doctor not found"];
-        }
-
-        // Check if office exists
-        $checkOffice = $this->conn->prepare("SELECT office_id FROM Office WHERE office_id = ?");
-        $checkOffice->bind_param("i", $office_id);
-        $checkOffice->execute();
-        if ($checkOffice->get_result()->num_rows === 0) {
-            return ["status" => "fail", "message" => "Office not found"];
-        }
-
-        // Check for duplicate assignment
-        $checkDup = $this->conn->prepare("
-            SELECT * FROM Doctor_office WHERE doctor_id = ? AND office_id = ?
-        ");
-        $checkDup->bind_param("ii", $doctor_id, $office_id);
-        $checkDup->execute();
-        if ($checkDup->get_result()->num_rows > 0) {
-            return ["status" => "fail", "message" => "This office is already assigned to the doctor"];
-        }
-
-        // Assign office
-        $stmt = $this->conn->prepare("
-            INSERT INTO Doctor_office (doctor_id, office_id)
-            VALUES (?, ?)
-        ");
-        $stmt->bind_param("ii", $doctor_id, $office_id);
-        $stmt->execute();
-
-        return $stmt->affected_rows > 0 ? ["status" => "success", "doctor_id" => $doctor_id, "office_id" => $office_id] : ["status" => "fail", "message" => "Failed to assign office"];
     }
-
-    // Get offices assigned to a doctor
-    public function getDoctorOffices($doctor_id) {
-        $stmt = $this->conn->prepare("
-            SELECT o.office_id, o.name, o.address, o.status
-            FROM Doctor_office dof
-            JOIN Office o ON dof.office_id = o.office_id
-            WHERE dof.doctor_id = ?
-        ");
-        $stmt->bind_param("i", $doctor_id);
-        $stmt->execute();
-        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-    }
-
-    public function deleteDoctorOffice($doctor_id, $office_id) {
-        $stmt = $this->conn->prepare("
-            DELETE FROM Doctor_office WHERE doctor_id = ? AND office_id = ?
-        ");
-        $stmt->bind_param("ii", $doctor_id, $office_id);
-        $stmt->execute();
-
-        return $stmt->affected_rows > 0
-            ? ["status" => "success"]
-            : ["status" => "fail", "message" => "Assignment not found"];
-    }
-
+    
     /* ===================== MEDICAL_SPECIALTY ===================== */
 
     public function getAllSpecialties() {

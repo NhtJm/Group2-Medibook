@@ -2,81 +2,143 @@
 require_once __DIR__ . '/../app/model/AppointmentModel.php';
 
 $appointmentModel = new AppointmentModel();
+$conn = Database::get_instance();
 
 echo "<h2>=== TEST APPOINTMENT MODEL ===</h2>";
 
-// NOTE: Bạn cần chỉnh các ID mẫu dưới đây cho đúng với dữ liệu hiện có trong database
-$patient_id = 1;   // ID của 1 patient hợp lệ
-$slot_id    = 29;   // ID của 1 slot hợp lệ (trạng thái "available")
+/* =============================
+   STEP 0: Setup Test Data
+   ============================= */
 
-// =============================
-// TEST 1: Thêm cuộc hẹn mới
-// =============================
+// --- Create Patient User ---
+echo "<h3>== Step 0.1: Create Test Patient User ==</h3>";
+$conn->query("INSERT INTO Users (email, username, password_hash, full_name, role)
+              VALUES ('patient_test@example.com', 'patient_test', 'hash123', 'Test Patient', 'patient')");
+$user_patient_id = $conn->insert_id;
+$conn->query("INSERT INTO Patient (user_id, date_of_birth, status, payment)
+              VALUES ($user_patient_id, '1990-01-01', 'active', 'cash')");
+$patient_id = $conn->insert_id;
+echo "✅ Created patient_id = $patient_id<br>";
+
+// --- Create Office User ---
+echo "<h3>== Step 0.2: Create Test Office & Doctor ==</h3>";
+$conn->query("INSERT INTO Users (email, username, password_hash, full_name, role)
+              VALUES ('office_test@example.com', 'office_test', 'hash123', 'Test Office Owner', 'office')");
+$user_office_id = $conn->insert_id;
+
+$conn->query("INSERT INTO Office (user_id, name, address, website, logo, description, status)
+              VALUES ($user_office_id, 'Test Clinic', 'HCM City', 'testclinic.vn', 'logo.png', 'Clinic for testing', 'approved')");
+$office_id = $conn->insert_id;
+
+$conn->query("INSERT INTO Medical_specialty (name, description)
+              VALUES ('General Medicine', 'Basic medical services')");
+$specialty_id = $conn->insert_id;
+
+$conn->query("INSERT INTO Doctor (office_id, photo, degree, graduate, specialty_id)
+              VALUES ($office_id, 'doc.png', 'MD', 'HCMC University', $specialty_id)");
+$doctor_id = $conn->insert_id;
+echo "✅ Created doctor_id = $doctor_id, office_id = $office_id<br>";
+
+// --- Create an available Appointment Slot ---
+echo "<h3>== Step 0.3: Create Appointment Slot ==</h3>";
+$start_time = date("Y-m-d H:i:s", strtotime("+1 day 09:00"));
+$end_time   = date("Y-m-d H:i:s", strtotime("+1 day 09:30"));
+$conn->query("INSERT INTO Appointment_slot (office_id, doctor_id, start_time, end_time, status)
+              VALUES ($office_id, $doctor_id, '$start_time', '$end_time', 'available')");
+$slot_id = $conn->insert_id;
+echo "✅ Created slot_id = $slot_id ($start_time - $end_time)<br>";
+
+/* =============================
+   TEST 1: Add Appointment
+   ============================= */
 echo "<h3>== Test 1: Add Appointment ==</h3>";
 $resAdd = $appointmentModel->addAppointment($patient_id, $slot_id, 'booked');
 print_r($resAdd);
 
 $appointment_id = $resAdd['appointment_id'] ?? null;
 if (!$appointment_id) {
-    die("❌ Cannot create appointment — check patient_id / slot_id validity.<br>");
+    die("❌ Cannot create appointment — check constraints or slot status.<br>");
 }
 
-// =============================
-// TEST 2: Lấy tất cả appointments
-// =============================
+/* =============================
+   TEST 2: Get All Appointments
+   ============================= */
 echo "<h3>== Test 2: Get All Appointments ==</h3>";
-$all = $appointmentModel->getAllAppointments();
-print_r($all);
+print_r($appointmentModel->getAllAppointments());
 
-// =============================
-// TEST 3: Lấy appointment theo ID
-// =============================
+/* =============================
+   TEST 3: Get Appointment By ID
+   ============================= */
 echo "<h3>== Test 3: Get Appointment By ID ==</h3>";
-$appt = $appointmentModel->getAppointmentById($appointment_id);
-print_r($appt);
+print_r($appointmentModel->getAppointmentById($appointment_id));
 
-// =============================
-// TEST 4: Lấy appointment theo bệnh nhân
-// =============================
+/* =============================
+   TEST 4: Get Appointments By Patient
+   ============================= */
 echo "<h3>== Test 4: Get Appointments By Patient ==</h3>";
-$byPatient = $appointmentModel->getAppointmentsByPatient($patient_id);
-print_r($byPatient);
+print_r($appointmentModel->getAppointmentsByPatient($patient_id));
 
-// =============================
-// TEST 5: Lấy appointment theo bác sĩ
-// =============================
+/* =============================
+   TEST 5: Get Appointments By Doctor
+   ============================= */
 echo "<h3>== Test 5: Get Appointments By Doctor ==</h3>";
-$doctor_id = 1; // ID của bác sĩ trong DB
-$byDoctor = $appointmentModel->getAppointmentsByDoctor($doctor_id);
-print_r($byDoctor);
+print_r($appointmentModel->getAppointmentsByDoctor($doctor_id));
 
-// =============================
-// TEST 6: Cập nhật trạng thái appointment
-// =============================
-echo "<h3>== Test 6: Update Appointment Status ==</h3>";
-$update = $appointmentModel->updateAppointmentStatus($appointment_id, 'completed');
-print_r($update);
+/* =============================
+   TEST 6: Update Appointment Status
+   ============================= */
+echo "<h3>== Test 6: Update Appointment Status (completed) ==</h3>";
+print_r($appointmentModel->updateAppointmentStatus($appointment_id, 'completed'));
 
-// =============================
-// TEST 7: Thử cập nhật trạng thái invalid
-// =============================
+/* =============================
+   TEST 7: Invalid Status Update
+   ============================= */
 echo "<h3>== Test 7: Invalid Status Update ==</h3>";
-$invalid = $appointmentModel->updateAppointmentStatus($appointment_id, 'unknown_status');
-print_r($invalid);
+print_r($appointmentModel->updateAppointmentStatus($appointment_id, 'invalid_status'));
 
-// =============================
-// TEST 8: Xóa appointment (nếu chưa completed)
-// =============================
-echo "<h3>== Test 8: Delete Appointment ==</h3>";
-$delete = $appointmentModel->deleteAppointment($appointment_id);
-print_r($delete);
+/* =============================
+   TEST 8: Try to Delete Completed Appointment (should fail)
+   ============================= */
+echo "<h3>== Test 8: Delete Completed Appointment ==</h3>";
+print_r($appointmentModel->deleteAppointment($appointment_id));
 
-// =============================
-// TEST 9: Kiểm tra lại danh sách sau khi xóa
-// =============================
-echo "<h3>== Test 9: Get All After Delete ==</h3>";
-$afterDelete = $appointmentModel->getAllAppointments();
-print_r($afterDelete);
+/* =============================
+   TEST 9: Create and Delete New Appointment
+   ============================= */
+echo "<h3>== Test 9: Add + Delete Another Appointment ==</h3>";
+// Create another slot
+$start2 = date("Y-m-d H:i:s", strtotime("+2 day 10:00"));
+$end2   = date("Y-m-d H:i:s", strtotime("+2 day 10:30"));
+$conn->query("INSERT INTO Appointment_slot (office_id, doctor_id, start_time, end_time, status)
+              VALUES ($office_id, $doctor_id, '$start2', '$end2', 'available')");
+$new_slot = $conn->insert_id;
+$newAppt = $appointmentModel->addAppointment($patient_id, $new_slot, 'booked');
+print_r($newAppt);
 
-echo "<h3>All Appointment tests completed ✅</h3>";
+$new_appointment_id = $newAppt['appointment_id'] ?? null;
+if ($new_appointment_id) {
+    echo "<br>Deleting new appointment:<br>";
+    print_r($appointmentModel->deleteAppointment($new_appointment_id));
+}
+
+/* =============================
+   TEST 10: Get All After Deletion
+   ============================= */
+echo "<h3>== Test 10: Get All After Delete ==</h3>";
+print_r($appointmentModel->getAllAppointments());
+
+/* =============================
+   CLEANUP
+   ============================= */
+echo "<h3>== Cleanup test data ==</h3>";
+$conn->query("DELETE FROM Appointment WHERE patient_id = $patient_id");
+$conn->query("DELETE FROM Appointment_slot WHERE office_id = $office_id");
+$conn->query("DELETE FROM Doctor WHERE doctor_id = $doctor_id");
+$conn->query("DELETE FROM Medical_specialty WHERE specialty_id = $specialty_id");
+$conn->query("DELETE FROM Office WHERE office_id = $office_id");
+$conn->query("DELETE FROM Patient WHERE patient_id = $patient_id");
+$conn->query("DELETE FROM Users WHERE user_id IN ($user_patient_id, $user_office_id)");
+echo "✅ Cleanup completed.<br>";
+
+echo "<h2>=== ALL APPOINTMENT TESTS COMPLETED SUCCESSFULLY ===</h2>";
 ?>

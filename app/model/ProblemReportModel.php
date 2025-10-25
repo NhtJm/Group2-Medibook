@@ -73,7 +73,7 @@ class ProblemReportModel {
                 pr.patient_id,
                 pr.doctor_id,
                 pr.office_id,
-                COALESCE(pu.name, du.name, o.name) AS reporter_name,
+                COALESCE(pu.full_name, ou.full_name, o.name) AS reporter_name,  -- CHANGE HERE
                 CASE
                     WHEN pr.patient_id IS NOT NULL THEN 'Patient'
                     WHEN pr.doctor_id IS NOT NULL THEN 'Doctor'
@@ -83,10 +83,10 @@ class ProblemReportModel {
             LEFT JOIN Patient p ON pr.patient_id = p.patient_id
             LEFT JOIN Users pu ON p.user_id = pu.user_id
             LEFT JOIN Doctor d ON pr.doctor_id = d.doctor_id
-            LEFT JOIN Users du ON d.user_id = du.user_id
             LEFT JOIN Office o ON pr.office_id = o.office_id
+            LEFT JOIN Users ou ON o.user_id = ou.user_id  -- CHANGE HERE
             ORDER BY pr.date_report DESC
-        ";
+        "; // CHANGE HERE
         return $this->conn->query($query)->fetch_all(MYSQLI_ASSOC);
     }
 
@@ -94,7 +94,7 @@ class ProblemReportModel {
         $stmt = $this->conn->prepare("
             SELECT 
                 pr.*,
-                COALESCE(pu.name, du.name, o.name) AS reporter_name,
+                COALESCE(pu.full_name, ou.full_name, o.name) AS reporter_name,  -- CHANGE HERE
                 CASE
                     WHEN pr.patient_id IS NOT NULL THEN 'Patient'
                     WHEN pr.doctor_id IS NOT NULL THEN 'Doctor'
@@ -104,10 +104,10 @@ class ProblemReportModel {
             LEFT JOIN Patient p ON pr.patient_id = p.patient_id
             LEFT JOIN Users pu ON p.user_id = pu.user_id
             LEFT JOIN Doctor d ON pr.doctor_id = d.doctor_id
-            LEFT JOIN Users du ON d.user_id = du.user_id
             LEFT JOIN Office o ON pr.office_id = o.office_id
+            LEFT JOIN Users ou ON o.user_id = ou.user_id  -- CHANGE HERE
             WHERE pr.report_id = ?
-        ");
+        "); // CHANGE HERE
         $stmt->bind_param("i", $report_id);
         $stmt->execute();
         return $stmt->get_result()->fetch_assoc();

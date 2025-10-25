@@ -80,6 +80,13 @@ class HandledModel {
             $values[] = $data['status'];
         }
 
+        // CHANGE HERE — cho phép cập nhật action_date (ngày xử lý)
+        if (isset($data['action_date'])) {
+            $fields[] = "action_date = ?";
+            $types .= 's';
+            $values[] = $data['action_date'];
+        }
+
         if (empty($fields)) {
             return ["status" => "fail", "message" => "No data to update"];
         }
@@ -126,7 +133,7 @@ class HandledModel {
 
     public function getStaffHandledReport($report_id) {
         $stmt = $this->db->prepare("
-            SELECT H.*, W.role, W.status AS staff_status
+            SELECT H.*, W.position, W.status AS staff_status
             FROM Handled H
             JOIN Web_staff W ON H.staff_id = W.staff_id
             WHERE H.report_id = ?

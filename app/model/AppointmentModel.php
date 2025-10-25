@@ -20,7 +20,7 @@ class AppointmentModel {
         }
 
         // Check for slot existence
-        $checkSlot = $this->conn->prepare("SELECT slot_id, status FROM Slots_free WHERE slot_id = ?");
+        $checkSlot = $this->conn->prepare("SELECT slot_id, status FROM Appointment_slot WHERE slot_id = ?"); // CHANGE HERE
         $checkSlot->bind_param("i", $slot_id);
         $checkSlot->execute();
         $slot = $checkSlot->get_result()->fetch_assoc();
@@ -45,9 +45,9 @@ class AppointmentModel {
         $checkOverlap = $this->conn->prepare("
             SELECT a.appointment_id
             FROM Appointment a
-            JOIN Slots_free s ON a.slot_id = s.slot_id
+            JOIN Appointment_slot s ON a.slot_id = s.slot_id  -- CHANGE HERE
             WHERE a.patient_id = ?
-              AND s.start = (SELECT start FROM Slots_free WHERE slot_id = ?)
+              AND s.start_time = (SELECT start_time FROM Appointment_slot WHERE slot_id = ?)  -- CHANGE HERE
         ");
         $checkOverlap->bind_param("ii", $patient_id, $slot_id);
         $checkOverlap->execute();
@@ -66,7 +66,6 @@ class AppointmentModel {
         return $stmt->affected_rows > 0
             ? ['status' => 'success', 'appointment_id' => $stmt->insert_id]
             : ['status' => 'fail', 'message' => 'Error booking appointment'];
-
     }
 
     public function getAllAppointments() {
@@ -75,19 +74,18 @@ class AppointmentModel {
                 a.appointment_id,
                 a.status,
                 p.patient_id,
-                u.name AS patient_name,
-                s.slot_id, s.start, s.end,
-                d.doctor_id, du.name AS doctor_name,
+                u.full_name AS patient_name,  -- CHANGE HERE
+                s.slot_id, s.start_time, s.end_time,  -- CHANGE HERE
+                d.doctor_id,
                 o.office_id, o.name AS office_name
             FROM Appointment a
             JOIN Patient p ON a.patient_id = p.patient_id
             JOIN Users u ON p.user_id = u.user_id
-            JOIN Slots_free s ON a.slot_id = s.slot_id
+            JOIN Appointment_slot s ON a.slot_id = s.slot_id  -- CHANGE HERE
             JOIN Doctor d ON s.doctor_id = d.doctor_id
-            JOIN Users du ON d.user_id = du.user_id
             JOIN Office o ON s.office_id = o.office_id
-            WHERE a.status != 'cancelled'
-            ORDER BY s.start DESC
+            WHERE a.status != 'canceled'  -- CHANGE HERE
+            ORDER BY s.start_time DESC  -- CHANGE HERE
         ";
         return $this->conn->query($query)->fetch_all(MYSQLI_ASSOC);
     }
@@ -96,16 +94,14 @@ class AppointmentModel {
         $stmt = $this->conn->prepare("
             SELECT 
                 a.appointment_id, a.status,
-                s.start, s.end,
-                u.name AS patient_name,
-                du.name AS doctor_name,
+                s.start_time, s.end_time,  -- CHANGE HERE
+                u.full_name AS patient_name,  -- CHANGE HERE
                 o.name AS office_name
             FROM Appointment a
             JOIN Patient p ON a.patient_id = p.patient_id
             JOIN Users u ON p.user_id = u.user_id
-            JOIN Slots_free s ON a.slot_id = s.slot_id
+            JOIN Appointment_slot s ON a.slot_id = s.slot_id  -- CHANGE HERE
             JOIN Doctor d ON s.doctor_id = d.doctor_id
-            JOIN Users du ON d.user_id = du.user_id
             JOIN Office o ON s.office_id = o.office_id
             WHERE a.appointment_id = ?
         ");
@@ -118,16 +114,14 @@ class AppointmentModel {
         $stmt = $this->conn->prepare("
             SELECT 
                 a.appointment_id, a.status,
-                s.start, s.end,
-                du.name AS doctor_name,
+                s.start_time, s.end_time,  -- CHANGE HERE
                 o.name AS office_name
             FROM Appointment a
-            JOIN Slots_free s ON a.slot_id = s.slot_id
+            JOIN Appointment_slot s ON a.slot_id = s.slot_id  -- CHANGE HERE
             JOIN Doctor d ON s.doctor_id = d.doctor_id
-            JOIN Users du ON d.user_id = du.user_id
             JOIN Office o ON s.office_id = o.office_id
-            WHERE a.patient_id = ? AND a.status != 'cancelled'
-            ORDER BY s.start
+            WHERE a.patient_id = ? AND a.status != 'canceled'  -- CHANGE HERE
+            ORDER BY s.start_time  -- CHANGE HERE
         ");
         $stmt->bind_param("i", $patient_id);
         $stmt->execute();
@@ -138,16 +132,16 @@ class AppointmentModel {
         $stmt = $this->conn->prepare("
             SELECT 
                 a.appointment_id, a.status,
-                s.start, s.end,
-                u.name AS patient_name,
+                s.start_time, s.end_time,  -- CHANGE HERE
+                u.full_name AS patient_name,  -- CHANGE HERE
                 o.name AS office_name
             FROM Appointment a
             JOIN Patient p ON a.patient_id = p.patient_id
             JOIN Users u ON p.user_id = u.user_id
-            JOIN Slots_free s ON a.slot_id = s.slot_id
+            JOIN Appointment_slot s ON a.slot_id = s.slot_id  -- CHANGE HERE
             JOIN Office o ON s.office_id = o.office_id
-            WHERE s.doctor_id = ? AND a.status != 'cancelled'
-            ORDER BY s.start
+            WHERE s.doctor_id = ? AND a.status != 'canceled'  -- CHANGE HERE
+            ORDER BY s.start_time  -- CHANGE HERE
         ");
         $stmt->bind_param("i", $doctor_id);
         $stmt->execute();
@@ -156,7 +150,7 @@ class AppointmentModel {
 
     public function updateAppointmentStatus($appointment_id, $status) {
         // Check valid status
-        $allowed = ['booked', 'completed', 'cancelled', 'no-show'];
+        $allowed = ['booked', 'completed', 'canceled', 'no-show']; // CHANGE HERE
         if (!in_array($status, $allowed)) {
             return ['status' => 'fail', 'message' => 'Status is not valid'];
         }
@@ -181,10 +175,10 @@ class AppointmentModel {
         $stmt->bind_param("si", $status, $appointment_id);
         $success = $stmt->execute();
 
-        // If cancelled, free up the slot
-        if ($success && $status === 'cancelled') {
+        // If canceled, free up the slot
+        if ($success && $status === 'canceled') { // CHANGE HERE
             $this->conn->query("
-                UPDATE Slots_free s
+                UPDATE Appointment_slot s  -- CHANGE HERE
                 JOIN Appointment a ON s.slot_id = a.slot_id
                 SET s.status = 'available'
                 WHERE a.appointment_id = $appointment_id
@@ -216,7 +210,7 @@ class AppointmentModel {
         // If deleted, free up the slot
         if ($success) {
             $this->conn->query("
-                UPDATE Slots_free s
+                UPDATE Appointment_slot s  -- CHANGE HERE
                 JOIN Appointment a ON s.slot_id = a.slot_id
                 SET s.status = 'available'
                 WHERE a.appointment_id = $appointment_id

@@ -2,101 +2,145 @@
 require_once __DIR__ . '/../app/model/ProblemReportModel.php';
 
 $reportModel = new ProblemReportModel();
+$conn = Database::get_instance();
 
 echo "<h2>=== TESTING ProblemReportModel ===</h2>";
 
-// =============================
-// TEST 1: Thêm report (theo patient)
-// =============================
+/* =============================
+   STEP 0: Setup Test Data
+   ============================= */
+echo "<h3>== Step 0: Setup test data ==</h3>";
+
+// --- Create patient user ---
+$conn->query("INSERT INTO Users (email, username, password_hash, full_name, role)
+              VALUES ('patient_test@demo.com', 'patient_test', '123', 'Patient Demo', 'patient')");
+$user_patient_id = $conn->insert_id;
+$conn->query("INSERT INTO Patient (user_id, date_of_birth, status, payment)
+              VALUES ($user_patient_id, '1999-09-09', 'active', 'cash')");
+$patient_id = $conn->insert_id;
+
+// --- Create office user ---
+$conn->query("INSERT INTO Users (email, username, password_hash, full_name, role)
+              VALUES ('office_test@demo.com', 'office_test', '123', 'Office Demo', 'office')");
+$user_office_id = $conn->insert_id;
+$conn->query("INSERT INTO Office (user_id, name, address, website, logo, description, status)
+              VALUES ($user_office_id, 'Test Clinic', 'HCM City', 'clinic.vn', 'logo.png', 'Test clinic description', 'approved')");
+$office_id = $conn->insert_id;
+
+// --- Create doctor under office ---
+$conn->query("INSERT INTO Medical_specialty (name, description)
+              VALUES ('Cardiology', 'Heart related diseases')");
+$specialty_id = $conn->insert_id;
+$conn->query("INSERT INTO Doctor (office_id, photo, degree, graduate, specialty_id)
+              VALUES ($office_id, 'photo.png', 'MD', 'Med School', $specialty_id)");
+$doctor_id = $conn->insert_id;
+
+echo "✅ Created test data: patient_id=$patient_id, doctor_id=$doctor_id, office_id=$office_id<br>";
+
+/* =============================
+   TEST 1: Add report by patient
+   ============================= */
 echo "<h3>== Test 1: Add Report (Patient) ==</h3>";
-$report1 = $reportModel->addReport("Test report from patient", 1, null, null);
+$report1 = $reportModel->addReport("Patient complaint about service", $patient_id, null, null);
 print_r($report1);
 $report_id1 = $report1['report_id'] ?? null;
 
-// =============================
-// TEST 2: Thêm report (theo doctor)
-// =============================
+/* =============================
+   TEST 2: Add report by doctor
+   ============================= */
 echo "<h3>== Test 2: Add Report (Doctor) ==</h3>";
-$report2 = $reportModel->addReport("Doctor report example", null, 1, null);
+$report2 = $reportModel->addReport("Doctor report test", null, $doctor_id, null);
 print_r($report2);
 $report_id2 = $report2['report_id'] ?? null;
 
-// =============================
-// TEST 3: Thêm report (theo office)
-// =============================
+/* =============================
+   TEST 3: Add report by office
+   ============================= */
 echo "<h3>== Test 3: Add Report (Office) ==</h3>";
-$report3 = $reportModel->addReport("Office report example", null, null, 1);
+$report3 = $reportModel->addReport("Office system issue report", null, null, $office_id);
 print_r($report3);
 $report_id3 = $report3['report_id'] ?? null;
 
-// =============================
-// TEST 4: Lấy tất cả report
-// =============================
-echo "<h3>== Test 4: Get All Reports ==</h3>";
-$allReports = $reportModel->getAllReports();
-print_r($allReports);
+/* =============================
+   TEST 4: Invalid input (multiple types)
+   ============================= */
+echo "<h3>== Test 4: Invalid Add (multiple types) ==</h3>";
+$reportInvalid = $reportModel->addReport("Invalid test", $patient_id, $doctor_id, null);
+print_r($reportInvalid);
 
-// =============================
-// TEST 5: Lấy report theo ID
-// =============================
-echo "<h3>== Test 5: Get Report by ID ==</h3>";
+/* =============================
+   TEST 5: Get all reports
+   ============================= */
+echo "<h3>== Test 5: Get All Reports ==</h3>";
+$all = $reportModel->getAllReports();
+print_r($all);
+
+/* =============================
+   TEST 6: Get report by ID
+   ============================= */
+echo "<h3>== Test 6: Get Report By ID ==</h3>";
 if ($report_id1) {
-    $singleReport = $reportModel->getReportById($report_id1);
-    print_r($singleReport);
-} else {
-    echo "Report ID không tồn tại.<br>";
+    $r = $reportModel->getReportById($report_id1);
+    print_r($r);
 }
 
-// =============================
-// TEST 6: Lấy report theo patient_id
-// =============================
-echo "<h3>== Test 6: Get Reports by Patient ==</h3>";
-$patientReports = $reportModel->getReportsByPatient(1);
-print_r($patientReports);
+/* =============================
+   TEST 7: Get reports by patient
+   ============================= */
+echo "<h3>== Test 7: Get Reports By Patient ==</h3>";
+print_r($reportModel->getReportsByPatient($patient_id));
 
-// =============================
-// TEST 7: Lấy report theo doctor_id
-// =============================
-echo "<h3>== Test 7: Get Reports by Doctor ==</h3>";
-$doctorReports = $reportModel->getReportsByDoctor(1);
-print_r($doctorReports);
+/* =============================
+   TEST 8: Get reports by doctor
+   ============================= */
+echo "<h3>== Test 8: Get Reports By Doctor ==</h3>";
+print_r($reportModel->getReportsByDoctor($doctor_id));
 
-// =============================
-// TEST 8: Lấy report theo office_id
-// =============================
-echo "<h3>== Test 8: Get Reports by Office ==</h3>";
-$officeReports = $reportModel->getReportsByOffice(1);
-print_r($officeReports);
+/* =============================
+   TEST 9: Get reports by office
+   ============================= */
+echo "<h3>== Test 9: Get Reports By Office ==</h3>";
+print_r($reportModel->getReportsByOffice($office_id));
 
-// =============================
-// TEST 9: Cập nhật nội dung report
-// =============================
-echo "<h3>== Test 9: Update Report Description ==</h3>";
+/* =============================
+   TEST 10: Update description
+   ============================= */
+echo "<h3>== Test 10: Update Report Description ==</h3>";
 if ($report_id1) {
-    $update = $reportModel->updateReportDescription($report_id1, "Updated description for patient report");
+    $update = $reportModel->updateReportDescription($report_id1, "Updated description for patient complaint");
     print_r($update);
-    $updatedData = $reportModel->getReportById($report_id1);
-    print_r($updatedData);
-} else {
-    echo "Không có report để update.<br>";
+    $updated = $reportModel->getReportById($report_id1);
+    print_r($updated);
 }
 
-// =============================
-// TEST 10: Xóa report
-// =============================
-echo "<h3>== Test 10: Delete Reports ==</h3>";
-if ($report_id1) {
-    echo "Deleting report_id = $report_id1<br>";
-    print_r($reportModel->deleteReport($report_id1));
-}
-if ($report_id2) {
-    echo "Deleting report_id = $report_id2<br>";
-    print_r($reportModel->deleteReport($report_id2));
-}
-if ($report_id3) {
-    echo "Deleting report_id = $report_id3<br>";
-    print_r($reportModel->deleteReport($report_id3));
+/* =============================
+   TEST 11: Delete Reports
+   ============================= */
+echo "<h3>== Test 11: Delete Reports ==</h3>";
+foreach ([$report_id1, $report_id2, $report_id3] as $rid) {
+    if ($rid) {
+        echo "Deleting report_id = $rid<br>";
+        print_r($reportModel->deleteReport($rid));
+    }
 }
 
-echo "<h3>All ProblemReportModel tests completed.</h3>";
+/* =============================
+   TEST 12: Check all after delete
+   ============================= */
+echo "<h3>== Test 12: Get All After Delete ==</h3>";
+print_r($reportModel->getAllReports());
+
+/* =============================
+   CLEANUP TEST DATA
+   ============================= */
+echo "<h3>== Cleanup Test Data ==</h3>";
+$conn->query("DELETE FROM Problem_report");
+$conn->query("DELETE FROM Doctor WHERE doctor_id = $doctor_id");
+$conn->query("DELETE FROM Medical_specialty WHERE specialty_id = $specialty_id");
+$conn->query("DELETE FROM Office WHERE office_id = $office_id");
+$conn->query("DELETE FROM Patient WHERE patient_id = $patient_id");
+$conn->query("DELETE FROM Users WHERE user_id IN ($user_patient_id, $user_office_id)");
+echo "✅ Cleanup completed.<br>";
+
+echo "<h2>=== ALL TESTS COMPLETED SUCCESSFULLY ===</h2>";
 ?>

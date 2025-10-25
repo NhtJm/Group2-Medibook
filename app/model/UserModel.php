@@ -32,25 +32,30 @@ class UserModel {
         return $stmt->get_result()->fetch_assoc();
     }
 
-    public function addUser($username, $password, $name) {
-        // Check if username already exists
+    public function addUser($username, $password, $full_name, $role, $email = null) { // CHANGE HERE
         if ($this->getUserByUsername($username)) {
             return ["status" => "fail", "message" => "Username already exists"];
         }
 
-        if (empty($username) || empty($password) || empty($name)) {
+        if (empty($username) || empty($password) || empty($full_name) || empty($role)) { // CHANGE HERE
             return ["status" => "fail", "message" => "Missing required fields"];
         }
 
+        $valid_roles = ['admin', 'webstaff', 'office', 'patient']; // CHANGE HERE
+        if (!in_array($role, $valid_roles)) {
+            return ["status" => "fail", "message" => "Invalid role"];
+        }
+
         $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-        $stmt = $this->db->prepare("INSERT INTO Users (username, password_hash, name) VALUES (?, ?, ?)");
-        $stmt->bind_param("sss", $username, $passwordHash, $name);
+        $stmt = $this->db->prepare("INSERT INTO Users (email, username, password_hash, full_name, role) VALUES (?, ?, ?, ?, ?)"); // CHANGE HERE
+        $stmt->bind_param("sssss", $email, $username, $passwordHash, $full_name, $role); // CHANGE HERE
         $stmt->execute();
 
         return $stmt->affected_rows > 0
             ? ["status" => "success", "user_id" => $stmt->insert_id]
             : ["status" => "fail", "message" => "Failed to add user"];
     }
+
 
     public function updateUser($user_id, $data = []) {
         $user = $this->getUserById($user_id);
@@ -62,10 +67,10 @@ class UserModel {
         $types = '';
         $values = [];
 
-        if (isset($data['name'])) {
-            $fields[] = "name = ?";
+        if (isset($data['full_name'])) { // CHANGE HERE
+            $fields[] = "full_name = ?"; // CHANGE HERE
             $types .= 's';
-            $values[] = $data['name'];
+            $values[] = $data['full_name']; // CHANGE HERE
         }
 
         if (isset($data['username'])) {
@@ -85,6 +90,22 @@ class UserModel {
             $fields[] = "password_hash = ?";
             $types .= 's';
             $values[] = password_hash($data['password'], PASSWORD_DEFAULT);
+        }
+
+        if (isset($data['email'])) { // CHANGE HERE
+            $fields[] = "email = ?"; // CHANGE HERE
+            $types .= 's';
+            $values[] = $data['email']; // CHANGE HERE
+        }
+
+        if (isset($data['role'])) { // CHANGE HERE
+            $valid_roles = ['admin', 'webstaff', 'office', 'patient']; // CHANGE HERE
+            if (!in_array($data['role'], $valid_roles)) {
+                return ["status" => "fail", "message" => "Invalid role"];
+            }
+            $fields[] = "role = ?"; // CHANGE HERE
+            $types .= 's';
+            $values[] = $data['role']; // CHANGE HERE
         }
 
         if (empty($fields)) {
@@ -113,6 +134,8 @@ class UserModel {
         $this->db->query("DELETE FROM User_phone WHERE user_id = $user_id");
         $this->db->query("DELETE FROM Web_staff WHERE user_id = $user_id");
         $this->db->query("DELETE FROM Patient WHERE user_id = $user_id");
+        $this->db->query("DELETE FROM Admin WHERE user_id = $user_id"); // CHANGE HERE
+        $this->db->query("DELETE FROM Office WHERE user_id = $user_id"); // CHANGE HERE
 
         $stmt = $this->db->prepare("DELETE FROM Users WHERE user_id = ?");
         $stmt->bind_param("i", $user_id);
@@ -205,26 +228,27 @@ class UserModel {
         return $stmt->get_result()->fetch_assoc();
     }
 
-    public function addStaff($user_id, $role, $status = "offline") {
+    public function addStaff($user_id, $position, $status = "offline") { // CHANGE HERE
         if (!$this->getUserById($user_id)) {
             return ["status" => "fail", "message" => "User not found"];
         }
+
         $valid_status = ['online', 'offline'];
         if (!in_array($status, $valid_status)) {
             return ["status" => "fail", "message" => "Invalid status"];
         }
 
-        $valid_roles = ['admin','support','developer','designer'];
-        if (!in_array($role, $valid_roles)) {
-            return ["status" => "fail", "message" => "Invalid role"];
+        $valid_positions = ['support','developer','designer']; // CHANGE HERE
+        if (!in_array($position, $valid_positions)) {
+            return ["status" => "fail", "message" => "Invalid position"];
         }
 
         if ($this->getStaffByUser($user_id)) {
             return ["status" => "fail", "message" => "Staff already exists"];
         }
 
-        $stmt = $this->db->prepare("INSERT INTO Web_staff (user_id, role, status) VALUES (?, ?, ?)");
-        $stmt->bind_param("iss", $user_id, $role, $status);
+        $stmt = $this->db->prepare("INSERT INTO Web_staff (user_id, position, status) VALUES (?, ?, ?)"); // CHANGE HERE
+        $stmt->bind_param("iss", $user_id, $position, $status); // CHANGE HERE
         $stmt->execute();
 
         return $stmt->affected_rows > 0
@@ -255,14 +279,14 @@ class UserModel {
             $values[] = $data['status'];
         }
 
-        if (isset($data['role'])) {
-            $valid_roles = ['admin','support','developer','designer'];
-            if (!in_array($data['role'], $valid_roles)) {
-                return ["status" => "fail", "message" => "Invalid role"];
+        if (isset($data['position'])) { // CHANGE HERE
+            $valid_positions = ['support','developer','designer']; // CHANGE HERE
+            if (!in_array($data['position'], $valid_positions)) {
+                return ["status" => "fail", "message" => "Invalid position"];
             }
-            $fields[] = "role = ?";
+            $fields[] = "position = ?"; // CHANGE HERE
             $types .= 's';
-            $values[] = $data['role'];
+            $values[] = $data['position']; // CHANGE HERE
         }
 
         if (empty($fields)) {
@@ -320,13 +344,6 @@ class UserModel {
         $stmt = $this->db->prepare("INSERT INTO Patient (user_id, date_of_birth, status, payment) VALUES (?, ?, ?, ?)");
         $stmt->bind_param("isss", $user_id, $date_of_birth, $status, $payment);
         $stmt->execute();
-
-        if ($stmt->affected_rows > 0) {
-            return [
-                "status" => "success",
-                "patient_id" => $stmt->insert_id 
-            ];
-        }
 
         return $stmt->affected_rows > 0
             ? ["status" => "success", "patient_id" => $stmt->insert_id]

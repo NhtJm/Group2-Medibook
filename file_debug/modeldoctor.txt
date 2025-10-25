@@ -1,25 +1,27 @@
 <?php
 require_once __DIR__ . '/../app/model/DoctorModel.php';
+require_once __DIR__ . '/../app/db.php';
 
 $doctorModel = new DoctorModel();
+$conn = Database::get_instance();
 
 echo "<h2>===== TEST DOCTOR MODEL =====</h2>";
 
 // =============================
-// TEST 1: Thêm specialty
+// TEST 1: Tạo specialty
 // =============================
 echo "<h3>== Test 1: Add Specialty ==</h3>";
-$spec1 = $doctorModel->addSpecialty("Cardiologykakaka", "Heart specialist");
+$spec1 = $doctorModel->addSpecialty("Cardiology_Test", "Heart specialist");
 print_r($spec1);
 
-$spec2 = $doctorModel->addSpecialty("Neurology", "Brain & nerves");
+$spec2 = $doctorModel->addSpecialty("Neurology_Test", "Brain & Nerve specialist");
 print_r($spec2);
 
 $spec_id = $spec1['specialty_id'] ?? null;
 $spec2_id = $spec2['specialty_id'] ?? null;
 
 // =============================
-// TEST 2: Lấy danh sách specialty
+// TEST 2: Lấy tất cả specialty
 // =============================
 echo "<h3>== Test 2: Get All Specialties ==</h3>";
 print_r($doctorModel->getAllSpecialties());
@@ -29,8 +31,8 @@ print_r($doctorModel->getAllSpecialties());
 // =============================
 echo "<h3>== Test 3: Get Specialty By ID ==</h3>";
 if ($spec_id) {
-    $specDetail = $doctorModel->getSpecialtyById($spec_id);
-    print_r($specDetail);
+    $detail = $doctorModel->getSpecialtyById($spec_id);
+    print_r($detail);
 }
 
 // =============================
@@ -39,16 +41,26 @@ if ($spec_id) {
 echo "<h3>== Test 4: Update Specialty ==</h3>";
 if ($spec_id) {
     $updateSpec = $doctorModel->updateSpecialty($spec_id, [
-        "description" => "Updated description"
+        "description" => "Updated: Heart expert"
     ]);
     print_r($updateSpec);
 }
 
 // =============================
-// TEST 5: Thêm doctor
+// TEST 5: Add Office (Setup)
 // =============================
-echo "<h3>== Test 5: Add Doctor ==</h3>";
-$doctorRes = $doctorModel->addDoctor(1, "photo1.jpg", "MD", "HCM University", $spec_id);
+echo "<h3>== Test 5: Add Office (Setup) ==</h3>";
+$conn->query("INSERT INTO Office (user_id, name, address, website, logo, description, status)
+              VALUES (21, 'Test Office', 'HCM City', 'office_test.com', 'logo.png', 'Testing office', 'approved')");
+$office_id = $conn->insert_id;
+echo "Created Office ID = $office_id<br>";
+
+
+// =============================
+// TEST 6: Thêm doctor mới
+// =============================
+echo "<h3>== Test 6: Add Doctor ==</h3>";
+$doctorRes = $doctorModel->addDoctor($office_id, "photo1.jpg", "MD", "HCM University", $spec_id);
 print_r($doctorRes);
 $doctor_id = $doctorRes['doctor_id'] ?? null;
 
@@ -57,77 +69,88 @@ if (!$doctor_id) {
 }
 
 // =============================
-// TEST 6: Lấy danh sách doctor
+// TEST 7: Lấy danh sách doctor
 // =============================
-echo "<h3>== Test 6: Get All Doctors ==</h3>";
+echo "<h3>== Test 7: Get All Doctors ==</h3>";
 print_r($doctorModel->getAllDoctors());
 
 // =============================
-// TEST 7: Lấy doctor theo ID
+// TEST 8: Lấy doctor theo ID
 // =============================
-echo "<h3>== Test 7: Get Doctor By ID ==</h3>";
+echo "<h3>== Test 8: Get Doctor By ID ==</h3>";
 $doctorDetail = $doctorModel->getDoctorById($doctor_id);
 print_r($doctorDetail);
 
 // =============================
-// TEST 8: Cập nhật doctor
+// TEST 9: Cập nhật doctor
 // =============================
-echo "<h3>== Test 8: Update Doctor ==</h3>";
+echo "<h3>== Test 9: Update Doctor ==</h3>";
 $updateDoctor = $doctorModel->updateDoctor($doctor_id, [
     "degree" => "Specialist",
-    "graduate" => "Updated University"
+    "graduate" => "Updated Medical School"
 ]);
 print_r($updateDoctor);
 
 // =============================
-// TEST 9: Thêm office (giả lập trước)
+// TEST 10: Cập nhật doctor với office khác (lỗi office không tồn tại)
 // =============================
-echo "<h3>== Test 9: Add Office (setup) ==</h3>";
-$conn = Database::get_instance();
-$conn->query("INSERT INTO Office (name, address, website, logo, description, status)
-              VALUES ('Office 1', 'HCM', 'office1.com', 'logo.png', 'Main office', 'active')");
-$office_id = $conn->insert_id;
-echo "Created Office ID = $office_id<br>";
+echo "<h3>== Test 10: Update Doctor Invalid Office ==</h3>";
+$updateInvalidOffice = $doctorModel->updateDoctor($doctor_id, [
+    "office_id" => 99999 // không tồn tại
+]);
+print_r($updateInvalidOffice);
 
 // =============================
-// TEST 10: Gán doctor vào office
+// TEST 11: Cập nhật doctor với specialty khác (tồn tại)
 // =============================
-echo "<h3>== Test 10: Assign Office to Doctor ==</h3>";
-$assign = $doctorModel->assignOffice($doctor_id, $office_id);
-print_r($assign);
+echo "<h3>== Test 11: Update Doctor with Different Specialty ==</h3>";
+if ($spec2_id) {
+    $updateDoctor2 = $doctorModel->updateDoctor($doctor_id, [
+        "specialty_id" => $spec2_id
+    ]);
+    print_r($updateDoctor2);
+}
 
 // =============================
-// TEST 11: Lấy danh sách office của doctor
+// TEST 12: Cập nhật doctor với specialty sai (không tồn tại)
 // =============================
-echo "<h3>== Test 11: Get Doctor Offices ==</h3>";
-print_r($doctorModel->getDoctorOffices($doctor_id));
+echo "<h3>== Test 12: Update Doctor Invalid Specialty ==</h3>";
+$updateInvalidSpec = $doctorModel->updateDoctor($doctor_id, [
+    "specialty_id" => 99999
+]);
+print_r($updateInvalidSpec);
 
 // =============================
-// TEST 12: Xóa liên kết doctor-office
+// TEST 13: Cập nhật doctor không có dữ liệu
 // =============================
-echo "<h3>== Test 12: Delete Doctor Office ==</h3>";
-$delOffice = $doctorModel->deleteDoctorOffice($doctor_id, $office_id);
-print_r($delOffice);
+echo "<h3>== Test 13: Update Doctor No Data ==</h3>";
+$updateEmpty = $doctorModel->updateDoctor($doctor_id, []);
+print_r($updateEmpty);
 
 // =============================
-// TEST 13: Xóa doctor
+// TEST 14: Xóa doctor
 // =============================
-echo "<h3>== Test 13: Delete Doctor ==</h3>";
+echo "<h3>== Test 14: Delete Doctor ==</h3>";
 $delDoctor = $doctorModel->deleteDoctor($doctor_id);
 print_r($delDoctor);
 
 // =============================
-// TEST 14: Xóa specialty
+// TEST 15: Xóa specialty
 // =============================
-echo "<h3>== Test 14: Delete Specialty ==</h3>";
+echo "<h3>== Test 15: Delete Specialties ==</h3>";
 if ($spec_id) {
-    $delSpec = $doctorModel->deleteSpecialty($spec_id);
-    print_r($delSpec);
+    print_r($doctorModel->deleteSpecialty($spec_id));
 }
 if ($spec2_id) {
-    $delSpec2 = $doctorModel->deleteSpecialty($spec2_id);
-    print_r($delSpec2);
+    print_r($doctorModel->deleteSpecialty($spec2_id));
 }
 
-echo "<h2>All tests completed.</h2>";
+// =============================
+// TEST 16: Xóa office test
+// =============================
+echo "<h3>== Test 16: Cleanup Office ==</h3>";
+$conn->query("DELETE FROM Office WHERE office_id = $office_id");
+echo "Office deleted.<br>";
+
+echo "<h2>All DoctorModel tests completed successfully.</h2>";
 ?>

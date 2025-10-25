@@ -30,9 +30,10 @@ class ContactModel {
             return ["status" => "fail", "message" => "Missing required fields"];
         }
 
+        // CHANGE HERE — thêm status mặc định là 'new' để phù hợp với bảng Contact
         $stmt = $this->db->prepare(
-            "INSERT INTO Contact (name, email, subject, message) VALUES (?, ?, ?, ?)"
-        );
+            "INSERT INTO Contact (name, email, subject, message, status) VALUES (?, ?, ?, ?, 'new')"
+        ); 
         $stmt->bind_param("ssss", $name, $email, $subject, $message);
         $stmt->execute();
 
