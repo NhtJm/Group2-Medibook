@@ -1,157 +1,390 @@
 /* ============== Container ============== */
-.section__inner, .hero__inner, .why__inner {
+.section__inner,
+.why__inner {
   max-width: var(--container);
   margin-inline: auto;
   padding: 24px 16px;
 }
 
-/* ============== Hero ============== */
-.hero{
-  background: linear-gradient(180deg,#58a6c7 0%, #4b93b4 40%, #3b85a8 100%);
-  color:#fff;
-  padding: 48px 0 36px;
+.hero__inner {
+  max-width: var(--container);
+  margin-inline: auto;
+  padding: 6px 16px;
 }
-.hero__title{
-  font-size: clamp(28px, 4vw, 48px);
+/* ============== Hero ============== */
+.hero {
+  background: linear-gradient(
+    100deg,
+    #0b1e3b 0%,
+    #1c3f78 45%,
+    #2f6fb0 75%,
+    #68afd8 100%
+  );
+  color: #fff;
+
+  /* bigger hero + room for overlap */
+  position: relative;
+  min-height: clamp(520px, 70vh, 720px);
+  padding: 0 0 29px;
+}
+.hero__title {
+  font-size: clamp(32px, 5vw, 64px);
   font-weight: 700;
-  letter-spacing: .2px;
+  letter-spacing: 0.2px;
   margin: 6px 0 8px;
 }
-.hero__title span{opacity:.9}
-.hero__lead{
-  max-width: 760px;
-  font-size: clamp(14px, 1.5vw, 18px);
-  opacity:.95;
+.hero__title span {
+  opacity: 0.9;
+}
+.hero__lead {
+  max-width: 860px;
+  font-size: clamp(15px, 1.8vw, 20px);
+  opacity: 0.95;
 }
 
 /* ============== Search bar (responsive) ============== */
-.search{
-  margin-top: 22px;
+.search {
+  /* layout */
   display: grid;
   grid-template-columns: 1fr 1fr auto;
   gap: 12px;
-
-  /* Glass pill */
-  background: rgba(255,255,255,.18);
-  border: 2px solid rgba(255,255,255,.35);
-  border-radius: 999px;
-  padding: 14px;
-  backdrop-filter: blur(4px);
-
-  /* Keep narrower than container + scale on mobile */
-  width: clamp(280px, 92vw, 880px);
+  align-items: center;
+  --control-h: 56px;
+  /* white card look */
+  background: #fff;
+  border: 1px solid #e6edf5;
+  border-radius: 28px;
+  padding: 18px;
+  width: clamp(320px, 92vw, 980px);
   margin-left: auto;
   margin-right: auto;
-  align-items: end;
+  box-shadow:
+    0 18px 40px rgba(20,30,70,.16),
+    0 2px 8px rgba(20,30,70,.08);
+
+  /* size + centering */
+  width: clamp(320px, 92vw, 980px);
+  margin-left: auto;
+  margin-right: auto;
+
+  /* anchored overlap is controlled in .hero .search below */
 }
-.search__field label{
-  display:block; font-weight:700;
+
+/* Anchor the search pill to the hero bottom and overlap by ~36px */
+.hero .search {
+  position: absolute;
+  left: 50%;
+  bottom: 0px;
+  transform: translateX(-50%);
+  margin: 0;
+  z-index: 5;
+}
+.hero + .section {           /* the section immediately after the hero */
+  padding-top: 30px;        /* was 120px */
+}
+.search__field label {
+  display: block;
+  font-weight: 700;
   font-size: clamp(12px, 1.6vw, 13px);
-  color:#082b3a; margin:0 0 6px;
+  color: #082b3a;
+  margin: 0 0 6px;
 }
-.search__field input{
-  width:100%;
-  height: clamp(36px, 4.8vw, 42px);
-  border-radius:999px; border:none; outline:none;
-  padding:10px 14px; color:#0d1726;
+.search__field input {
+  width: 100%;
+  height: clamp(38px, 4.8vw, 44px);
+  border-radius: 999px;
+  border: 1px solid #dbe3ef;
+  background: #f7f9fc;
+  outline: none;
+  padding: 10px 14px;
+  color: #0d1726;
   font-size: clamp(14px, 1.8vw, 16px);
 }
-.search__btn{
-  border:none; border-radius:999px;
-  height: clamp(36px, 4.8vw, 42px);
-  padding: 0 clamp(14px, 3vw, 26px);
-  background:#e3ecff; color:#0d1726; font-weight:700; cursor:pointer;
+.search__btn {
+  height: clamp(38px, 4.8vw, 44px);
+  padding: 0 clamp(16px, 3vw, 28px);
+  border: none;
+  border-radius: 999px;
+  background: #2f5bf0; /* primary */
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
   align-self: end;
+  margin-top: -22px;
+  box-shadow: 0 6px 14px rgba(47, 91, 240, 0.28);
+}
+.search__btn:hover {
+  filter: brightness(1.05);
+}
+.search__btn:active {
+  transform: translateY(1px);
+}
+
+/* make room in the first white section so content doesn't sit under the pill */
+.section {
+  background: #fff;
 }
 
 /* ============== Section ============== */
-.section{background:#fff}
-.section__title{font-size:clamp(22px,2.4vw,28px);text-align:center;margin:6px 0 6px}
-.section__bar{width:120px;height:10px;border-radius:8px;background:#2f4b7f1a;border:2px solid #2f4b7f33;margin:8px auto 18px}
+.section__title {
+  font-size: clamp(22px, 2.4vw, 28px);
+  text-align: center;
+  margin: 6px 0 6px;
+}
+.section__bar {
+  width: 120px;
+  height: 10px;
+  border-radius: 8px;
+  background: #2f4b7f1a;
+  border: 2px solid #2f4b7f33;
+  margin: 8px auto 18px;
+}
 
 /* ============== Specialties cards ============== */
-.spec-grid{
-  display:grid;
+.spec-grid {
+  display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap:16px;
+  gap: 16px;
 }
-.spec-card{
-  background:#f6f7fb;
-  border:1px solid var(--border);
-  border-radius:20px;
-  box-shadow: 0 6px 18px rgba(13,23,38,.06);
-  overflow:hidden;
+.spec-card {
+  background: #f6f7fb;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: 0 6px 18px rgba(13, 23, 38, 0.06);
+  overflow: hidden;
 }
-.spec-card__img{display:block;width:100%;height:140px;object-fit:cover}
-.spec-card__body{padding:12px 14px}
-.spec-card__body h3{margin:4px 0}
-.spec-card__body p{margin:0 0 8px;color:#5c6b80}
-.spec-card__link{font-size:13px;color:#2456f0;text-decoration:underline}
+.spec-card__img {
+  display: block;
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+}
+.spec-card__body {
+  padding: 12px 14px;
+}
+.spec-card__body h3 {
+  margin: 4px 0;
+}
+.spec-card__body p {
+  margin: 0 0 8px;
+  color: #5c6b80;
+}
+.spec-card__link {
+  font-size: 13px;
+  color: #2456f0;
+  text-decoration: underline;
+}
 
 /* ============== Why choose ============== */
-.why{
-  background: linear-gradient(180deg,#58a6c7 0%, #4b93b4 40%, #3b85a8 100%);
-  color:#0d1726;
+.why {
+  background: linear-gradient(
+    100deg,
+    #0b1e3b 0%,
+    #1c3f78 45%,
+    #2f6fb0 75%,
+    #68afd8 100%
+  );
+  color: #0d1726;
   padding: 36px 0 48px;
 }
-.why-grid{
-  display:grid; grid-template-columns: repeat(3, 1fr); gap:18px;
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
 }
-.why-card{
-  background:#f6f7fb;
-  border:1px solid var(--border);
-  border-radius:28px;
-  padding:22px;
-  box-shadow: 0 6px 18px rgba(13,23,38,.08);
-  text-align:center;
+.why-card {
+  background: #f6f7fb;
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  padding: 22px;
+  box-shadow: 0 6px 18px rgba(13, 23, 38, 0.08);
+  text-align: center;
 }
-.why-card__icon{
-  width:56px;height:56px;border-radius:50%;
-  display:grid;place-items:center;margin:0 auto 10px;
-  background:#e8f0ff;font-size:26px;
+.why-card__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 10px;
+  background: #e8f0ff;
+  font-size: 26px;
 }
 
 /* ============== Companion ============== */
-.companion{background:#fff;padding:24px 0 48px}
-.companion-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;align-items:start}
-.companion-item{text-align:center}
-.companion-item__img{width:140px;height:auto;margin:0 auto 8px;display:block}
-.companion-item h4{margin:6px 0}
-.companion-item p{color:#5c6b80;margin:4px auto 0;max-width:320px}
+.companion {
+  background: #fff;
+  padding: 24px 0 48px;
+}
+.companion-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.companion-item {
+  text-align: center;
+}
+.companion-item__img {
+  width: 140px;
+  height: auto;
+  margin: 0 auto 8px;
+  display: block;
+}
+.companion-item h4 {
+  margin: 6px 0;
+}
+.companion-item p {
+  color: #5c6b80;
+  margin: 4px auto 0;
+  max-width: 320px;
+}
 
 /* ============== Responsive ============== */
-@media (max-width: 960px){
-  .spec-grid, .why-grid, .companion-grid{grid-template-columns: 1fr 1fr}
+@media (max-width: 960px) {
+  .spec-grid,
+  .why-grid,
+  .companion-grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 @media (max-width: 900px){
+  /* keep hero tall, slightly less bottom room */
+  .hero{
+    min-height: 520px;
+    padding-bottom: 90px;
+  }
+
+  /* pill overlap a bit less */
+  .hero .search{
+    bottom: -100px;
+  }
+
+  /* smaller, tighter pill */
+  .search{
+    grid-template-columns: 1fr;     /* stack fields */
+    row-gap: 12px;
+    width: min(88vw, 640px);        /* narrower than before */
+    padding: 12px;                  /* tighter padding */
+    border-radius: 18px;            /* smaller radius */
+  }
+
   .search .search__field label{
     text-align: center;
     width: 100%;
-    display: block;   /* ensure it spans full width */
+    display: block;
+    font-size: 13px;
     margin: 0 0 6px;
   }
+
+  .search__field input{
+    height: 42px;                   /* smaller controls */
+    font-size: 15px;
+  }
+
   .search__btn{
-    grid-column: 1 / -1;   /* put it on its own row */
-    justify-self: center;  /* center horizontally */
-    width: auto;           /* don't stretch full width */
-    min-width: 270px;      /* optional: a nice minimum */
+    grid-column: 1;
+    width: 100%;
+    height: 42px;
+    font-size: 15px;
+    margin-top: 0;
+    border-radius: 12px;
+    box-shadow: 0 6px 14px rgba(47,91,240,.24);
+  }
+
+  /* move the next section down just enough to clear the pill */
+  .hero + .section{
+    padding-top: 120px;
   }
 }
 
-@media (max-width: 640px){
-  .search .search__field label{
+@media (max-width: 640px) {
+  /* compact hero, disable overlap for stacked layout */
+  .hero {
+    min-height: auto;
+    padding: 36px 0 24px;
+  }
+
+  .search {
+    position: absolute;
+    grid-template-columns: 1fr;
+    bottom: -20px;
+    width: 92vw;
+  }
+
+  .search .search__field label {
     text-align: center;
     width: 100%;
-    display: block;   /* ensure it spans full width */
+    display: block;
     margin: 0 0 6px;
   }
-  .search__btn{
+  .search__btn {
     grid-column: 1 / -1;
-    justify-self: center;  /* center horizontally */
-    width: auto;           /* don't stretch */
-    min-width: 192px;      
+    justify-self: center;
+    width: 100%;
+    min-width: 0;
+    margin-top: 0;
   }
-  .spec-grid, .why-grid, .companion-grid{grid-template-columns:1fr}
+  .section:first-of-type {
+    padding-top: 90px;
+  }
 }
 
+/* Make sure the hero can crop any overflow from the image glow */
+.hero { overflow: hidden; }
+
+/* Two-column hero layout */
+.hero__inner{
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;  /* left copy, right art */
+  align-items: center;
+  gap: clamp(16px, 3vw, 32px);
+  position: relative;
+}
+
+/* Keep text block a comfortable width */
+.hero__copy{ 
+  z-index: 2; 
+  max-width: 720px;
+}
+
+/* Right-side art */
+.hero__art{
+  justify-self: end;  /* push image to the right edge */
+  align-self: end;
+  position: relative;
+  z-index: 1;
+}
+
+/* Image sizing and soft shadow */
+.hero__art img{
+  width: clamp(380px, 42vw, 560px);  /* scales nicely */
+  height: auto;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 22px 40px rgba(13,23,38,.28));
+  transform: translateY(6px); /* tiny settle so it sits parallel with the copy */
+}
+
+/* Optional soft glow behind the doctor */
+.hero__art::before{
+  content:"";
+  position:absolute;
+  right: -6%;
+  bottom: 2%;
+  width: clamp(420px, 44vw, 560px);
+  height: clamp(420px, 44vw, 560px);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255,255,255,.22), rgba(255,255,255,0));
+  z-index: -1;
+}
+
+/* Make the search pill span the whole hero width under both columns */
+.hero .search{ grid-column: 1 / -1; }
+
+/* Hide the art on tablet/phone; fall back to centered copy */
+@media (max-width: 900px){
+  .hero__inner{ grid-template-columns: 1fr; }
+  .hero__art{ display: none; }
+}
