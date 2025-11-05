@@ -1,35 +1,26 @@
 <section class="hero">
-  <div class="hero__inner">
-    <!-- LEFT: text -->
-    <div class="hero__copy">
-      <h1 class="hero__title">
-        Connecting <span>patients</span> with care.
-      </h1>
-      <p class="hero__lead">
-        MediBook makes it easy to find the right doctor, schedule appointments online,
-        and manage your healthcare—all in one place
-      </p>
-    </div>
+    <div class="hero__inner">
+        <h1 class="hero__title">
+            Connecting <span>patients</span> with care.
+        </h1>
+        <p class="hero__lead">
+            MediBook makes it easy to find the right doctor, schedule appointments online,
+            and manage your healthcare—all in one place
+        </p>
 
-    <!-- RIGHT: image -->
-    <div class="hero__art">
-      <img src="<?= BASE_URL ?>/public/assets/images/hero-doctor.png" alt="Doctor illustration">
+        <form class="search" method="get" action="<?= BASE_URL ?>index.php">
+            <input type="hidden" name="page" value="clinics">
+            <div class="search__field">
+                <label>Doctor, Clinic or Specialty</label>
+                <input type="text" name="q" placeholder="e.g., Dr. Clark, Cardiology, …">
+            </div>
+            <div class="search__field">
+                <label>Location</label>
+                <input type="text" name="loc" placeholder="Where ?">
+            </div>
+            <button class="search__btn" type="submit">Search</button>
+        </form>
     </div>
-
-    <!-- Search pill spans under both columns -->
-    <form class="search" method="get" action="<?= BASE_URL ?>index.php">
-      <input type="hidden" name="page" value="clinics">
-      <div class="search__field">
-        <label>Doctor, Clinic or Specialty</label>
-        <input type="text" name="q" placeholder="e.g., Dr. Clark, Cardiology, …">
-      </div>
-      <div class="search__field">
-        <label>Location</label>
-        <input type="text" name="loc" placeholder="Where ?">
-      </div>
-      <button class="search__btn" type="submit">Search</button>
-    </form>
-  </div>
 </section>
 
 <section class="section">

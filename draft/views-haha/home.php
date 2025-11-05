@@ -1,18 +1,12 @@
 <section class="hero">
   <div class="hero__inner">
-    <!-- LEFT: text -->
-    <div class="hero__copy">
-      <h1 class="hero__title">
-        Connecting <span>patients</span> with care.
-      </h1>
-      <p class="hero__lead">
-        MediBook makes it easy to find the right doctor, schedule appointments online,
-        and manage your healthcare—all in one place
-      </p>
-    </div>
-    <div class="hero__art">
-      <img src="<?= BASE_URL ?>/public/assets/images/hero-doctor.png" alt="Doctor illustration">
-    </div>
+    <h1 class="hero__title">
+      Connecting <span>patients</span> with care.
+    </h1>
+    <p class="hero__lead">
+      MediBook makes it easy to find the right doctor, schedule appointments online,
+      and manage your healthcare—all in one place
+    </p>
 
     <form class="search">
       <div class="search__field">
