@@ -104,17 +104,20 @@
 
     <div class="why-grid">
       <div class="why-card">
-        <div class="why-card__icon">⏱️</div>
+        <!-- FIX path: thêm '/' sau BASE_URL -->
+        <div class="why-card__icon" style="--icon-url: url('<?= BASE_URL ?>assets/timer.png');"></div>
         <h3>Simple and fast booking</h3>
         <p>Find the right doctor and schedule your appointment in just a few clicks.</p>
       </div>
+
       <div class="why-card">
-        <div class="why-card__icon">🛡️</div>
+        <div class="why-card__icon" style="--icon-url: url('<?= BASE_URL ?>assets/shield-check.png');"></div>
         <h3>Verified doctors and clinics</h3>
         <p>All medical offices are reviewed and approved to ensure trusted, quality care.</p>
       </div>
+
       <div class="why-card">
-        <div class="why-card__icon">👤</div>
+        <div class="why-card__icon" style="--icon-url: url('<?= BASE_URL ?>assets/user-heart.png');"></div>
         <h3>Personalized experience</h3>
         <p>Easily manage your appointments and health information in one secure place.</p>
       </div>
@@ -128,17 +131,17 @@
 
     <div class="companion-grid">
       <div class="companion-item">
-        <img src="<?= BASE_URL ?>/public/assets/images/comp-1.svg" alt="" class="companion-item__img">
+        <img src="<?= BASE_URL ?>assets/comp-1.png" alt="" class="companion-item__img">
         <h4>Access care with ease</h4>
         <p>Find doctors by specialty and location, and book your appointments in just a few clicks.</p>
       </div>
       <div class="companion-item">
-        <img src="<?= BASE_URL ?>/public/assets/images/comp-2.svg" alt="" class="companion-item__img">
+        <img src="<?= BASE_URL ?>assets/comp-2.png" alt="" class="companion-item__img">
         <h4>Receive personalized care</h4>
         <p>Choose the right doctor for your needs and keep track of your upcoming visits.</p>
       </div>
       <div class="companion-item">
-        <img src="<?= BASE_URL ?>/public/assets/images/comp-3.svg" alt="" class="companion-item__img">
+        <img src="<?= BASE_URL ?>assets/comp-3.png" alt="" class="companion-item__img">
         <h4>Manage your health</h4>
         <p>Store and organize your health information, along with the details of your loved ones.</p>
       </div>

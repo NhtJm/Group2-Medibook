@@ -11,6 +11,7 @@
   margin-inline: auto;
   padding: 6px 16px;
 }
+
 /* ============== Hero ============== */
 .hero {
   background: linear-gradient(
@@ -21,11 +22,10 @@
     #68afd8 100%
   );
   color: #fff;
-
-  /* bigger hero + room for overlap */
   position: relative;
   min-height: clamp(520px, 70vh, 720px);
   padding: 0 0 29px;
+  overflow: hidden; /* crop overflow from image glow */
 }
 .hero__title {
   font-size: clamp(32px, 5vw, 64px);
@@ -33,9 +33,7 @@
   letter-spacing: 0.2px;
   margin: 6px 0 8px;
 }
-.hero__title span {
-  opacity: 0.9;
-}
+.hero__title span { opacity: 0.9; }
 .hero__lead {
   max-width: 860px;
   font-size: clamp(15px, 1.8vw, 20px);
@@ -44,13 +42,12 @@
 
 /* ============== Search bar (responsive) ============== */
 .search {
-  /* layout */
   display: grid;
   grid-template-columns: 1fr 1fr auto;
   gap: 12px;
   align-items: center;
   --control-h: 56px;
-  /* white card look */
+
   background: #fff;
   border: 1px solid #e6edf5;
   border-radius: 28px;
@@ -61,27 +58,21 @@
   box-shadow:
     0 18px 40px rgba(20,30,70,.16),
     0 2px 8px rgba(20,30,70,.08);
-
-  /* size + centering */
-  width: clamp(320px, 92vw, 980px);
-  margin-left: auto;
-  margin-right: auto;
-
-  /* anchored overlap is controlled in .hero .search below */
 }
 
-/* Anchor the search pill to the hero bottom and overlap by ~36px */
+/* Anchor the search pill to the hero bottom and overlap */
 .hero .search {
   position: absolute;
   left: 50%;
-  bottom: 0px;
+  bottom: 0;
   transform: translateX(-50%);
   margin: 0;
   z-index: 5;
 }
-.hero + .section {           /* the section immediately after the hero */
-  padding-top: 30px;        /* was 120px */
+.hero + .section {           /* section ngay sau hero */
+  padding-top: 30px;         /* was 120px */
 }
+
 .search__field label {
   display: block;
   font-weight: 700;
@@ -105,7 +96,7 @@
   padding: 0 clamp(16px, 3vw, 28px);
   border: none;
   border-radius: 999px;
-  background: #2f5bf0; /* primary */
+  background: #2f5bf0;
   color: #fff;
   font-weight: 700;
   cursor: pointer;
@@ -113,17 +104,11 @@
   margin-top: -22px;
   box-shadow: 0 6px 14px rgba(47, 91, 240, 0.28);
 }
-.search__btn:hover {
-  filter: brightness(1.05);
-}
-.search__btn:active {
-  transform: translateY(1px);
-}
+.search__btn:hover { filter: brightness(1.05); }
+.search__btn:active { transform: translateY(1px); }
 
 /* make room in the first white section so content doesn't sit under the pill */
-.section {
-  background: #fff;
-}
+.section { background: #fff; }
 
 /* ============== Section ============== */
 .section__title {
@@ -159,12 +144,8 @@
   height: 140px;
   object-fit: cover;
 }
-.spec-card__body {
-  padding: 12px 14px;
-}
-.spec-card__body h3 {
-  margin: 4px 0;
-}
+.spec-card__body { padding: 12px 14px; }
+.spec-card__body h3 { margin: 4px 0; }
 .spec-card__body p {
   margin: 0 0 8px;
   color: #5c6b80;
@@ -212,6 +193,7 @@
 }
 
 /* ============== Companion ============== */
+/* (Đã sửa để 3 card luôn đều hàng ngang) */
 .companion {
   background: #fff;
   padding: 24px 0 48px;
@@ -220,24 +202,45 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 24px;
-  align-items: start;
+  align-items: stretch;               /* các ô bằng chiều cao */
 }
 .companion-item {
+  /* card feel + equal height layout */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
+
+  /* nếu muốn plain (không viền) thì bỏ 4 dòng dưới */
+  background: #fff;
+  border: 1px solid #eef2f7;
+  border-radius: 26px;
+  box-shadow: 0 8px 22px rgba(0,0,0,.08);
+
+  padding: 22px 18px;
+  height: 100%;
 }
 .companion-item__img {
-  width: 140px;
-  height: auto;
-  margin: 0 auto 8px;
+  width: 120px;
+  height: 120px;          /* cố định để không nhảy bố cục */
+  object-fit: contain;
   display: block;
+  margin: 0 auto 12px;
+  flex: none;
 }
 .companion-item h4 {
-  margin: 6px 0;
+  margin: 6px 0 8px;
+  font-weight: 700;
+  line-height: 1.25;
+  min-height: calc(1.25em * 2);   /* ~2 dòng để các card thẳng hàng */
 }
 .companion-item p {
   color: #5c6b80;
   margin: 4px auto 0;
   max-width: 320px;
+  line-height: 1.55;
+  font-size: 15px;
+  margin-top: auto;               /* đẩy p xuống đáy card */
 }
 
 /* ============== Responsive ============== */
@@ -257,17 +260,15 @@
   }
 
   /* pill overlap a bit less */
-  .hero .search{
-    bottom: -100px;
-  }
+  .hero .search{ bottom: -100px; }
 
   /* smaller, tighter pill */
   .search{
     grid-template-columns: 1fr;     /* stack fields */
     row-gap: 12px;
-    width: min(88vw, 640px);        /* narrower than before */
-    padding: 12px;                  /* tighter padding */
-    border-radius: 18px;            /* smaller radius */
+    width: min(88vw, 640px);
+    padding: 12px;
+    border-radius: 18px;
   }
 
   .search .search__field label{
@@ -279,7 +280,7 @@
   }
 
   .search__field input{
-    height: 42px;                   /* smaller controls */
+    height: 42px;
     font-size: 15px;
   }
 
@@ -294,9 +295,11 @@
   }
 
   /* move the next section down just enough to clear the pill */
-  .hero + .section{
-    padding-top: 120px;
-  }
+  .hero + .section{ padding-top: 120px; }
+
+  /* Ẩn art, rơi về layout 1 cột */
+  .hero__inner{ grid-template-columns: 1fr; }
+  .hero__art{ display: none; }
 }
 
 @media (max-width: 640px) {
@@ -326,15 +329,10 @@
     min-width: 0;
     margin-top: 0;
   }
-  .section:first-of-type {
-    padding-top: 90px;
-  }
+  .section:first-of-type { padding-top: 90px; }
 }
 
-/* Make sure the hero can crop any overflow from the image glow */
-.hero { overflow: hidden; }
-
-/* Two-column hero layout */
+/* ============== Two-column hero layout ============== */
 .hero__inner{
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;  /* left copy, right art */
@@ -344,14 +342,14 @@
 }
 
 /* Keep text block a comfortable width */
-.hero__copy{ 
-  z-index: 2; 
+.hero__copy{
+  z-index: 2;
   max-width: 720px;
 }
 
 /* Right-side art */
 .hero__art{
-  justify-self: end;  /* push image to the right edge */
+  justify-self: end;
   align-self: end;
   position: relative;
   z-index: 1;
@@ -359,12 +357,12 @@
 
 /* Image sizing and soft shadow */
 .hero__art img{
-  width: clamp(380px, 42vw, 560px);  /* scales nicely */
+  width: clamp(380px, 42vw, 560px);
   height: auto;
   object-fit: contain;
   display: block;
   filter: drop-shadow(0 22px 40px rgba(13,23,38,.28));
-  transform: translateY(6px); /* tiny settle so it sits parallel with the copy */
+  transform: translateY(6px);
 }
 
 /* Optional soft glow behind the doctor */
@@ -382,9 +380,3 @@
 
 /* Make the search pill span the whole hero width under both columns */
 .hero .search{ grid-column: 1 / -1; }
-
-/* Hide the art on tablet/phone; fall back to centered copy */
-@media (max-width: 900px){
-  .hero__inner{ grid-template-columns: 1fr; }
-  .hero__art{ display: none; }
-}
