@@ -1,7 +1,7 @@
 <?php
 // app/function/google_oauth.php
 require_once __DIR__ . '/../db.php';
-require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../../config/config.php';
 
 function google_build_auth_url(): string {
   $params = [
@@ -11,7 +11,7 @@ function google_build_auth_url(): string {
     'scope'         => GOOGLE_OAUTH_SCOPE,
     'access_type'   => 'offline',
     'include_granted_scopes' => 'true',
-    'prompt'        => 'select_account', // hoặc 'consent'
+    'prompt'        => 'select_account',
   ];
   return 'https://accounts.google.com/o/oauth2/v2/auth?' . http_build_query($params);
 }
@@ -49,60 +49,109 @@ function google_fetch_userinfo(string $accessToken): ?array {
 }
 
 function app_login_or_create_from_google(array $g): bool {
-  // $g ví dụ: ['sub'=>'...', 'email'=>'..','email_verified'=>true,'name'=>..., 'given_name'=>..., 'picture'=>...]
   if (empty($g['email'])) return false;
 
   $conn = Database::get_instance();
 
-  // 1) Tìm theo email
-  $email = $g['email'];
-  $stmt = $conn->prepare("SELECT user_id, username FROM Users WHERE email = ?");
-  $stmt->bind_param('s', $email);
-  $stmt->execute();
-  $res = $stmt->get_result();
-  $row = $res->fetch_assoc();
-  $stmt->close();
+  // Tìm user theo email
+  $email = trim($g['email']);
+  $q = $conn->prepare("SELECT user_id, username, email, password_hash, full_name, role FROM Users WHERE email=? LIMIT 1");
+  $q->bind_param('s', $email);
+  $q->execute();
+  $u = $q->get_result()->fetch_assoc();
+  $q->close();
 
-  if ($row) {
-    // Đăng nhập
-    $_SESSION['user_id']  = (int)$row['user_id'];
-    $_SESSION['username'] = $row['username'];
-    $_SESSION['email']    = $email;
+  // Nếu đã có user: set session + profile_id theo role
+  if ($u) {
+    $profile_id = _app_fetch_profile_id($conn, (int)$u['user_id'], (string)$u['role']);
+
+    $_SESSION['user'] = [
+      'id'         => (int)$u['user_id'],
+      'username'   => $u['username'],
+      'email'      => $u['email'],
+      'name'       => $u['full_name'],
+      'role'       => $u['role'],
+      'profile_id' => $profile_id,
+    ];
     return true;
   }
 
-  // 2) Chưa có → tạo user mới
-  $username = explode('@', $email)[0];
-  // đảm bảo unique username: nếu trùng thì thêm số ngẫu nhiên
-  $try = 0;
-  $base = $username;
+  // Chưa có user → tạo mới (role mặc định: patient)
+  $google_sub = trim($g['sub'] ?? '');
+  $username = preg_replace('/[^a-z0-9_]/i', '', strtok($email, '@'));
+  if ($username === '') $username = 'google_' . substr($google_sub, 0, 12);
+
+  // Đảm bảo unique username
+  $base = $username; $try = 0;
+  $chk = $conn->prepare("SELECT 1 FROM Users WHERE username=? LIMIT 1");
   while (true) {
-    $check = $conn->prepare("SELECT 1 FROM Users WHERE username = ?");
-    $check->bind_param('s', $username);
-    $check->execute();
-    $check->store_result();
-    if ($check->num_rows === 0) { $check->close(); break; }
-    $check->close();
+    $chk->bind_param('s', $username);
+    $chk->execute(); $chk->store_result();
+    if ($chk->num_rows === 0) break;
+    $chk->free_result();
     $try++;
     $username = $base . $try;
-    if ($try > 50) break;
+    if ($try > 100) { $chk->close(); return false; }
   }
+  $chk->close();
 
-  $name  = $g['name'] ?? $username;
-  $hash  = password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT);
+  $full_name = trim($g['name'] ?? '');
+  if ($full_name === '') $full_name = $username;
 
-  $ins = $conn->prepare("INSERT INTO Users (username, email, password_hash, name) VALUES (?, ?, ?, ?)");
-  $ins->bind_param('ssss', $username, $email, $hash, $name);
-  if (!$ins->execute()) {
+  $rand = bin2hex(random_bytes(16));
+  $hash = password_hash($rand, PASSWORD_DEFAULT);
+  $role = 'patient';
+
+  $conn->begin_transaction();
+  try {
+    // Tạo Users (đúng cột: full_name, role)
+    $ins = $conn->prepare("INSERT INTO Users (email, username, password_hash, full_name, role) VALUES (?, ?, ?, ?, ?)");
+    $ins->bind_param('sssss', $email, $username, $hash, $full_name, $role);
+    if (!$ins->execute()) throw new Exception($ins->error);
+    $user_id = (int)$conn->insert_id;
     $ins->close();
+
+    // Tạo hồ sơ Patient mặc định
+    $p = $conn->prepare("INSERT INTO Patient (user_id, status) VALUES (?, 'active')");
+    $p->bind_param('i', $user_id);
+    if (!$p->execute()) throw new Exception($p->error);
+    $patient_id = (int)$conn->insert_id; // optional
+    $p->close();
+
+    $conn->commit();
+
+    $_SESSION['user'] = [
+      'id'         => $user_id,
+      'username'   => $username,
+      'email'      => $email,
+      'name'       => $full_name,
+      'role'       => $role,
+      'profile_id' => $patient_id ?: null,
+    ];
+    return true;
+
+  } catch (Throwable $e) {
+    $conn->rollback();
     return false;
   }
-  $newId = $ins->insert_id;
-  $ins->close();
+}
 
-  // Đăng nhập
-  $_SESSION['user_id']  = (int)$newId;
-  $_SESSION['username'] = $username;
-  $_SESSION['email']    = $email;
-  return true;
+/* Helper: lấy profile_id theo role hiện tại của user */
+function _app_fetch_profile_id(mysqli $conn, int $user_id, string $role): ?int {
+  if ($role === 'patient') {
+    $s = $conn->prepare("SELECT patient_id AS id FROM Patient WHERE user_id=? LIMIT 1");
+  } elseif ($role === 'webstaff') {
+    $s = $conn->prepare("SELECT staff_id AS id FROM Web_staff WHERE user_id=? LIMIT 1");
+  } elseif ($role === 'office') {
+    $s = $conn->prepare("SELECT office_id AS id FROM Office WHERE user_id=? LIMIT 1");
+  } elseif ($role === 'admin') {
+    $s = $conn->prepare("SELECT admin_id AS id FROM Admin WHERE user_id=? LIMIT 1");
+  } else {
+    return null;
+  }
+  $s->bind_param('i', $user_id);
+  $s->execute();
+  $r = $s->get_result()->fetch_assoc();
+  $s->close();
+  return $r['id'] ?? null;
 }

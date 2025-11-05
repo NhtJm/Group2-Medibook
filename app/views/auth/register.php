@@ -9,39 +9,80 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $email    = trim($_POST['email'] ?? '');
   $pass     = $_POST['password'] ?? '';
   $confirm  = $_POST['password_confirm'] ?? '';
+  $full_name = trim($_POST['full_name'] ?? $username);
 
   $errors = [];
-
   if ($username === '') $errors[] = 'Username is required';
   if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'Valid email is required';
   if ($pass === '' || strlen($pass) < 8) $errors[] = 'Password must be at least 8 characters';
   if ($pass !== $confirm) $errors[] = 'Passwords do not match';
 
   if (!$errors) {
-    // kiểm tra trùng username/email
     $stmt = $conn->prepare("SELECT 1 FROM Users WHERE username = ? OR email = ?");
     $stmt->bind_param('ss', $username, $email);
     $stmt->execute();
     $stmt->store_result();
-    if ($stmt->num_rows > 0) {
-      $errors[] = 'Username or email already exists';
-    }
+    if ($stmt->num_rows > 0) $errors[] = 'Username or email already exists';
     $stmt->close();
   }
 
-  if (!$errors) {
+  $account_type = $_POST['account_type'] ?? 'patient';
+  $allowed_types = ['patient','webstaff','office','admin'];
+  if (!in_array($account_type, $allowed_types, true)) $account_type = 'patient';
+
+  if ($errors) {
+    // render lại form + $errors (giữ nguyên phần view của bạn)
+  } else {
     $hash = password_hash($pass, PASSWORD_DEFAULT);
-    $stmt = $conn->prepare("INSERT INTO Users (username, email, password_hash, name) VALUES (?, ?, ?, ?)");
-    /* tạm dùng username làm name; sau này bạn thêm field "Full name" thì bind tên thật */
-    $name = $username;
-    $stmt->bind_param('ssss', $username, $email, $hash, $name);
-    if ($stmt->execute()) {
+
+    $conn->begin_transaction();
+    try {
+      // 1) Tạo Users (đúng cột: full_name, role)
+      $stmt = $conn->prepare("
+        INSERT INTO Users (email, username, password_hash, full_name, role)
+        VALUES (?, ?, ?, ?, ?)
+      ");
+      $stmt->bind_param('sssss', $email, $username, $hash, $full_name, $account_type);
+      if (!$stmt->execute()) throw new Exception($stmt->error);
+      $user_id = $conn->insert_id;
+      $stmt->close();
+
+      // 2) Hồ sơ theo role
+      if ($account_type === 'patient') {
+        $stmt = $conn->prepare("INSERT INTO Patient (user_id, status) VALUES (?, 'active')");
+        $stmt->bind_param('i', $user_id);
+        if (!$stmt->execute()) throw new Exception($stmt->error);
+        $stmt->close();
+
+      } elseif ($account_type === 'webstaff') {
+        $stmt = $conn->prepare("INSERT INTO Web_staff (user_id, position, status) VALUES (?, 'support', 'offline')");
+        $stmt->bind_param('i', $user_id);
+        if (!$stmt->execute()) throw new Exception($stmt->error);
+        $stmt->close();
+
+      } elseif ($account_type === 'office') {
+        $stmt = $conn->prepare("INSERT INTO Office (user_id, name, status) VALUES (?, ?, 'pending')");
+        $stmt->bind_param('is', $user_id, $full_name);
+        if (!$stmt->execute()) throw new Exception($stmt->error);
+        $stmt->close();
+
+      } elseif ($account_type === 'admin') {
+        $stmt = $conn->prepare("INSERT INTO Admin (user_id) VALUES (?)");
+        $stmt->bind_param('i', $user_id);
+        if (!$stmt->execute()) throw new Exception($stmt->error);
+        $stmt->close();
+      }
+
+      $conn->commit();
       header('Location: ' . rtrim(BASE_URL, '/') . '/index.php?page=login');
       exit;
-    } else {
-      $errors[] = 'Register failed: ' . $stmt->error;
+
+    } catch (Throwable $e) {
+      $conn->rollback();
+      $errors[] = 'Register failed. Please try again.';
+      // error_log($e->getMessage());
+      // render lại form + $errors
     }
-    $stmt->close();
   }
 }
 
@@ -62,6 +103,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       .notice__icon{width:20px; height:20px; flex:0 0 auto; margin-top:2px;}
       .notice__title{font-weight:700; color:#7a0f0f; margin:0 0 2px;}
       .notice__list{margin:4px 0 0 18px; padding:0; color:#7a0f0f;}
+      .radio-group { display:flex; gap:16px; align-items:center; }
+      .radio-group label { display:inline-flex; gap:6px; align-items:center; font-weight:400; }
     </style>
 
     <div class="segmented" role="tablist" aria-label="Auth tabs">
@@ -73,6 +116,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           href="<?= rtrim(BASE_URL, '/') ?>/index.php?page=register"
           class="segmented__item is-active">Sign Up</a>
     </div>
+
+    <div class="oauth-or" style="text-align:center;margin:16px 0 8px;color:#6b7a90;">or</div>
+      <a class="btn btn--ghost btn--xl"
+        style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px"
+        href="<?= rtrim(BASE_URL, '/') ?>/index.php?page=google_choose_role">
+        <img src="<?= IMAGE_PATH ?>google.svg" alt="" style="width:18px;height:18px">
+        <span>Sign in with Google</span>
+      </a>
 
       <?php if (!empty($errors)): ?>
         <div class="notice notice--error" role="alert" aria-live="polite" style="margin-top:14px;">
@@ -108,6 +159,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <label class="form__label">Confirm Password
         <input type="password" name="password_confirm" placeholder="Enter your password again" required minlength="8">
       </label>
+
+      <div class="field">
+        <label>Account type</label>
+        <div class="radio-group">
+          <label><input type="radio" name="account_type" value="patient" checked> Patient</label>
+          <label><input type="radio" name="account_type" value="webstaff"> Web staff</label>
+          <label><input type="radio" name="account_type" value="office"> Office</label>
+        </div>
+      </div>
 
       <div class="form__row" style="justify-content:flex-start; gap:8px;">
         <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:#5c6b80;">

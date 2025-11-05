@@ -16,35 +16,14 @@ if (!function_exists('h')) {
 }
 
 $specialties = [];
-$sql = "SELECT * FROM Medical_specialty ORDER BY name";  // không giả định cột mới
+$sql = "SELECT specialty_id, slug, name, blurb, image_url
+        FROM Medical_specialty
+        WHERE is_featured = 1
+        ORDER BY sort_order ASC, name ASC
+        LIMIT 6";
 if ($res = $conn->query($sql)) {
-  $rows = $res->fetch_all(MYSQLI_ASSOC);
+  $specialties = $res->fetch_all(MYSQLI_ASSOC);
   $res->free();
-
-  // Chuẩn hoá dữ liệu + fallback cho UI card
-  $specialties = array_map(function($sp){
-    $id    = (int)($sp['specialty_id'] ?? 0);
-    $name  = (string)($sp['name'] ?? '');
-    $desc  = trim((string)($sp['description'] ?? ''));
-
-    // Fallback nếu DB CHƯA có các cột mới
-    $slug  = isset($sp['slug']) ? (string)$sp['slug'] : (string)$id;
-    $blurb = isset($sp['blurb']) && $sp['blurb'] !== '' ? (string)$sp['blurb'] : (
-      mb_strlen($desc) > 140 ? (mb_substr($desc, 0, 140) . '…') : $desc
-    );
-    $image = isset($sp['image_url']) && $sp['image_url'] !== '' ? (string)$sp['image_url'] : '/images/specialties/placeholder.jpg';
-
-    return [
-      'id'    => $id,
-      'slug'  => $slug,
-      'name'  => $name,
-      'blurb' => $blurb,
-      'image' => $image,
-    ];
-  }, $rows);
-
-  // Lấy 6 cái “Popular” đầu tiên (đúng layout Figma)
-  $specialties = array_slice($specialties, 0, 6);
 } else {
   echo "<!-- specialties query failed: " . h($conn->error) . " -->";
 }
@@ -88,8 +67,8 @@ if ($res = $conn->query($sql)) {
     <div class="specialty-grid">
       <?php foreach ($specialties as $sp): ?>
         <article class="specialty-card">
-          <a class="specialty-media" href="/public/index.php?page=clinics&specialty=<?= h($sp['slug']) ?>">
-            <img src="<?= h($sp['image']) ?>" alt="<?= h($sp['name']) ?>">
+          <a class="specialty-media" href="<?= rtrim(BASE_URL,'/') ?>/index.php?page=clinics&specialty=<?= h($sp['slug']) ?>">
+            <img src="<?= h($sp['image_url']) ?>" alt="<?= h($sp['name']) ?>">
           </a>
 
           <div class="specialty-body">
@@ -98,7 +77,7 @@ if ($res = $conn->query($sql)) {
               <p class="specialty-blurb"><?= h($sp['blurb']) ?></p>
             <?php endif; ?>
 
-            <a class="specialty-cta" href="/public/index.php?page=clinics&specialty=<?= h($sp['slug']) ?>">
+            <a class="specialty-cta" href="<?= rtrim(BASE_URL,'/') ?>/index.php?page=clinics&specialty=<?= h($sp['slug']) ?>">
               Find Specialists
             </a>
           </div>

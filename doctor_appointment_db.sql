@@ -1,16 +1,15 @@
 DROP DATABASE IF EXISTS doctor_appointment_db;
-
 CREATE DATABASE doctor_appointment_db;
-
 USE doctor_appointment_db;
 
 CREATE TABLE Users (
-    user_id       INT AUTO_INCREMENT PRIMARY KEY,
-    username      VARCHAR(50)  NOT NULL UNIQUE,
-    email         VARCHAR(100) NOT NULL UNIQUE,
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    username VARCHAR(100) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    name          VARCHAR(100) NULL,
-    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    full_name VARCHAR(255) NOT NULL,
+    role ENUM('admin','webstaff','office','patient') NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE User_phone (
@@ -21,10 +20,17 @@ CREATE TABLE User_phone (
         ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+CREATE TABLE Admin (
+    admin_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL UNIQUE,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
 CREATE TABLE Web_staff (
     staff_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    role ENUM('admin','support','developer','designer') NOT NULL,
+    user_id INT NOT NULL UNIQUE,
+    position ENUM('support','developer','designer') NOT NULL,
     status ENUM('online','offline') DEFAULT 'offline',
     FOREIGN KEY (user_id) REFERENCES Users(user_id)
         ON DELETE CASCADE ON UPDATE CASCADE
@@ -32,7 +38,7 @@ CREATE TABLE Web_staff (
 
 CREATE TABLE Patient (
     patient_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
+    user_id INT NOT NULL UNIQUE,
     date_of_birth DATE,
     status ENUM('active','inactive') DEFAULT 'active',
     payment VARCHAR(100),
@@ -42,24 +48,36 @@ CREATE TABLE Patient (
 
 CREATE TABLE Medical_specialty (
     specialty_id INT AUTO_INCREMENT PRIMARY KEY,
-    slug         VARCHAR(80)  NOT NULL UNIQUE,     -- dùng cho URL/route
-    name         VARCHAR(120) NOT NULL,            -- tiêu đề card
-    blurb        VARCHAR(255) NULL,                -- mô tả ngắn (hiển thị dưới title)
-    description  TEXT         NULL,                -- mô tả dài (trang chi tiết)
-    image_url    VARCHAR(255) NULL,                -- ảnh thumbnail của card
-    is_featured  TINYINT(1)   NOT NULL DEFAULT 1,  -- lọc “Popular”
-    sort_order   INT          NOT NULL DEFAULT 0,  -- sắp xếp
-    created_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+    slug        VARCHAR(120) NOT NULL UNIQUE,
+    name        VARCHAR(100) NOT NULL,
+    blurb       VARCHAR(255) NULL,
+    description TEXT NULL,
+    image_url   VARCHAR(255) NULL,
+    is_featured TINYINT(1) NOT NULL DEFAULT 0,
+    sort_order  INT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE Office (
     office_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL UNIQUE,
     name VARCHAR(255) NOT NULL,
     address VARCHAR(255),
     website VARCHAR(255),
     logo VARCHAR(255),
     description TEXT,
-    status ENUM('approved','pending','deactivated') DEFAULT 'pending'
+    status ENUM('approved','pending','deactivated') DEFAULT 'pending',
+    FOREIGN KEY (user_id) REFERENCES Users(user_id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Office_has_specialty (
+    office_id INT NOT NULL,
+    specialty_id INT NOT NULL,
+    PRIMARY KEY (office_id, specialty_id),
+    FOREIGN KEY (office_id) REFERENCES Office(office_id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (specialty_id) REFERENCES Medical_specialty(specialty_id)
+        ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE Office_phone (
@@ -72,38 +90,23 @@ CREATE TABLE Office_phone (
 
 CREATE TABLE Doctor (
     doctor_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
+    office_id INT NOT NULL,
     photo VARCHAR(255),
     degree VARCHAR(100),
     graduate VARCHAR(100),
     specialty_id INT NULL,
-    FOREIGN KEY (user_id) REFERENCES Users(user_id)
+    FOREIGN KEY (office_id) REFERENCES Office(office_id)
         ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (specialty_id) REFERENCES Medical_specialty(specialty_id)
         ON DELETE SET NULL ON UPDATE CASCADE
 );
 
-
-# Change log: Allow doctors to be associated with multiple offices
-CREATE TABLE Doctor_office (
-    doctor_id INT,
-    office_id INT,
-    PRIMARY KEY (doctor_id, office_id),
-    FOREIGN KEY (doctor_id) REFERENCES Doctor(doctor_id)
-        ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (office_id) REFERENCES Office(office_id)
-        ON DELETE CASCADE ON UPDATE CASCADE
-);
-
-CREATE TABLE Slots_free (
+CREATE TABLE Appointment_slot (
     slot_id INT AUTO_INCREMENT PRIMARY KEY,
-    office_id INT NOT NULL,
     doctor_id INT NOT NULL,
-    start DATETIME NOT NULL,
-    end DATETIME NOT NULL,
+    start_time DATETIME NOT NULL,
+    end_time   DATETIME NOT NULL,
     status ENUM('available','unavailable') DEFAULT 'available',
-    FOREIGN KEY (office_id) REFERENCES Office(office_id)
-        ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (doctor_id) REFERENCES Doctor(doctor_id)
         ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -113,9 +116,10 @@ CREATE TABLE Appointment (
     patient_id INT NOT NULL,
     slot_id INT NOT NULL,
     status ENUM('booked','canceled','completed','no-show') DEFAULT 'booked',
+    booked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (patient_id) REFERENCES Patient(patient_id)
         ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (slot_id) REFERENCES Slots_free(slot_id)
+    FOREIGN KEY (slot_id) REFERENCES Appointment_slot(slot_id)
         ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -132,7 +136,6 @@ CREATE TABLE Problem_report (
         ON DELETE SET NULL ON UPDATE CASCADE,
     FOREIGN KEY (office_id) REFERENCES Office(office_id)
         ON DELETE SET NULL ON UPDATE CASCADE,
-    
     CHECK (
         (patient_id IS NOT NULL) + (doctor_id IS NOT NULL) + (office_id IS NOT NULL) = 1
     )
@@ -160,40 +163,3 @@ CREATE TABLE Contact (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     status ENUM('new','read','replied') DEFAULT 'new'
 );
-
--- CREATE TABLE Problem_report (
---     report_id INT AUTO_INCREMENT PRIMARY KEY,
---     description_action TEXT,
---     status ENUM('open','resolved','dismissed') DEFAULT 'open',
---     action_date DATETIME DEFAULT CURRENT_TIMESTAMP
--- );
-
--- CREATE TABLE Patient_report (
---     patient_id INT,
---     report_id INT,
---     PRIMARY KEY (patient_id, report_id),
---     FOREIGN KEY (patient_id) REFERENCES Patient(patient_id)
---         ON DELETE CASCADE ON UPDATE CASCADE,
---     FOREIGN KEY (report_id) REFERENCES Problem_report(report_id)
---         ON DELETE CASCADE ON UPDATE CASCADE
--- );
-
--- CREATE TABLE Doctor_report (
---     doctor_id INT,
---     report_id INT,
---     PRIMARY KEY (doctor_id, report_id),
---     FOREIGN KEY (doctor_id) REFERENCES Doctor(doctor_id)
---         ON DELETE CASCADE ON UPDATE CASCADE,
---     FOREIGN KEY (report_id) REFERENCES Problem_report(report_id)
---         ON DELETE CASCADE ON UPDATE CASCADE
--- );
-
--- CREATE TABLE Office_report (
---     office_id INT,
---     report_id INT,
---     PRIMARY KEY (office_id, report_id),
---     FOREIGN KEY (office_id) REFERENCES Office(office_id)
---         ON DELETE CASCADE ON UPDATE CASCADE,
---     FOREIGN KEY (report_id) REFERENCES Problem_report(report_id)
---         ON DELETE CASCADE ON UPDATE CASCADE
--- );

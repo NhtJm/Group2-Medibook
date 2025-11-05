@@ -13,8 +13,8 @@ define('SCRIPT_PATH', BASE_URL . 'js/');      // public/assets/js/
 define('IMAGE_PATH',  BASE_URL . 'images/');  // public/assets/images/
 
 // Google OAuth
-define('GOOGLE_CLIENT_ID',     'YOUR_GOOGLE_CLIENT_ID');
-define('GOOGLE_CLIENT_SECRET', 'YOUR_GOOGLE_CLIENT_SECRET');
+define('GOOGLE_CLIENT_ID',     '823718931471-5pkqnju02peal0pg41pbtk3j7pq3b77u.apps.googleusercontent.com');
+define('GOOGLE_CLIENT_SECRET', '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');
 
 // Redirect URL phải public được truy cập (đang dùng front controller)
 define('GOOGLE_REDIRECT_URI',  rtrim(BASE_URL, '/') . '/index.php?page=google_callback');
