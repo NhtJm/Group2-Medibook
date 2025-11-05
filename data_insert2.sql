@@ -97,23 +97,23 @@ INSERT INTO Office_phone (office_id, phone) VALUES
 -- ==========================
 -- DOCTORS (no user_id)
 -- ==========================
-INSERT INTO Doctor (office_id, photo, degree, graduate, specialty_id) VALUES
-(1,'photo1.jpg','MD','Hanoi Medical University',1),
-(1,'photo2.jpg','MD','Hue Medical College',2),
-(2,'photo3.jpg','PhD','HCMC University of Medicine',3),
-(2,'photo4.jpg','MD','Thai Binh Medical University',4),
-(2,'photo5.jpg','MD','Can Tho Medical University',5),
-(3,'photo6.jpg','MD','Hanoi Medical University',6),
-(3,'photo7.jpg','PhD','University of Tokyo',1),
-(3,'photo8.jpg','MD','Seoul National University',2),
-(4,'photo9.jpg','MD','Harvard Medical School',3),
-(4,'photo10.jpg','MD','Oxford University',4),
-(4,'photo11.jpg','MD','Cambridge University',5),
-(1,'photo12.jpg','PhD','Stanford University',6),
-(1,'photo13.jpg','MD','University of Toronto',1),
-(2,'photo14.jpg','MD','University of Sydney',2),
-(3,'photo15.jpg','MD','Yale University',3),
-(3,'photo16.jpg','MD','Columbia University',4);
+INSERT INTO Doctor (office_id, doctor_name, photo, degree, graduate, specialty_id) VALUES
+(1,'Dr. Nguyen Anh Minh','photo1.jpg','MD','Hanoi Medical University',1),
+(1,'Dr. Tran Thi Lan','photo2.jpg','MD','Hue Medical College',2),
+(2,'Dr. Le Quang Huy','photo3.jpg','PhD','HCMC University of Medicine',3),
+(2,'Dr. Pham Gia Bao','photo4.jpg','MD','Thai Binh Medical University',4),
+(2,'Dr. Vo Kim Ngan','photo5.jpg','MD','Can Tho Medical University',5),
+(3,'Dr. Hoang Duc Long','photo6.jpg','MD','Hanoi Medical University',6),
+(3,'Dr. Mai Yuki','photo7.jpg','PhD','University of Tokyo',1),
+(3,'Dr. Park Ji Soo','photo8.jpg','MD','Seoul National University',2),
+(4,'Dr. John Smith','photo9.jpg','MD','Harvard Medical School',3),
+(4,'Dr. Emily Brown','photo10.jpg','MD','Oxford University',4),
+(4,'Dr. William Green','photo11.jpg','MD','Cambridge University',5),
+(1,'Dr. Sarah Johnson','photo12.jpg','PhD','Stanford University',6),
+(1,'Dr. Nguyen Thu Trang','photo13.jpg','MD','University of Toronto',1),
+(2,'Dr. David Nguyen','photo14.jpg','MD','University of Sydney',2),
+(3,'Dr. Phan Minh Chau','photo15.jpg','MD','Yale University',3),
+(3,'Dr. Tran Hoai Nam','photo16.jpg','MD','Columbia University',4);
 
 -- ==========================
 -- PATIENT PROFILES (users 5..24)

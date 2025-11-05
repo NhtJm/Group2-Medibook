@@ -89,16 +89,17 @@ CREATE TABLE Office_phone (
 );
 
 CREATE TABLE Doctor (
-    doctor_id INT AUTO_INCREMENT PRIMARY KEY,
-    office_id INT NOT NULL,
-    photo VARCHAR(255),
-    degree VARCHAR(100),
-    graduate VARCHAR(100),
-    specialty_id INT NULL,
-    FOREIGN KEY (office_id) REFERENCES Office(office_id)
-        ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (specialty_id) REFERENCES Medical_specialty(specialty_id)
-        ON DELETE SET NULL ON UPDATE CASCADE
+  doctor_id    INT AUTO_INCREMENT PRIMARY KEY,
+  office_id    INT NOT NULL,
+  doctor_name  VARCHAR(150) NOT NULL,
+  photo        VARCHAR(255),
+  degree       VARCHAR(100),
+  graduate     VARCHAR(100),
+  specialty_id INT NULL,
+  FOREIGN KEY (office_id)    REFERENCES Office(office_id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (specialty_id) REFERENCES Medical_specialty(specialty_id)
+    ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 CREATE TABLE Appointment_slot (

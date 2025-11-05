@@ -31,6 +31,7 @@ $allowed = [
   'logout','clinics','clinic','doctor','confirm',
   'google_login','google_callback', // Google OAuth
   'google_choose_role','google_begin', 
+  'api.search', // JSON endpoint cho AJAX
 ];
 if (!in_array($page, $allowed, true)) $page = 'home';
 
@@ -112,20 +113,11 @@ if ($page === 'google_callback') {
   exit;
 }
 
-
-
-// /* ========= Login (stub có sẵn) ========= */
-// if ($page === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-//   $email = trim($_POST['email'] ?? '');
-//   $pass  = trim($_POST['password'] ?? '');
-//   if ($email !== '' && $pass !== '') {
-//     $_SESSION['user'] = [
-//       'id' => 1, 'name' => 'Guest Patient', 'role' => 'patient', 'email' => $email
-//     ];
-//     header('Location: ' . BASE_URL . 'index.php?page=dashboard');
-//     exit;
-//   }
-// }
+if ($page === 'api.search') {
+  require_once __DIR__ . '/../app/controller/SearchController.php';
+  SearchController::suggest();
+  exit;
+}
 
 /* ========= Logout ========= */
 if ($page === 'logout') {

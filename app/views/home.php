@@ -44,16 +44,21 @@ if ($res = $conn->query($sql)) {
       <img src="images/hero-doctor.png" alt="Doctor illustration">
     </div>
 
-    <form class="search">
+    <form class="search search--has-suggest">
       <div class="search__field">
         <label>Doctor, Clinic or Specialty</label>
-        <input type="text" placeholder="e.g., Dr. Clark, Cardiology, …">
+        <input id="search-q" type="text" placeholder="e.g., Dr. Clark, Cardiology, …" autocomplete="off">
       </div>
+
       <div class="search__field">
         <label>Location</label>
-        <input type="text" placeholder="Where ?">
+        <input id="search-loc" type="text" placeholder="Where ?" autocomplete="off">
       </div>
-      <button class="search__btn" type="button">Search</button>
+
+      <button id="search-btn" class="search__btn">Search</button>
+
+      <!-- dropdown gợi ý -->
+      <div id="search-suggest" class="search__suggest hidden" role="listbox" aria-label="Search suggestions"></div> 
     </form>
   </div>
 </section>
@@ -204,6 +209,122 @@ if ($res = $conn->query($sql)) {
 
   .why-card h3 { margin: 0 0 8px; font-size: 20px; font-weight: 700; }   /* giữ màu chữ mặc định */
   .why-card p  { margin: 0; color: #4b5563; line-height: 1.55; font-size: 15px; }  /* GIỮ màu #4b5563 */
+
+  /* Form bọc thanh search */
+.search--has-suggest { position: relative; }
+
+/* DROPDOWN */
+.search__suggest{
+  position: absolute;
+  /* bám theo padding của khung trắng: nếu khung có padding-x = 24px thì đặt 24 */
+  left: 24px;
+  right: 24px;
+  top: calc(100% + 12px);          /* ngay dưới form */
+  background: #fff;
+  border: 1px solid #e7eaf3;
+  border-radius: 16px;
+  box-shadow: 0 18px 40px rgba(16,24,40,.12);
+  max-height: 420px;
+  overflow: auto;
+  z-index: 150;                     /* cao hơn header/ảnh */
+  padding: 6px;
+  color: #1c2430;
+}
+.search__suggest.hidden{ display:none; }
+
+/* Nhóm tiêu đề */
+.search__suggest .s-head{
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: 10px 12px 4px;
+}
+
+/* Item */
+.search__suggest .s-item{
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background .15s ease;
+}
+.search__suggest .s-item:hover{ background: #f5f7ff; }
+
+/* Nhãn nhỏ */
+.search__suggest .s-pill{
+  font-size: 12px;
+  line-height: 20px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3c50e0;
+  flex: 0 0 auto;
+  background: #eef2ff;
+}
+
+.search__suggest .s-item > span:nth-of-type(2){
+  color: #1c2430;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+/* Meta */
+.search__suggest .s-meta{
+  opacity: .7;
+  font-size: 12px;
+  margin-left: 6px;
+  color: #667085;
+}
+
+/* Empty */
+.search__suggest .s-empty{
+  padding: 14px;
+  color: #667085;
+  text-align: center;
+}
+
+/* Scrollbar */
+.search__suggest::-webkit-scrollbar{ width: 8px; }
+.search__suggest::-webkit-scrollbar-thumb{
+  background: #e1e6f9; border-radius: 999px;
+}
+
+/* Mobile: khít mép, không tràn */
+@media (max-width: 768px){
+  .search__suggest{ left: 12px; right: 12px; top: calc(100% + 8px); }
+}
+
+/* form chứa dropdown */
+.search--has-suggest{
+  position: relative;
+  z-index: 1000;            /* nổi hơn các section phía dưới */
+}
+
+/* chính dropdown */
+.search__suggest{
+  z-index: 10000;           /* cao hẳn để không bị che */
+}
+
+/* hero/khung chứa form – tránh cắt dropdown */
+.hero,
+.hero__inner{
+  overflow: visible !important;  /* nếu trước đó bị hidden */
+  position: relative;
+  z-index: 5;                    /* cao hơn các section tiếp theo */
+}
+
+/* các section phía dưới không cần cao z-index */
+.home-specialties,
+.why,
+.companion{
+  position: relative;
+  z-index: 1;              /* đảm bảo thấp hơn hero */
+}
+
 </style>
 
 <section class="why">
@@ -257,3 +378,7 @@ if ($res = $conn->query($sql)) {
     </div>
   </div>
 </section>
+
+///////////////////////////
+<script>const BASE_URL = "<?= BASE_URL ?>";</script>
+<script src="<?= BASE_URL ?>js/search.js"></script>
