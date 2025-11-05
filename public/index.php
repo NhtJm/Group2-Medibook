@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ ;
+require_once __DIR__ . '/../config/config.php';
 session_start();
 
 /* ---- Helpers ---- */
@@ -28,6 +28,7 @@ $allowed = [
   'home',
   'login',
   'register',
+  'register2',
   'dashboard',
   'appointments',
   'profile',
@@ -36,11 +37,6 @@ $allowed = [
   'clinic',
   'doctor',
   'confirm',
-  'profile_setup',
-  'clinic_setup',
-  'office_dashboard',
-  'doctor_schedule',
-  'admin_dashboard'
 ];
 if (!in_array($page, $allowed, true))
   $page = 'home';
@@ -73,62 +69,50 @@ $labels = [
   'home' => 'Home',
   'login' => 'Login',
   'register' => 'Sign Up',
+  'register2' => 'Sign Up',
   'dashboard' => 'Dashboard',
-  'profile_setup' => 'profile setup',
-  'clinic_setup'=> 'Clinic setup',
   'appointments' => 'Appointments',
   'profile' => 'My Profile',
-  'office_dashboard' => 'Clinic Dashboard',
   'clinics' => 'Clinics'  // <-- add
 ];
 $title = 'MEDIBOOK — ' . ($labels[$page] ?? 'MediBook');
 $css = [STYLE_PATH . '/base.css', STYLE_PATH . '/header.css'];
+
+// Page-specific CSS
 if ($page === 'clinics')
   $css[] = STYLE_PATH . '/clinics.css';
-elseif ($page === 'profile_setup')
-  $css[] = STYLE_PATH . '/profile_setup.css';
-elseif ($page === 'admin_dashboard')
-  $css[] = STYLE_PATH . '/admin_dashboard.css';
-elseif ($page === 'clinic_setup')
-  $css[] = STYLE_PATH . '/clinic_setup.css';
 elseif ($page === 'clinic')
   $css[] = STYLE_PATH . '/clinic.css';
 elseif ($page === 'doctor')   
   $css[] = STYLE_PATH . '/doctor.css';
-elseif ($page === 'doctor_schedule')
-  $css[] = STYLE_PATH . '/doctor_schedule.css';
-elseif ($page === 'clinic_dashboard')
-  $css[] = STYLE_PATH . '/office_dashboard.css';
 elseif ($page === 'appointments')
   $css[] = STYLE_PATH . '/appointments.css';
-elseif ($page === 'confirm') 
+elseif ($page === 'confirm')  
   $css[] = STYLE_PATH . '/confirm.css'; 
 elseif ($page === 'home' || $page === 'dashboard')
   $css[] = STYLE_PATH . '/home.css';
 else
   $css[] = STYLE_PATH . '/login.css';
 
+
 /* Views map */
 $views = [
-  'home' => __DIR__ . '/app/views/home.php',
-  'login' => __DIR__ . '/app/views/auth/login.php',
-  'register' => __DIR__ . '/app/views/auth/register.php',
-  'dashboard' => __DIR__ . '/app/views/user/dashboard.php',
-  'appointments' => __DIR__ . '/app/views/user/appointments.php',
-  'profile' => __DIR__ . '/app/views/user/profile.php',
-  'clinics' => __DIR__ . '/app/views/search/clinics.php',
-  'clinic' => __DIR__ . '/app/views/search/clinic.php',
-  'doctor' => __DIR__ . '/app/views/search/doctor.php',
-  'confirm' => __DIR__ . '/app/views/booking/confirm.php',
-  'profile_setup'=> __DIR__ . '/app/views/user/profile_setup.php',
-  'clinic_setup'=> __DIR__ . '/app/views/clinic/clinic_setup.php',
-  'office_dashboard'=> __DIR__ . '/app/views/clinic/office_dashboard.php',
-  'doctor_schedule'=> __DIR__ . '/app/views/clinic/doctor_schedule.php',
-  'admin_dashboard'=> __DIR__ . '/app/views/admin/admin_dashboard.php',
+  'home' => __DIR__ . '/../app/views/home.php',
+  'login' => __DIR__ . '/../app/views/auth/login.php',
+  'register' => __DIR__ . '/../app/views/auth/register.php',
+  'register2' => __DIR__ . '/../app/views/auth/register2.php',
+  'dashboard' => __DIR__ . '/../app/views/user/dashboard.php',
+  'appointments' => __DIR__ . '/../app/views/user/appointments.php',
+  'profile' => __DIR__ . '/../app/views/user/profile.php',
+  'clinics' => __DIR__ . '/../app/views/search/clinics.php',
+  'clinic' => __DIR__ . '/../app/views/search/clinic.php',
+  'doctor' => __DIR__ . '/../app/views/search/doctor.php',
+  'confirm' => __DIR__ . '/../app/views/booking/confirm.php',
 ];
 
 $brandTarget = current_user() ? 'dashboard' : 'home';
 ?>
+<!-- HTML TEMPLATE -->
 <!doctype html>
 <html lang="en">
 
@@ -192,9 +176,6 @@ $brandTarget = current_user() ? 'dashboard' : 'home';
       if (btn) { menu.classList.toggle('show'); return; }
       if (!box && menu) menu.classList.remove('show');
     });
-
-
-    
   </script>
 </body>
 

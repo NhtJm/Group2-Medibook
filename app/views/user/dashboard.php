@@ -13,7 +13,7 @@
 
     <!-- RIGHT: image -->
     <div class="hero__art">
-      <img src="<?= BASE_URL ?>/public/assets/images/hero-doctor.png" alt="Doctor illustration">
+      <img src="images/hero-doctor.png" alt="Doctor illustration">
     </div>
 
     <!-- Search pill spans under both columns -->
