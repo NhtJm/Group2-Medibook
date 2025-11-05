@@ -1,56 +1,56 @@
 -- ==========================
-INSERT INTO Users (username, password_hash, name)
-VALUES
-('admin01', 'hash_pw1', 'Nguyen Van Admin'),
-('support01', 'hash_pw2', 'Tran Thi Support'),
-('dev01', 'hash_pw3', 'John Doe'),
-('design01', 'hash_pw4', 'Emma Brown'),
+USE doctor_appointment_db;
 
--- ==========================
+INSERT INTO Users (username, email, password_hash, name) VALUES
+-- staff (1..4)
+('admin01',   'admin01@example.com',   'hash_pw1',  'Nguyen Van Admin'),
+('support01', 'support01@example.com', 'hash_pw2',  'Tran Thi Support'),
+('dev01',     'dev01@example.com',     'hash_pw3',  'John Doe'),
+('design01',  'design01@example.com',  'hash_pw4',  'Emma Brown'),
 
-('patient01', 'hash_pw5', 'Nguyen Van An'),
-('patient02', 'hash_pw6', 'Tran Thi Bich'),
-('patient03', 'hash_pw7', 'Le Van Cuong'),
-('patient04', 'hash_pw8', 'Pham Thi Dao'),
-('patient05', 'hash_pw9', 'Hoang Van Duc'),
-('patient06', 'hash_pw10', 'Do Thi Lan'),
-('patient07', 'hash_pw11', 'Bui Van Hung'),
-('patient08', 'hash_pw12', 'Dang Thi Mai'),
-('patient09', 'hash_pw13', 'Nguyen Van Nam'),
-('patient10', 'hash_pw14', 'Tran Thi Oanh'),
-('patient11', 'hash_pw15', 'Oliver Smith'),
-('patient12', 'hash_pw16', 'Sophia Johnson'),
-('patient13', 'hash_pw17', 'James Miller'),
-('patient14', 'hash_pw18', 'Isabella Davis'),
-('patient15', 'hash_pw19', 'William Wilson'),
-('patient16', 'hash_pw20', 'Mia Taylor'),
-('patient17', 'hash_pw21', 'Benjamin Anderson'),
-('patient18', 'hash_pw22', 'Charlotte Thomas'),
-('patient19', 'hash_pw23', 'Lucas Martinez'),
-('patient20', 'hash_pw24', 'Amelia Garcia'),
+-- patients (5..24)
+('patient01', 'patient01@example.com', 'hash_pw5',  'Nguyen Van An'),
+('patient02', 'patient02@example.com', 'hash_pw6',  'Tran Thi Bich'),
+('patient03', 'patient03@example.com', 'hash_pw7',  'Le Van Cuong'),
+('patient04', 'patient04@example.com', 'hash_pw8',  'Pham Thi Dao'),
+('patient05', 'patient05@example.com', 'hash_pw9',  'Hoang Van Duc'),
+('patient06', 'patient06@example.com', 'hash_pw10', 'Do Thi Lan'),
+('patient07', 'patient07@example.com', 'hash_pw11', 'Bui Van Hung'),
+('patient08', 'patient08@example.com', 'hash_pw12', 'Dang Thi Mai'),
+('patient09', 'patient09@example.com', 'hash_pw13', 'Nguyen Van Nam'),
+('patient10', 'patient10@example.com', 'hash_pw14', 'Tran Thi Oanh'),
+('patient11', 'patient11@example.com', 'hash_pw15', 'Oliver Smith'),
+('patient12', 'patient12@example.com', 'hash_pw16', 'Sophia Johnson'),
+('patient13', 'patient13@example.com', 'hash_pw17', 'James Miller'),
+('patient14', 'patient14@example.com', 'hash_pw18', 'Isabella Davis'),
+('patient15', 'patient15@example.com', 'hash_pw19', 'William Wilson'),
+('patient16', 'patient16@example.com', 'hash_pw20', 'Mia Taylor'),
+('patient17', 'patient17@example.com', 'hash_pw21', 'Benjamin Anderson'),
+('patient18', 'patient18@example.com', 'hash_pw22', 'Charlotte Thomas'),
+('patient19', 'patient19@example.com', 'hash_pw23', 'Lucas Martinez'),
+('patient20', 'patient20@example.com', 'hash_pw24', 'Amelia Garcia'),
 
--- ==========================
-
-('doctor01', 'hash_pw25', 'BS. Nguyen Van Bao'),
-('doctor02', 'hash_pw26', 'BS. Tran Thi Cam'),
-('doctor03', 'hash_pw27', 'BS. Le Van Dung'),
-('doctor04', 'hash_pw28', 'BS. Pham Thi Ha'),
-('doctor05', 'hash_pw29', 'BS. Hoang Van Hieu'),
-('doctor06', 'hash_pw30', 'BS. Do Thi Khanh'),
-('doctor07', 'hash_pw31', 'BS. Bui Van Long'),
-('doctor08', 'hash_pw32', 'BS. Dang Thi Minh'),
-('doctor09', 'hash_pw33', 'BS. Nguyen Van Phuc'),
-('doctor10', 'hash_pw34', 'BS. Tran Thi Quyen'),
-('doctor11', 'hash_pw35', 'Dr. Michael Scott'),
-('doctor12', 'hash_pw36', 'Dr. Emily Clark'),
-('doctor13', 'hash_pw37', 'Dr. David Lee'),
-('doctor14', 'hash_pw38', 'Dr. Sarah Adams'),
-('doctor15', 'hash_pw39', 'Dr. Daniel White'),
-('doctor16', 'hash_pw40', 'Dr. Emma Harris'),
-('doctor17', 'hash_pw41', 'Dr. Matthew Lewis'),
-('doctor18', 'hash_pw42', 'Dr. Olivia Hall'),
-('doctor19', 'hash_pw43', 'Dr. Christopher Young'),
-('doctor20', 'hash_pw44', 'Dr. Grace King');
+-- doctors (25..44)
+('doctor01', 'doctor01@example.com', 'hash_pw25', 'BS. Nguyen Van Bao'),
+('doctor02', 'doctor02@example.com', 'hash_pw26', 'BS. Tran Thi Cam'),
+('doctor03', 'doctor03@example.com', 'hash_pw27', 'BS. Le Van Dung'),
+('doctor04', 'doctor04@example.com', 'hash_pw28', 'BS. Pham Thi Ha'),
+('doctor05', 'doctor05@example.com', 'hash_pw29', 'BS. Hoang Van Hieu'),
+('doctor06', 'doctor06@example.com', 'hash_pw30', 'BS. Do Thi Khanh'),
+('doctor07', 'doctor07@example.com', 'hash_pw31', 'BS. Bui Van Long'),
+('doctor08', 'doctor08@example.com', 'hash_pw32', 'BS. Dang Thi Minh'),
+('doctor09', 'doctor09@example.com', 'hash_pw33', 'BS. Nguyen Van Phuc'),
+('doctor10', 'doctor10@example.com', 'hash_pw34', 'BS. Tran Thi Quyen'),
+('doctor11', 'doctor11@example.com', 'hash_pw35', 'Dr. Michael Scott'),
+('doctor12', 'doctor12@example.com', 'hash_pw36', 'Dr. Emily Clark'),
+('doctor13', 'doctor13@example.com', 'hash_pw37', 'Dr. David Lee'),
+('doctor14', 'doctor14@example.com', 'hash_pw38', 'Dr. Sarah Adams'),
+('doctor15', 'doctor15@example.com', 'hash_pw39', 'Dr. Daniel White'),
+('doctor16', 'doctor16@example.com', 'hash_pw40', 'Dr. Emma Harris'),
+('doctor17', 'doctor17@example.com', 'hash_pw41', 'Dr. Matthew Lewis'),
+('doctor18', 'doctor18@example.com', 'hash_pw42', 'Dr. Olivia Hall'),
+('doctor19', 'doctor19@example.com', 'hash_pw43', 'Dr. Christopher Young'),
+('doctor20', 'doctor20@example.com', 'hash_pw44', 'Dr. Grace King');
 
 -- ==========================
 
@@ -70,14 +70,13 @@ VALUES
 
 -- ==========================
 
-INSERT INTO Medical_specialty (name, description)
-VALUES
-('Cardiology','Heart and blood vessel care'),
-('Neurology','Brain and nervous system'),
-('Pediatrics','Child healthcare'),
-('Dermatology','Skin and hair treatment'),
-('Orthopedics','Bone and joint care'),
-('Psychiatry','Mental health treatment');
+INSERT INTO Medical_specialty (slug, name, blurb, description, image_url, is_featured, sort_order) VALUES
+('general-practice', 'General Practice', 'Everyday care for you and your family.', NULL, 'images/general-practice.jpg', 1, 10),
+('pediatrics', 'Pediatrics', 'Focused on children’s health and growth.', NULL, 'images/pediatrics.jpg', 1, 20),
+('internal-medicine', 'Internal Medicine', 'Care for adult health and chronic issues.', NULL, 'images/internal-medicine.jpg', 1, 30),
+('obgyn', 'Obstetrics & Gynecology', 'Comprehensive women’s health care.', NULL, 'images/obgyn.jpg', 1, 40),
+('dermatology', 'Dermatology', 'Expert care for skin, hair, and nails.', NULL, 'images/dermatology.jpg', 1, 50),
+('cardiology', 'Cardiology', 'Dedicated to heart and vascular health.', NULL, 'images/cardiology.jpg', 1, 60);
 
 -- ==========================
 

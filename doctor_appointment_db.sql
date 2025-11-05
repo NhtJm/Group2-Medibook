@@ -5,10 +5,12 @@ CREATE DATABASE doctor_appointment_db;
 USE doctor_appointment_db;
 
 CREATE TABLE Users (
-    user_id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(100) NOT NULL UNIQUE,
+    user_id       INT AUTO_INCREMENT PRIMARY KEY,
+    username      VARCHAR(50)  NOT NULL UNIQUE,
+    email         VARCHAR(100) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    name VARCHAR(255) NOT NULL
+    name          VARCHAR(100) NULL,
+    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE User_phone (
@@ -40,8 +42,14 @@ CREATE TABLE Patient (
 
 CREATE TABLE Medical_specialty (
     specialty_id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    description TEXT
+    slug         VARCHAR(80)  NOT NULL UNIQUE,     -- dùng cho URL/route
+    name         VARCHAR(120) NOT NULL,            -- tiêu đề card
+    blurb        VARCHAR(255) NULL,                -- mô tả ngắn (hiển thị dưới title)
+    description  TEXT         NULL,                -- mô tả dài (trang chi tiết)
+    image_url    VARCHAR(255) NULL,                -- ảnh thumbnail của card
+    is_featured  TINYINT(1)   NOT NULL DEFAULT 1,  -- lọc “Popular”
+    sort_order   INT          NOT NULL DEFAULT 0,  -- sắp xếp
+    created_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE Office (

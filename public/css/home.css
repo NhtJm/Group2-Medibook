@@ -157,40 +157,51 @@
 }
 
 /* ============== Why choose ============== */
-.why {
-  background: linear-gradient(
-    100deg,
-    #0b1e3b 0%,
-    #1c3f78 45%,
-    #2f6fb0 75%,
-    #68afd8 100%
-  );
-  color: #0d1726;
-  padding: 36px 0 48px;
-}
-.why-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
-}
-.why-card {
-  background: #f6f7fb;
-  border: 1px solid var(--border);
-  border-radius: 28px;
-  padding: 22px;
-  box-shadow: 0 6px 18px rgba(13, 23, 38, 0.08);
-  text-align: center;
-}
-.why-card__icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  margin: 0 auto 10px;
-  background: #e8f0ff;
-  font-size: 26px;
-}
+/* GIỮ MÀU CŨ – KHÔNG đổi palette */
+  .why { padding: 64px 0 72px; }                  /* không dùng gradient */
+  .why__inner { max-width: 1100px; margin: 0 auto; padding: 0 16px; text-align: center; }
+
+  .why .section__title {                          /* giữ màu mặc định */
+    font-size: 36px; line-height: 1.2; font-weight: 700;
+    margin: 0 0 10px;
+  }
+  .why .section__bar {                            /* GIỮ màu #2563eb như trước */
+    width: 80px; height: 8px; background: #2563eb;
+    border-radius: 999px; margin: 0 auto 36px;
+  }
+
+  .why-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px; align-items: stretch;
+  }
+  @media (max-width: 960px){ .why-grid { grid-template-columns: 1fr; gap: 16px; } }
+
+  .why-card {
+    background: #fff;                             /* giữ nền trắng */
+    border: 1px solid #eef2f7;                    /* giữ viền cũ */
+    border-radius: 26px;                          /* bo lớn như hình */
+    padding: 28px 22px 26px;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.08);      /* bóng nhẹ */
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .why-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,0.10); }
+
+  .why-card__icon {
+    width: 76px; height: 76px; border-radius: 50%;
+    background: #eef6ff;                          /* GIỮ màu icon circle cũ */
+    position: relative; margin: 4px auto 16px; flex: none;
+  }
+  .why-card__icon::before {
+    content: ""; position: absolute; inset: 0; margin: auto;
+    width: 36px; height: 36px;                    /* icon to hơn */
+    background-image: var(--icon-url);
+    background-repeat: no-repeat; background-position: center; background-size: contain;
+  }
+
+  .why-card h3 { margin: 0 0 8px; font-size: 20px; font-weight: 700; }   /* giữ màu chữ mặc định */
+  .why-card p  { margin: 0; color: #4b5563; line-height: 1.55; font-size: 15px; }  /* GIỮ màu #4b5563 */
 
 /* ============== Companion ============== */
 /* (Đã sửa để 3 card luôn đều hàng ngang) */

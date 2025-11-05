@@ -1,4 +1,4 @@
-<?php
+<!-- <?php
 require_once __DIR__ . '/../config/config.php';
 session_start();
 
@@ -121,6 +121,7 @@ $brandTarget = current_user() ? 'dashboard' : 'home';
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= htmlspecialchars($title) ?></title>
   <link rel="icon" href="<?= IMAGE_PATH ?>/Logo.svg">
+
   <?php foreach ($css as $href): ?>
     <link rel="stylesheet" href="<?= htmlspecialchars($href) ?>">
   <?php endforeach; ?>
@@ -179,4 +180,4 @@ $brandTarget = current_user() ? 'dashboard' : 'home';
   </script>
 </body>
 
-</html>
+</html> -->
