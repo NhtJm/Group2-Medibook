@@ -6,11 +6,21 @@ CREATE TABLE Users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
     username VARCHAR(100) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255) NULL,   -- Cho phép NULL để user Google không cần mật khẩu
     full_name VARCHAR(255) NOT NULL,
     role ENUM('admin','webstaff','office','patient') NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+
+    -- OAuth
+    oauth_provider VARCHAR(50)  NULL,  -- ví dụ: 'google'
+    oauth_sub      VARCHAR(255) NULL,  -- Google 'sub' (định danh ổn định)
+    picture_url    VARCHAR(512) NULL,
+
+    -- giữ nguyên field sẵn có
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    UNIQUE KEY ux_users_oauth (oauth_provider, oauth_sub)
 );
+
 
 CREATE TABLE User_phone (
     user_id INT,
@@ -92,6 +102,7 @@ CREATE TABLE Doctor (
   doctor_id    INT AUTO_INCREMENT PRIMARY KEY,
   office_id    INT NOT NULL,
   doctor_name  VARCHAR(150) NOT NULL,
+  email        VARCHAR(255) NOT NULL UNIQUE,
   photo        VARCHAR(255),
   degree       VARCHAR(100),
   graduate     VARCHAR(100),
@@ -163,4 +174,17 @@ CREATE TABLE Contact (
     message TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     status ENUM('new','read','replied') DEFAULT 'new'
+);
+
+CREATE TABLE IF NOT EXISTS email_outbox (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  to_email       VARCHAR(255) NOT NULL,
+  to_name        VARCHAR(255) NULL,
+  subject        VARCHAR(255) NOT NULL,
+  template       VARCHAR(64)  NULL,
+  payload_json   JSON         NOT NULL,
+  html_body      MEDIUMTEXT   NOT NULL,
+  created_at     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  status         ENUM('queued','sent','failed') NOT NULL DEFAULT 'queued',
+  meta           JSON         NULL
 );

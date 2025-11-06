@@ -44,7 +44,7 @@ function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 
         <!-- Web Staff (mặc định disabled để đúng spec: không tự đăng ký) -->
         <label class="roleitem is-disabled" title="Web Staff accounts are issued by Admin">
-          <input type="radio" name="role" value="staff" disabled>
+          <input type="radio" name="role" value="webstaff" disabled>
           <div class="roleitem__body">
             <div class="roleitem__title">Web Staff</div>
             <div class="roleitem__desc">Internal tools for managing platform operations.</div>

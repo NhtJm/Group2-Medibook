@@ -378,7 +378,7 @@ if ($res = $conn->query($sql)) {
     </div>
   </div>
 </section>
+<!-- This is a single-line comment in HTML -->
 
-///////////////////////////
 <script>const BASE_URL = "<?= BASE_URL ?>";</script>
 <script src="<?= BASE_URL ?>js/search.js"></script>

@@ -13,17 +13,6 @@ function require_auth_or_redirect() {
   }
 }
 
-
-// Ko demo nx
-// /* ========= Demo login (optional) ========= */
-// if (($_GET['page'] ?? '') === 'demo_login') {
-//   $_SESSION['user'] = [
-//     'id' => 999, 'name' => 'Demo Patient', 'role' => 'patient', 'email' => 'demo@medibook.local'
-//   ];
-//   header('Location: ' . BASE_URL . 'index.php?page=dashboard');
-//   exit;
-// }
-
 /* ========= Routing: xác định $page + allowlist ========= */
 $page = $_GET['page'] ?? 'home';
 $allowed = [
@@ -35,83 +24,64 @@ $allowed = [
 ];
 if (!in_array($page, $allowed, true)) $page = 'home';
 
-/* ========= Google OAuth routes ========= */
-if ($page === 'google_login') {
-  header('Location: ' . BASE_URL . 'index.php?page=google_choose_role');
-  exit;
-}
-
 if ($page === 'google_begin') {
-  // nhận role từ form và lưu vào session rồi mới gọi OAuth
   $role = $_POST['role'] ?? '';
-  if (!in_array($role, ['patient','office'], true)) {
-    header('Location: ' . BASE_URL . 'index.php?page=google_choose_role&err=role'); exit;
+
+  // Web Staff không được tự đăng ký
+  if ($role === 'webstaff') {
+    header('Location: ' . BASE_URL . 'index.php?page=google_choose_role&err=staff_forbidden');
+    exit;
   }
-  $_SESSION['oauth_role'] = $role; // lưu role đã chọn cho callback dùng
+
+  // Chỉ chấp nhận 2 role được phép tự tạo
+  if (!in_array($role, ['patient', 'office'], true)) {
+    header('Location: ' . BASE_URL . 'index.php?page=google_choose_role&err=role');
+    exit;
+  }
+
+  $_SESSION['oauth_flow'] = 'register';
+  $_SESSION['oauth_role'] = $role;
 
   require_once __DIR__ . '/../app/function/google_oauth.php';
-  // đi tiếp tới Google (hàm cũ của bạn)
   header('Location: ' . google_build_auth_url());
   exit;
 }
 
+// LOGIN -> đi Google (không hỏi role)
+if ($page === 'google_login') {
+  $_SESSION['oauth_flow'] = 'login';
+  unset($_SESSION['oauth_role']);
+  require_once __DIR__ . '/../app/function/google_oauth.php';
+  header('Location: ' . google_build_auth_url());
+  exit;
+}
+
+// CALLBACK: login/link/tạo mới nếu cần
+if ($page === 'google_callback') {
+  require_once __DIR__ . '/../app/function/google_oauth.php';
+  $ok = google_handle_callback_login_or_register();
+  if ($ok) {
+    header('Location: ' . BASE_URL . 'index.php?page=dashboard');
+    exit;
+  }
+  // flow=login, chưa có user -> yêu cầu chọn role
+  header('Location: ' . BASE_URL . 'index.php?page=google_choose_role');
+  exit;
+}
+
+// Trang chọn role (chỉ cho phép khi flow=login hoặc có pending_google_user)
 if ($page === 'google_choose_role') {
+  $flow = $_SESSION['oauth_flow'] ?? null;
+  $hasPending = isset($_SESSION['pending_google_user']);
+  if ($flow !== 'login' && !$hasPending) {
+    header('Location: ' . BASE_URL . 'index.php?page=login');
+    exit;
+  }
   require __DIR__ . '/../app/views/auth/google_choose_role.php';
   exit;
 }
 
-if ($page === 'google_callback') {
-  require_once __DIR__ . '/../app/function/google_oauth.php';
 
-  $code = $_GET['code'] ?? '';
-  if (!$code) {
-    header('Location: ' . BASE_URL . 'index.php?page=login');
-    exit;
-  }
-
-  $token = google_exchange_code_for_token($code);
-  if (!$token || empty($token['access_token'])) {
-    header('Location: ' . BASE_URL . 'index.php?page=login');
-    exit;
-  }
-
-  $info = google_fetch_userinfo($token['access_token']); // email, name, sub, ...
-  if (!$info) {
-    header('Location: ' . BASE_URL . 'index.php?page=login');
-    exit;
-  }
-
-  if (app_login_or_create_from_google($info)) {
-    // Role người dùng đã chọn trước OAuth (patient | office)
-    $chosenRole = $_SESSION['oauth_role'] ?? 'patient';
-
-    // Chuẩn hoá session cho current_user()
-    if (empty($_SESSION['user'])) {
-      $_SESSION['user'] = [
-        'id'    => $_SESSION['user_id'] ?? 0,
-        'name'  => $_SESSION['username'] ?? ($info['name'] ?? 'User'),
-        'role'  => $chosenRole, // dùng role đã chọn
-        'email' => $_SESSION['email'] ?? ($info['email'] ?? ''),
-      ];
-    } else {
-      // nếu app_login_or_create_from_google đã set $_SESSION['user'] sẵn, ép role cho khớp luồng
-      $_SESSION['user']['role'] = $chosenRole;
-    }
-
-    // Dọn session tạm
-    unset($_SESSION['oauth_role']);
-
-    // Điều hướng theo role: lần đầu đăng ký nên đưa tới trang setup tương ứng
-    if ($chosenRole === 'office') {
-      header('Location: ' . BASE_URL . 'index.php?page=clinic_setup');
-    } else {
-      header('Location: ' . BASE_URL . 'index.php?page=profile_setup');
-    }
-  } else {
-    header('Location: ' . BASE_URL . 'index.php?page=login');
-  }
-  exit;
-}
 
 if ($page === 'api.search') {
   require_once __DIR__ . '/../app/controller/SearchController.php';
@@ -173,6 +143,7 @@ $brandTarget = current_user() ? 'dashboard' : 'home';
 <!doctype html>
 <html lang="en">
 <head>
+  <link rel="stylesheet" href="<?= BASE_URL ?>css/footer.css?v=1">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?></title>
@@ -233,4 +204,65 @@ $brandTarget = current_user() ? 'dashboard' : 'home';
     });
   </script>
 </body>
+
+<footer class="site-footer">
+  <div class="footer__inner">
+    <div class="footer__brand">
+      <a class="brand" href="<?= BASE_URL ?>index.php?page=home">
+        <img class="brand__logo" src="<?= IMAGE_PATH ?>logo.svg" alt="MediBook">
+        <span class="brand__name">MediBook</span>
+      </a>
+      <p class="footer__blurb">
+        Find the right doctor, book appointments online, and manage your care—all in one place.
+      </p>
+    </div>
+
+    <nav class="footer__cols">
+      <div class="footer__col">
+        <h4>Explore</h4>
+        <ul>
+          <li><a href="<?= BASE_URL ?>index.php?page=clinics">Find Clinics</a></li>
+          <li><a href="<?= BASE_URL ?>index.php?page=search">Search Doctors</a></li>
+          <li><a href="<?= BASE_URL ?>index.php?page=home#why">Why MediBook</a></li>
+        </ul>
+      </div>
+
+      <div class="footer__col">
+        <h4>Account</h4>
+        <ul>
+          <?php if (!empty($_SESSION['user'])): ?>
+            <li><a href="<?= BASE_URL ?>index.php?page=dashboard">Dashboard</a></li>
+            <li><a href="<?= BASE_URL ?>index.php?page=appointments">My Appointments</a></li>
+            <li><a href="<?= BASE_URL ?>index.php?page=profile">Profile</a></li>
+            <li><a href="<?= BASE_URL ?>index.php?page=logout">Sign out</a></li>
+          <?php else: ?>
+            <li><a href="<?= BASE_URL ?>index.php?page=login">Login</a></li>
+            <li><a href="<?= BASE_URL ?>index.php?page=register">Sign Up</a></li>
+          <?php endif; ?>
+        </ul>
+      </div>
+
+      <div class="footer__col">
+        <h4>Support</h4>
+        <ul>
+          <li><a href="<?= BASE_URL ?>index.php?page=help">Help Center</a></li>
+          <li><a href="<?= BASE_URL ?>index.php?page=contact">Contact</a></li>
+          <li><a href="<?= BASE_URL ?>index.php?page=privacy">Privacy</a></li>
+          <li><a href="<?= BASE_URL ?>index.php?page=terms">Terms</a></li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+
+  <div class="footer__bar">
+    <div class="footer__bar-inner">
+      <span>© <?= date('Y') ?> MediBook. All rights reserved.</span>
+      <div class="footer__social">
+        <a aria-label="Facebook" href="#" rel="noopener">Fb</a>
+        <a aria-label="X" href="#" rel="noopener">X</a>
+        <a aria-label="LinkedIn" href="#" rel="noopener">In</a>
+      </div>
+    </div>
+  </div>
+</footer>
 </html>

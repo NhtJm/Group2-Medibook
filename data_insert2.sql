@@ -1,3 +1,4 @@
+USE doctor_appointment_db;
 -- ==========================
 -- USERS (no 'doctor' users)
 -- ==========================
@@ -97,23 +98,29 @@ INSERT INTO Office_phone (office_id, phone) VALUES
 -- ==========================
 -- DOCTORS (no user_id)
 -- ==========================
-INSERT INTO Doctor (office_id, doctor_name, photo, degree, graduate, specialty_id) VALUES
-(1,'Dr. Nguyen Anh Minh','photo1.jpg','MD','Hanoi Medical University',1),
-(1,'Dr. Tran Thi Lan','photo2.jpg','MD','Hue Medical College',2),
-(2,'Dr. Le Quang Huy','photo3.jpg','PhD','HCMC University of Medicine',3),
-(2,'Dr. Pham Gia Bao','photo4.jpg','MD','Thai Binh Medical University',4),
-(2,'Dr. Vo Kim Ngan','photo5.jpg','MD','Can Tho Medical University',5),
-(3,'Dr. Hoang Duc Long','photo6.jpg','MD','Hanoi Medical University',6),
-(3,'Dr. Mai Yuki','photo7.jpg','PhD','University of Tokyo',1),
-(3,'Dr. Park Ji Soo','photo8.jpg','MD','Seoul National University',2),
-(4,'Dr. John Smith','photo9.jpg','MD','Harvard Medical School',3),
-(4,'Dr. Emily Brown','photo10.jpg','MD','Oxford University',4),
-(4,'Dr. William Green','photo11.jpg','MD','Cambridge University',5),
-(1,'Dr. Sarah Johnson','photo12.jpg','PhD','Stanford University',6),
-(1,'Dr. Nguyen Thu Trang','photo13.jpg','MD','University of Toronto',1),
-(2,'Dr. David Nguyen','photo14.jpg','MD','University of Sydney',2),
-(3,'Dr. Phan Minh Chau','photo15.jpg','MD','Yale University',3),
-(3,'Dr. Tran Hoai Nam','photo16.jpg','MD','Columbia University',4);
+INSERT INTO Doctor (office_id, doctor_name, email, photo, degree, graduate, specialty_id) VALUES
+(1,'Dr. Nguyen Anh Minh','hung.nguyentien2004@gmail.com','photo1.jpg','MD','Hanoi Medical University',1),
+(1,'Dr. Tran Thi Lan','tran.thi.lan@hch.vn','photo2.jpg','MD','Hue Medical College',2),
+
+(2,'Dr. Le Quang Huy','le.quang.huy@sgclinic.vn','photo3.jpg','PhD','HCMC University of Medicine',3),
+(2,'Dr. Pham Gia Bao','pham.gia.bao@sgclinic.vn','photo4.jpg','MD','Thai Binh Medical University',4),
+(2,'Dr. Vo Kim Ngan','vo.kim.ngan@sgclinic.vn','photo5.jpg','MD','Can Tho Medical University',5),
+
+(3,'Dr. Hoang Duc Long','hoang.duc.long@eurocare.uk','photo6.jpg','MD','Hanoi Medical University',6),
+(3,'Dr. Mai Yuki','mai.yuki@eurocare.uk','photo7.jpg','PhD','University of Tokyo',1),
+(3,'Dr. Park Ji Soo','park.ji.soo@eurocare.uk','photo8.jpg','MD','Seoul National University',2),
+
+(4,'Dr. John Smith','john.smith@nygh.com','photo9.jpg','MD','Harvard Medical School',3),
+(4,'Dr. Emily Brown','emily.brown@nygh.com','photo10.jpg','MD','Oxford University',4),
+(4,'Dr. William Green','william.green@nygh.com','photo11.jpg','MD','Cambridge University',5),
+
+(1,'Dr. Sarah Johnson','sarah.johnson@hch.vn','photo12.jpg','PhD','Stanford University',6),
+(1,'Dr. Nguyen Thu Trang','nguyen.thu.trang@hch.vn','photo13.jpg','MD','University of Toronto',1),
+
+(2,'Dr. David Nguyen','david.nguyen@sgclinic.vn','photo14.jpg','MD','University of Sydney',2),
+
+(3,'Dr. Phan Minh Chau','phan.minh.chau@eurocare.uk','photo15.jpg','MD','Yale University',3),
+(3,'Dr. Tran Hoai Nam','tran.hoai.nam@eurocare.uk','photo16.jpg','MD','Columbia University',4);
 
 -- ==========================
 -- PATIENT PROFILES (users 5..24)

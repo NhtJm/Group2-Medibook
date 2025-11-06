@@ -95,8 +95,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-
-
 <section class="wall">
   <div class="card">
     <div class="card__logo">
@@ -106,12 +104,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <h1 class="title">Welcome Back!</h1>
     <p class="subtitle">Sign in to book and track your appointments</p>
 
-    <!-- Use router param instead of linking to /app/views files -->
+    <!-- Tabs -->
     <div class="segmented" role="tablist" aria-label="Auth tabs">
-      <a role="tab" aria-selected="true" href="<?= BASE_URL ?>/index.php?page=login"
-        class="segmented__item is-active">Log In</a>
-      <a role="tab" aria-selected="false" href="<?= BASE_URL ?>/index.php?page=register" class="segmented__item">Sign
-        Up</a>
+      <a role="tab" aria-selected="true"
+         href="<?= rtrim(BASE_URL, '/') ?>/index.php?page=login"
+         class="segmented__item is-active">Log In</a>
+      <a role="tab" aria-selected="false"
+         href="<?= rtrim(BASE_URL, '/') ?>/index.php?page=register"
+         class="segmented__item">Sign Up</a>
     </div>
 
     <?php if (!empty($errors)): ?>
@@ -122,7 +122,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </div>
     <?php endif; ?>
 
-    <form class="form" method="post" action="<?= BASE_URL ?>/index.php?page=login">
+    <!-- ======= GOOGLE LOGIN (không hỏi role trước) ======= -->
+    <div class="oauth-or" style="text-align:center;margin:16px 0 8px;color:#6b7a90;">or</div>
+
+    <a class="btn btn--ghost btn--xl"
+      style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px"
+      href="<?= rtrim(BASE_URL, '/') ?>/index.php?page=google_login">
+      <img src="<?= IMAGE_PATH ?>google.svg" alt="" style="width:18px;height:18px">
+      <span>Log in with Google</span>
+    </a>
+
+    <!-- ======= /GOOGLE ======= -->
+
+    <form class="form" method="post" action="<?= rtrim(BASE_URL, '/') ?>/index.php?page=login">
       <label class="form__label">Email address
         <input type="email" name="email" placeholder="Enter your email address" required>
       </label>
