@@ -5,9 +5,9 @@ USE doctor_appointment_db;
 CREATE TABLE Users (
     user_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL UNIQUE,
-    username VARCHAR(40) NOT NULL UNIQUE,
+    username VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(100) NULL,   -- Cho phép NULL để user Google không cần mật khẩu
-    full_name VARCHAR(50) NOT NULL,
+    full_name VARCHAR(255) NOT NULL,
     role ENUM('admin','webstaff','office','patient') NOT NULL,
 
     -- OAuth
@@ -68,7 +68,7 @@ CREATE TABLE Office (
     office_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_id INT UNSIGNED NOT NULL UNIQUE,
     name VARCHAR(80) NOT NULL,
-    address VARCHAR(120),
+    address VARCHAR(255),
     website VARCHAR(150),
     logo VARCHAR(255),
     description TEXT,
@@ -100,7 +100,7 @@ CREATE TABLE Doctor (
   office_id    INT UNSIGNED NOT NULL,
   doctor_name  VARCHAR(50) NOT NULL,
   email        VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL UNIQUE,
-  photo        VARCHAR(255),            --url
+  photo        VARCHAR(255),            
   degree       VARCHAR(30),
   graduate     VARCHAR(100),
   specialty_id INT UNSIGNED NULL,
@@ -135,21 +135,21 @@ CREATE TABLE Appointment (
 );
 
 CREATE TABLE Problem_report (
-    report_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    description TEXT,
-    date_report DATETIME DEFAULT CURRENT_TIMESTAMP,
-    patient_id INT UNSIGNED NULL,
-    doctor_id INT UNSIGNED NULL,
-    office_id INT UNSIGNED NULL,
+  report_id   INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  description TEXT,
+  date_report DATETIME DEFAULT CURRENT_TIMESTAMP,
+  patient_id  INT UNSIGNED NULL,
+  doctor_id   INT UNSIGNED NULL,
+  office_id   INT UNSIGNED NULL,
+  CONSTRAINT fk_problem_patient
     FOREIGN KEY (patient_id) REFERENCES Patient(patient_id)
-        ON DELETE SET NULL ON UPDATE CASCADE,
-    FOREIGN KEY (doctor_id) REFERENCES Doctor(doctor_id)
-        ON DELETE SET NULL ON UPDATE CASCADE,
-    FOREIGN KEY (office_id) REFERENCES Office(office_id)
-        ON DELETE SET NULL ON UPDATE CASCADE,
-    CHECK (
-        (patient_id IS NOT NULL) + (doctor_id IS NOT NULL) + (office_id IS NOT NULL) = 1
-    )
+    ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT fk_problem_doctor
+    FOREIGN KEY (doctor_id)  REFERENCES Doctor(doctor_id)
+    ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT fk_problem_office
+    FOREIGN KEY (office_id)  REFERENCES Office(office_id)
+    ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 CREATE TABLE Handled (

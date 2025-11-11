@@ -7,7 +7,7 @@ class Database {
         $this->connection = new mysqli(
             'localhost',     // Host
             'root',          // Username 
-            '',              // Password
+            'root',              // Password
             'doctor_appointment_db'   // Database name
         );
 

@@ -11,10 +11,25 @@
   height: var(--topbar-h);           /* keeps everything vertically centered */
   display: flex; align-items: center; justify-content: space-between;
 }
+/* Control the logo size via a variable */
+.topbar{
+  --logo-size: 66px;                                  /* set the size you want */
+  --topbar-h: max(56px, calc(var(--logo-size) + 5px));/* header height */
+}
+/* Responsive bump if you like */
+@media (min-width: 1024px){
+  .topbar{ --logo-size: 76px; }
+}
 
 /* Brand */
 .brand{ display:flex; align-items:center; gap:12px; text-decoration:none; color:var(--ink) }
-.brand__logo{ width: var(--logo-size); height: var(--logo-size) }
+.topbar .brand__logo{
+  height: var(--logo-size) !important;
+  width: auto !important;          /* keep PNG aspect ratio */
+  max-height: none !important;
+  display: inline-block;
+  object-fit: contain;
+}
 .brand__name{
   font-weight: 800;                   /* 800 (unitless) */
   letter-spacing: .5px;
