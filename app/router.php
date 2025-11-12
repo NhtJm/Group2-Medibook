@@ -1,6 +1,13 @@
 <?php
 // app/router.php
+require_once __DIR__ . '/db.php';
 
+global $conn;
+if (!isset($conn) || !($conn instanceof mysqli)) {
+  if (class_exists('Database') && method_exists('Database','get_instance')) {
+    $conn = Database::get_instance();   // must return mysqli
+  }
+}
 /* ========= Routing: which page ========= */
 $page = $_GET['page'] ?? 'home';
 
@@ -153,9 +160,19 @@ $views = [
 $brandTarget = current_user() ? 'dashboard' : 'home';
 $view        = $views[$page] ?? null;
 $data = null;
+
 if ($page === 'clinics') {
   require_once __DIR__ . '/controller/ClinicsController.php';
-  $data = ClinicsController::index(); // passes $data to the included view
+  $data = ClinicsController::index();  // already working
+}
+elseif ($page === 'clinic') {
+  require_once __DIR__ . '/controller/ClinicController.php';
+  $data = ClinicController::show();    // <-- returns ['clinic'=>..., 'doctors'=>...]
+}
+elseif ($page === 'doctor') {
+  // optional, if you have a DoctorController
+  // require_once __DIR__ . '/controller/DoctorController.php';
+  // $data = DoctorController::show();
 }
 /* ========= Choose layout ========= */
 $layout = __DIR__ . '/views/layout/' . ($noChrome ? 'blank.php' : 'app.php');

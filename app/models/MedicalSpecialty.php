@@ -45,4 +45,17 @@ class MedicalSpecialty
     $res->free();
     return $rows;
   }
+  public static function findBySlug(mysqli $conn, string $slug): ?array
+    {
+        $sql = "SELECT specialty_id, slug, name, blurb, image_url
+                FROM Medical_specialty
+                WHERE slug = ?
+                LIMIT 1";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("s", $slug);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        return $row ?: null;
+    }
 }

@@ -10,7 +10,7 @@
 
         <nav class="topbar__nav">
             <?php if (current_user()): ?>
-                <a class="btn" href="<?= BASE_URL ?>index.php?page=clinics">Search</a>
+                <a class="btn" href="<?= BASE_URL ?>index.php?page=clinics">All Clinics</a>
                 <a class="btn" href="<?= BASE_URL ?>index.php?page=appointments">My Appointments</a>
 
                 <div class="dropdown">

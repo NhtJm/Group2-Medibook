@@ -9,7 +9,7 @@
 .hero__inner {
   max-width: var(--container);
   margin-inline: auto;
-  padding: 6px 16px;
+  padding: 5.7px 13px;
 }
 
 /* ============== Hero ============== */
@@ -24,13 +24,13 @@
   color: #fff;
   position: relative;
   min-height: clamp(520px, 70vh, 720px);
-  padding: 0 0 29px;
+  padding: 0 0 12px;
   overflow: hidden; /* crop overflow from image glow */
 }
 .hero__title {
   font-size: clamp(32px, 5vw, 64px);
-  font-weight: 700;
-  letter-spacing: 0.2px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
   margin: 6px 0 8px;
 }
 .hero__title span { opacity: 0.9; }

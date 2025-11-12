@@ -1,39 +1,92 @@
 <?php
 // app/controller/ClinicsController.php
-
 require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../models/Office.php';
+require_once __DIR__ . '/../models/MedicalSpecialty.php';
 
 class ClinicsController
 {
+    /**
+     * Rules:
+     * - If q or loc present  -> search across ALL facilities (ignore specialty).
+     * - Else if specialty     -> list facilities of that specialty.
+     * - Else                  -> list ALL facilities (paginated).
+     */
     public static function index(): array
     {
-        // Get mysqli connection (compatible with your db.php style)
-        if (isset($GLOBALS['conn']) && $GLOBALS['conn'] instanceof mysqli) {
-            $conn = $GLOBALS['conn'];
-        } elseif (class_exists('Database')) {
-            $conn = Database::get_instance();
-        } else {
-            throw new RuntimeException('DB connection not available');
+        // get mysqli conn compatible with your db.php
+        global $conn;
+        if (!isset($conn) || !$conn) {
+            if (class_exists('Database')) {
+                $conn = Database::get_instance();
+            }
         }
 
-        $q   = isset($_GET['q'])   ? trim((string)$_GET['q'])   : null;
-        $loc = isset($_GET['loc']) ? trim((string)$_GET['loc']) : null;
-        $p   = isset($_GET['p'])   ? (int)$_GET['p'] : 1;
+        $q      = trim((string)($_GET['q'] ?? ''));
+        $loc    = trim((string)($_GET['loc'] ?? ''));
+        $slug   = trim((string)($_GET['specialty'] ?? ''));
+        $page   = max(1, (int)($_GET['p'] ?? 1));
+        $per    = max(1, min(24, (int)($_GET['per'] ?? 10)));
 
-        // 9 per page like your sample grid pacing, adjust if you wish
-        $perPage = 10;
+        // If user typed anything, IGNORE specialty filter → search ALL
+        if ($q !== '' || $loc !== '') {
+            $res = Office::searchPaginated($conn, $q, $loc, $page, $per);
+            return [
+                'slug'      => '',
+                'specialty' => null,
+                'offices'   => $res['rows'],
+                'page'      => $res['page'],
+                'per'       => $res['perPage'],
+                'total'     => $res['total'],
+                'pages'     => $res['pages'],
+                'q'         => $q,
+                'loc'       => $loc,
+            ];
+        }
 
-        $result = Office::searchPaginated($conn, $q, $loc, $p, $perPage);
+        // If no q/loc but has specialty slug → list by specialty
+        if ($slug !== '') {
+            $spec = MedicalSpecialty::findBySlug($conn, $slug);
+            if ($spec) {
+                $res = Office::bySpecialtyPaginated($conn, (int)$spec['specialty_id'], $page, $per);
+                return [
+                    'slug'      => $slug,
+                    'specialty' => $spec,
+                    'offices'   => $res['rows'],
+                    'page'      => $res['page'],
+                    'per'       => $res['perPage'],
+                    'total'     => $res['total'],
+                    'pages'     => $res['pages'],
+                    'q'         => '',
+                    'loc'       => '',
+                ];
+            }
+            // Bad slug → empty state
+            return [
+                'slug'      => $slug,
+                'specialty' => null,
+                'offices'   => [],
+                'page'      => 1,
+                'per'       => $per,
+                'total'     => 0,
+                'pages'     => 1,
+                'q'         => '',
+                'loc'       => '',
+            ];
+        }
 
-        // Shape data for the view
+        // Default: show ALL approved facilities
+        $res = Office::listPaginatedAll($conn, $page, $per);
         return [
-            'clinics' => $result['rows'],
-            'total'   => $result['total'],
-            'page'    => $result['page'],
-            'pages'   => $result['pages'],
-            'q'       => $q,
-            'loc'     => $loc,
+            'slug'      => '',
+            'specialty' => null,
+            'offices'   => $res['rows'],
+            'page'      => $res['page'],
+            'per'       => $res['perPage'],
+            'total'     => $res['total'],
+            'pages'     => $res['pages'],
+            'q'         => '',
+            'loc'       => '',
         ];
     }
 }
