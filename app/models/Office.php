@@ -383,7 +383,7 @@ class Office
         ];
     }
 
-    private static function hasSlotToday(array $slots): bool
+    public static function hasSlotToday(array $slots): bool
     {
         if (!$slots)
             return false;
@@ -420,6 +420,9 @@ class Office
             mb_substr($parts[0] ?? '', 0, 1) .
             mb_substr($parts ? end($parts) : '', 0, 1)
         );
+        $slotsForOpen = self::nextSlots($conn, (int) $row['office_id'], 1);
+        $row['is_open'] = self::hasTodaySlot($slotsForOpen);   // reuse the helper below
+        $row['hours_label'] = $row['is_open'] ? 'Slots today' : null;
 
         return $row;
     }
@@ -462,12 +465,16 @@ class Office
             $specExpr = "ms.name";
             $joinSpec = "LEFT JOIN Medical_specialty ms ON ms.specialty_id = d.specialty_id";
         }
-
+        $degreeExpr = "''";
+        if (self::colExists($conn, 'Doctor', 'degree')) {
+            $degreeExpr = "COALESCE(d.degree, '')";
+        }
         // ----- Fetch doctors -----
         $sql = "SELECT 
                 d.doctor_id,
                 $nameExpr   AS doc_name,
-                $specExpr   AS specialty
+                $specExpr   AS specialty,
+                $degreeExpr AS degree
             FROM Doctor d
             $joinSpec
             WHERE d.office_id = ?
@@ -484,6 +491,7 @@ class Office
             $r['id'] = (int) $r['doctor_id'];
             $r['name'] = (string) $r['doc_name'];
             $r['spec'] = (string) $r['specialty'];
+            $r['degree'] = (string) ($r['degree'] ?? '');
 
             // Initials
             $p = preg_split('/\s+/', trim($r['name']));

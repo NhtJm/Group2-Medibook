@@ -1,10 +1,13 @@
 <?php
 // app/router.php
+
+
+
 require_once __DIR__ . '/db.php';
 
 global $conn;
 if (!isset($conn) || !($conn instanceof mysqli)) {
-  if (class_exists('Database') && method_exists('Database','get_instance')) {
+  if (class_exists('Database') && method_exists('Database', 'get_instance')) {
     $conn = Database::get_instance();   // must return mysqli
   }
 }
@@ -13,22 +16,38 @@ $page = $_GET['page'] ?? 'home';
 
 /* ---- Allow-list ---- */
 $allowed = [
-  'home','login','register',
-  'dashboard','appointments','profile',
+  'home',
+  'login',
+  'register',
+  'dashboard',
+  'appointments',
+  'profile',
   'logout',
-  'clinics','clinic','doctor','confirm',
+  'clinics',
+  'clinic',
+  'doctor',
+  'confirm',
+  'doctors',
   // Google OAuth flow
-  'google_login','google_callback','google_choose_role','google_begin',
+  'google_login',
+  'google_callback',
+  'google_choose_role',
+  'google_begin',
   // JSON endpoint
   'api.search',
   // admin/office
-  'admin_dashboard','clinic_setup','office_dashboard','doctor_schedule',
+  'admin_dashboard',
+  'clinic_setup',
+  'office_dashboard',
+  'doctor_schedule',
+  'book',
 ];
-if (!in_array($page, $allowed, true)) $page = 'home';
+if (!in_array($page, $allowed, true))
+  $page = 'home';
 
 /* ---- Route groups ---- */
-$adminOnly  = ['admin_dashboard'];
-$protected  = ['dashboard','appointments','profile','office_dashboard','clinic_setup','doctor_schedule'];
+$adminOnly = ['admin_dashboard'];
+$protected = ['dashboard', 'appointments', 'profile', 'office_dashboard', 'clinic_setup', 'doctor_schedule'];
 
 /* ---- Guards ---- */
 if (in_array($page, $adminOnly, true)) {
@@ -52,7 +71,7 @@ if ($page === 'google_begin') {
     header('Location: ' . BASE_URL . 'index.php?page=google_choose_role&err=staff_forbidden');
     exit;
   }
-  if (!in_array($role, ['patient','office'], true)) {
+  if (!in_array($role, ['patient', 'office'], true)) {
     header('Location: ' . BASE_URL . 'index.php?page=google_choose_role&err=role');
     exit;
   }
@@ -99,17 +118,19 @@ if ($page === 'logout') {
 
 /* ========= Labels & CSS ========= */
 $labels = [
-  'home'             => 'Home',
-  'login'            => 'Login',
-  'register'         => 'Sign Up',
-  'dashboard'        => 'Dashboard',
-  'appointments'     => 'Appointments',
-  'profile'          => 'My Profile',
-  'clinics'          => 'Clinics',
-  'admin_dashboard'  => 'Admin',
-  'clinic_setup'     => 'Clinic Setup',
+  'home' => 'Home',
+  'login' => 'Login',
+  'register' => 'Sign Up',
+  'dashboard' => 'Dashboard',
+  'appointments' => 'Appointments',
+  'profile' => 'My Profile',
+  'clinics' => 'Clinics',
+  'admin_dashboard' => 'Admin',
+  'clinic_setup' => 'Clinic Setup',
   'office_dashboard' => 'Office',
-  'doctor_schedule'  => 'Schedule',
+  'doctor_schedule' => 'Schedule',
+  'doctor' => 'Doctor Visit',
+  'book' => 'Choose Date',
 ];
 $title = 'MEDIBOOK — ' . ($labels[$page] ?? 'MediBook');
 
@@ -122,57 +143,88 @@ $css = [STYLE_PATH . '/base.css'];
 if (!$noChrome) {
   $css[] = STYLE_PATH . '/header.css';
 }
-if     ($page === 'clinics')         $css[] = STYLE_PATH . '/clinics.css';
-elseif ($page === 'clinic')          $css[] = STYLE_PATH . '/clinic.css';
-elseif ($page === 'doctor')          $css[] = STYLE_PATH . '/doctor.css';
-elseif ($page === 'appointments')    $css[] = STYLE_PATH . '/appointments.css';
-elseif ($page === 'confirm')         $css[] = STYLE_PATH . '/confirm.css';
-elseif ($page === 'admin_dashboard') $css[] = STYLE_PATH . '/admin_dashboard.css';
-elseif ($page === 'office_dashboard')$css[] = STYLE_PATH . '/office_dashboard.css';
-elseif ($page === 'doctor_schedule') $css[] = STYLE_PATH . '/doctor_schedule.css';
-elseif ($page === 'clinic_setup')    $css[] = STYLE_PATH . '/clinic_setup.css';
+if ($page === 'clinics')
+  $css[] = STYLE_PATH . '/clinics.css';
+elseif ($page === 'clinic')
+  $css[] = STYLE_PATH . '/clinic.css';
+elseif ($page === 'doctor') {
+  $css[] = STYLE_PATH . '/clinic.css';    // hero + base
+  $css[] = STYLE_PATH . '/doctors.css';   // ⬅️ reuse the left card + grid styles
+  $css[] = STYLE_PATH . '/doctor.css';    // calendar-specific polish
+} elseif ($page === 'doctors') {
+  $css[] = STYLE_PATH . '/clinic.css';   // reuse hero + layout spacing
+  $css[] = STYLE_PATH . '/doctors.css';  // only style the list itself
+
+} elseif ($page === 'appointments')
+  $css[] = STYLE_PATH . '/appointments.css';
+elseif ($page === 'confirm')
+  $css[] = STYLE_PATH . '/confirm.css';
+elseif ($page === 'admin_dashboard')
+  $css[] = STYLE_PATH . '/admin_dashboard.css';
+elseif ($page === 'office_dashboard')
+  $css[] = STYLE_PATH . '/office_dashboard.css';
+elseif ($page === 'doctor_schedule')
+  $css[] = STYLE_PATH . '/doctor_schedule.css';
+elseif ($page === 'clinic_setup')
+  $css[] = STYLE_PATH . '/clinic_setup.css';
 elseif ($page === 'home' || $page === 'dashboard')
-                                     $css[] = STYLE_PATH . '/home.css';
-else                                 $css[] = STYLE_PATH . '/login.css';
+  $css[] = STYLE_PATH . '/home.css';
+else
+  $css[] = STYLE_PATH . '/login.css';
 if (!$noChrome) {
   $css[] = STYLE_PATH . '/footer.css';
 }
 
 /* ========= Views map ========= */
 $views = [
-  'home'               => __DIR__ . '/views/home.php',
-  'login'              => __DIR__ . '/views/auth/login.php',
-  'register'           => __DIR__ . '/views/auth/register.php',
-  'dashboard'          => __DIR__ . '/views/user/dashboard.php',
-  'appointments'       => __DIR__ . '/views/user/appointments.php',
-  'profile'            => __DIR__ . '/views/user/profile.php',
-  'clinics'            => __DIR__ . '/views/search/clinics.php',
-  'clinic'             => __DIR__ . '/views/search/clinic.php',
-  'doctor'             => __DIR__ . '/views/search/doctor.php',
-  'confirm'            => __DIR__ . '/views/booking/confirm.php',
+  'home' => __DIR__ . '/views/home.php',
+  'login' => __DIR__ . '/views/auth/login.php',
+  'register' => __DIR__ . '/views/auth/register.php',
+  'dashboard' => __DIR__ . '/views/user/dashboard.php',
+  'appointments' => __DIR__ . '/views/user/appointments.php',
+  'profile' => __DIR__ . '/views/user/profile.php',
+  'clinics' => __DIR__ . '/views/search/clinics.php',
+  'clinic' => __DIR__ . '/views/search/clinic.php',
+  'doctor' => __DIR__ . '/views/search/doctor.php',
+  'doctors' => __DIR__ . '/views/search/doctors.php',
+  'confirm' => __DIR__ . '/views/booking/confirm.php',
   'google_choose_role' => __DIR__ . '/views/auth/google_choose_role.php',
-  'admin_dashboard'    => __DIR__ . '/views/admin/admin_dashboard.php',
-  'clinic_setup'       => __DIR__ . '/views/clinic/clinic_setup.php',
-  'office_dashboard'   => __DIR__ . '/views/clinic/office_dashboard.php',
-  'doctor_schedule'    => __DIR__ . '/views/clinic/doctor_schedule.php',
+  'book' => __DIR__ . '/views/appointment/calendar.php',
+  'admin_dashboard' => __DIR__ . '/views/admin/admin_dashboard.php',
+  'clinic_setup' => __DIR__ . '/views/clinic/clinic_setup.php',
+  'office_dashboard' => __DIR__ . '/views/clinic/office_dashboard.php',
+  'doctor_schedule' => __DIR__ . '/views/clinic/doctor_schedule.php',
 ];
 
 $brandTarget = current_user() ? 'dashboard' : 'home';
-$view        = $views[$page] ?? null;
+$view = $views[$page] ?? null;
 $data = null;
 
 if ($page === 'clinics') {
   require_once __DIR__ . '/controller/ClinicsController.php';
   $data = ClinicsController::index();  // already working
-}
-elseif ($page === 'clinic') {
+} elseif ($page === 'clinic') {
   require_once __DIR__ . '/controller/ClinicController.php';
   $data = ClinicController::show();    // <-- returns ['clinic'=>..., 'doctors'=>...]
+} elseif ($page === 'doctors') {
+  require_once __DIR__ . '/controller/DoctorController.php';
+  $data = DoctorController::listByClinic();  // ⬅️ new
+} 
+// --- AJAX for doctor calendar ---
+if ($page === 'doctor' && isset($_GET['ajax'])) {
+  require_once __DIR__ . '/controller/DoctorController.php';
+  header('Content-Type: application/json; charset=utf-8');
+  echo json_encode(DoctorController::calendarData(), JSON_UNESCAPED_UNICODE);
+  exit;
 }
+
 elseif ($page === 'doctor') {
-  // optional, if you have a DoctorController
-  // require_once __DIR__ . '/controller/DoctorController.php';
-  // $data = DoctorController::show();
+  require_once __DIR__ . '/controller/DoctorController.php';
+  $data = DoctorController::visit();
+}
+elseif ($page === 'confirm') {
+  require_once __DIR__ . '/controller/ConfirmController.php';
+  $data = ConfirmController::show();
 }
 /* ========= Choose layout ========= */
 $layout = __DIR__ . '/views/layout/' . ($noChrome ? 'blank.php' : 'app.php');

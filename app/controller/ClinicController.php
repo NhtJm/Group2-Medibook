@@ -7,7 +7,6 @@ class ClinicController
 {
     public static function show(): array
     {
-        // ---- DB bootstrap (router should already have done this) ----
         global $conn;
         if (!isset($conn) || !($conn instanceof mysqli)) {
             if (class_exists('Database') && method_exists('Database','get_instance')) {
@@ -17,13 +16,14 @@ class ClinicController
             }
         }
 
-        // ---- Read clinic id ----
-        $id = max(0, (int)($_GET['id'] ?? 0));
+        // Accept ?clinic= (preferred) or ?id=
+        $officeId = (int)($_GET['clinic'] ?? ($_GET['id'] ?? 0));
+        if ($officeId <= 0) return ['clinic' => null, 'doctors' => []];
 
-        // ---- Fetch clinic + doctors ----
-        $clinic  = Office::findOne($conn, $id);                // returns null if not found
-        $doctors = $clinic ? Office::doctorsWithNext($conn, $id) : [];
+        $clinic  = Office::findOne($conn, $officeId);
+        if (!$clinic) return ['clinic' => null, 'doctors' => []];
 
+        $doctors = Office::doctorsWithNext($conn, $officeId); // all doctors in this clinic
         return ['clinic' => $clinic, 'doctors' => $doctors];
     }
 }

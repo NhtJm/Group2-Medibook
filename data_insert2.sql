@@ -225,7 +225,14 @@ ALTER TABLE Office
   ADD UNIQUE KEY uniq_office_slug (slug);
 
 
+ALTER TABLE Appointment_slot
+  MODIFY status ENUM('available','unavailable') NOT NULL DEFAULT 'available';
 
+ALTER TABLE Appointment_slot
+  ADD UNIQUE KEY uniq_doctor_start (doctor_id, start_time);
+
+ALTER TABLE Appointment_slot
+  ADD INDEX idx_slot_doctor_status_time (doctor_id, status, start_time);
   
 INSERT INTO Users (email, username, password_hash, full_name, role) VALUES
 ('benh-vien-dai-hoc-y-duoc-tphcm-co-so-2@mail.com','benh-vien-dai-hoc-y-duoc-tphcm-co-so-2','hash_benh-vien-da_001','Bệnh viện Đại học Y Dược TP.HCM (Cơ sở 2)','office'),
