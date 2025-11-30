@@ -6,15 +6,35 @@ if (!function_exists('e')) {
     return htmlspecialchars((string) $s, ENT_QUOTES, 'UTF-8');
   }
 }
-
+$flash = $data['flash'] ?? null;
+$flashType = $data['flash_type'] ?? 'info';
+$redirectTo = $data['redirect_to'] ?? null;
+$redirectAfter = (int) ($data['redirect_after'] ?? 0);
+$user = current_user();
 $clinic = $data['clinic'] ?? null;
 $doctor = $data['doctor'] ?? null;
 $when = $data['when'] ?? null;
 $slotId = $data['slot_id'] ?? null;
 
+// ✅ use the same login state as the rest of the app
+$me = function_exists('current_user') ? current_user() : ($_SESSION['user'] ?? null);
+$isLoggedIn = !empty($me);
+
+// back link
 $back = BASE_URL . 'index.php?page=doctor'
   . '&clinic=' . (int) ($clinic['office_id'] ?? $_GET['clinic'] ?? 0)
   . '&doc=' . (int) ($doctor['doctor_id'] ?? $_GET['doc'] ?? 0);
+
+// where to land after successful insert
+$appointmentsUrl = BASE_URL . 'index.php?page=appointments';
+
+// confirm endpoint (+slot)
+$confirmUrl = BASE_URL . 'index.php?page=confirm' . ($slotId ? '&slot=' . (int) $slotId : '');
+$confirmAction = $confirmUrl . '&next=' . rawurlencode($appointmentsUrl);
+
+// 🔁 not-logged-in bounce: login -> return to confirm with do=confirm -> auto insert -> appointments
+$loginNext = $confirmUrl . '&do=confirm&next=' . rawurlencode($appointmentsUrl);
+$loginUrl = BASE_URL . 'index.php?page=login&next=' . rawurlencode($loginNext);
 
 // avatar initials
 $ini = $doctor ? ($doctor['initials'] ?? 'DR') : 'DR';
@@ -32,7 +52,8 @@ $ini = $doctor ? ($doctor['initials'] ?? 'DR') : 'DR';
         <div class="tile-left">
           <div class="avatar-lg"><?= e($ini) ?></div>
           <div>
-            <div class="tile-title"><?= e($doctor['name'] ?? 'Doctor') ?>
+            <div class="tile-title">
+              <?= e($doctor['name'] ?? 'Doctor') ?>
               <?php if (!empty($doctor['degree'])): ?> - <?= e($doctor['degree']) ?><?php endif; ?>
             </div>
             <div class="tile-sub"><?= e($doctor['specialty'] ?? 'Medical Doctor') ?></div>
@@ -60,8 +81,6 @@ $ini = $doctor ? ($doctor['initials'] ?? 'DR') : 'DR';
         </div>
       </div>
 
-      <!-- When -->
-      <!-- When -->
       <div class="conf-tile conf-tile--wide">
         <div class="tile-title">Your time</div>
         <div class="chips">
@@ -75,9 +94,41 @@ $ini = $doctor ? ($doctor['initials'] ?? 'DR') : 'DR';
       </div>
     </div>
 
-    <form class="conf-actions" method="post" action="#">
-      <?php if ($slotId): ?><input type="hidden" name="slot" value="<?= (int) $slotId ?>"><?php endif; ?>
-      <button class="btn-confirm" type="submit">Confirm</button>
-    </form>
+    <?php if (current_user()): ?>
+      <?php
+      $confirmUrl = BASE_URL . 'index.php?page=confirm'
+        . ($slotId ? '&slot=' . (int) $slotId : '');
+      $go = $confirmUrl . '&do=confirm&next='
+        . rawurlencode(BASE_URL . 'index.php?page=appointments');
+      ?>
+      <div class="conf-actions">
+        <a class="btn-confirm" href="<?= e($go) ?>">Confirm</a>
+      </div>
+    <?php else: ?>
+      <?php
+      $confirmUrl = BASE_URL . 'index.php?page=confirm'
+        . ($slotId ? '&slot=' . (int) $slotId : '');
+      $loginNext = $confirmUrl . '&do=confirm&next='
+        . rawurlencode(BASE_URL . 'index.php?page=appointments');
+      $loginUrl = BASE_URL . 'index.php?page=login&next=' . rawurlencode($loginNext);
+      ?>
+      <div class="conf-actions">
+        <a class="btn-confirm" href="<?= e($loginUrl) ?>">Confirm</a>
+      </div>
+    <?php endif; ?>
+
+
+    <?php if ($flash): ?>
+      <p class="notice notice--<?= e($flashType) ?>" role="status"><?= e($flash) ?></p>
+      <?php if ($redirectTo && $redirectAfter > 0): ?>
+        <script>
+          setTimeout(function () { window.location.href = "<?= e($redirectTo) ?>"; }, <?= (int) $redirectAfter ?>);
+        </script>
+      <?php endif; ?>
+    <?php endif; ?>
+
+    <?php if (!empty($data['error'])): ?>
+      <p class="notice notice--error" role="alert"><?= e($data['error']) ?></p>
+    <?php endif; ?>
   </div>
 </section>

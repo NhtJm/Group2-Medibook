@@ -1,0 +1,78 @@
+/* ====== Admin Specialties: match Clinics look ====== */
+:root{
+  --ink-1:#1f315c; --ink-2:#4b587c; --ink-3:#6b778c;
+  --bg:#fff; --muted:#f5f7fb; --line:#e6ebf5; --line-2:#edf1f7;
+  --radius:14px; --chip-radius:999px;
+  --shadow:0 6px 20px rgba(54,73,125,.08);
+  --shadow-md:0 12px 30px rgba(32,56,103,.15);
+}
+
+/* Panels */
+.admin-specialties .panel,
+.admin-specialty-edit .panel{
+  background:var(--bg);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+}
+.admin-specialties .panel__head,
+.admin-specialty-edit .panel__head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px;border-bottom:1px solid var(--line-2);
+  font-weight:600;color:var(--ink-1);
+}
+
+/* Topbar bits */
+.ac-select{border:1px solid #dbe2ea;border-radius:8px;background:#fff;
+  padding:6px 10px;font-size:.9rem;color:#1f315c}
+
+/* Buttons (match clinics) */
+.btn{padding:8px 12px;border-radius:10px;font-weight:600;border:1px solid transparent;cursor:pointer}
+.btn-ghost{background:#fff;border-color:#dbe2ea}
+.btn-primary{background:#274686;color:#fff}
+.btn-primary:hover{filter:brightness(1.05)}
+.btn-danger{background:#ef4444;color:#fff;border-color:#ef4444}
+
+/* Table */
+.table-scroller{overflow:auto}
+.admin-table{width:100%;border-collapse:separate;border-spacing:0 8px;padding:16px}
+.admin-table thead th{font-weight:700;color:var(--ink-2);padding:8px 12px;border-bottom:1px solid var(--line-2)}
+.admin-table tbody tr{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
+.admin-table tbody td{padding:12px 14px;border-bottom:0;vertical-align:middle}
+.admin-table tbody tr:hover{box-shadow:var(--shadow-md);transform:translateY(-1px);transition:box-shadow .15s ease, transform .05s ease}
+.admin-table code{background:var(--muted);border:1px solid var(--line);padding:2px 6px;border-radius:8px}
+
+/* Up/Down "move" buttons */
+.btn.btn-ghost.js-move{padding:4px 8px}
+
+/* Toggle (featured) */
+.switch{position:relative;display:inline-block;width:44px;height:24px}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;border-radius:999px;background:#d1d5db;transition:.2s}
+.slider:before{content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:.2s}
+.switch input:checked + .slider{background:#10b981}
+.switch input:checked + .slider:before{transform:translateX(20px)}
+
+/* Form (edit page) */
+.admin-specialty-edit .form{padding:0}
+.admin-specialty-edit .form-grid{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:16px;padding:20px
+}
+.admin-specialty-edit .form-grid label{display:flex;flex-direction:column;gap:8px}
+.admin-specialty-edit .form-grid .span-2{grid-column:span 2}
+.admin-specialty-edit input[type="text"],
+.admin-specialty-edit input[type="number"],
+.admin-specialty-edit textarea{
+  border:1px solid #d5dce7;border-radius:8px;padding:10px;font:inherit
+}
+
+/* Small preview icon in table */
+.admin-specialties img{border:1px solid var(--line);background:#fff;border-radius:8px}
+
+/* Responsive */
+@media (max-width:820px){
+  .admin-specialty-edit .form-grid{grid-template-columns:1fr}
+  .admin-table thead{display:none}
+  .admin-table tbody tr{display:block}
+  .admin-table tbody td{display:block;padding:10px 12px}
+}

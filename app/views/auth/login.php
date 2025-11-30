@@ -1,5 +1,6 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) session_start();
+if (session_status() === PHP_SESSION_NONE)
+  session_start();
 
 // Gom lỗi để hiển thị trong view
 $errors = [];
@@ -29,7 +30,7 @@ if (!isset($conn) || !($conn instanceof mysqli)) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $email = trim($_POST['email'] ?? '');
-  $pass  = $_POST['password'] ?? '';
+  $pass = $_POST['password'] ?? '';
 
   if ($email === '' || $pass === '') {
     $errors[] = 'Email and password are required';
@@ -45,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($stmt) {
       $stmt->bind_param('s', $email);
       $stmt->execute();
-      $res  = $stmt->get_result();
+      $res = $stmt->get_result();
       $user = $res ? $res->fetch_assoc() : null;
       $stmt->close();
     } else {
@@ -59,19 +60,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       // Lấy profile_id theo role (nếu có)
       $profileId = null;
       $roleMap = [
-        'patient'  => "SELECT patient_id AS pid FROM Patient WHERE user_id=? LIMIT 1",
+        'patient' => "SELECT patient_id AS pid FROM Patient WHERE user_id=? LIMIT 1",
         'webstaff' => "SELECT staff_id  AS pid FROM Web_staff WHERE user_id=? LIMIT 1",
-        'office'   => "SELECT office_id  AS pid FROM Office     WHERE user_id=? LIMIT 1",
-        'admin'    => "SELECT admin_id   AS pid FROM Admin      WHERE user_id=? LIMIT 1",
+        'office' => "SELECT office_id  AS pid FROM Office     WHERE user_id=? LIMIT 1",
+        'admin' => "SELECT admin_id   AS pid FROM Admin      WHERE user_id=? LIMIT 1",
       ];
       if (isset($roleMap[$user['role']])) {
         if ($q = $conn->prepare($roleMap[$user['role']])) {
-          $uid = (int)$user['user_id'];
+          $uid = (int) $user['user_id'];
           $q->bind_param('i', $uid);
           $q->execute();
           if ($r = $q->get_result()) {
             $row = $r->fetch_assoc();
-            if ($row && isset($row['pid'])) $profileId = $row['pid'];
+            if ($row && isset($row['pid']))
+              $profileId = $row['pid'];
           }
           $q->close();
         }
@@ -80,14 +82,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       // Đăng nhập REAL user
       session_regenerate_id(true);
       $_SESSION['user'] = [
-        'id'         => (int)$user['user_id'],
-        'email'      => $user['email'],
-        'username'   => $user['username'] ?? null,
-        'name'       => $user['full_name'] ?? ($user['username'] ?? $user['email']),
-        'role'       => $user['role'],
+        'id' => (int) $user['user_id'],
+        'email' => $user['email'],
+        'username' => $user['username'] ?? null,
+        'name' => $user['full_name'] ?? ($user['username'] ?? $user['email']),
+        'role' => $user['role'],
         'profile_id' => $profileId,
       ];
-
       header('Location: ' . BASE_URL . 'index.php?page=dashboard');
       exit;
     }
@@ -106,12 +107,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <!-- Tabs -->
     <div class="segmented" role="tablist" aria-label="Auth tabs">
-      <a role="tab" aria-selected="true"
-         href="<?= rtrim(BASE_URL, '/') ?>/index.php?page=login"
-         class="segmented__item is-active">Log In</a>
-      <a role="tab" aria-selected="false"
-         href="<?= rtrim(BASE_URL, '/') ?>/index.php?page=register"
-         class="segmented__item">Sign Up</a>
+      <a role="tab" aria-selected="true" href="<?= rtrim(BASE_URL, '/') ?>/index.php?page=login"
+        class="segmented__item is-active">Log In</a>
+      <a role="tab" aria-selected="false" href="<?= rtrim(BASE_URL, '/') ?>/index.php?page=register"
+        class="segmented__item">Sign Up</a>
     </div>
 
     <?php if (!empty($errors)): ?>
@@ -125,8 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- ======= GOOGLE LOGIN (không hỏi role trước) ======= -->
     <div class="oauth-or" style="text-align:center;margin:16px 0 8px;color:#6b7a90;">or</div>
 
-    <a class="btn btn--ghost btn--xl"
-      style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px"
+    <a class="btn btn--ghost btn--xl" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px"
       href="<?= rtrim(BASE_URL, '/') ?>/index.php?page=google_login">
       <img src="<?= IMAGE_PATH ?>google.svg" alt="" style="width:18px;height:18px">
       <span>Log in with Google</span>

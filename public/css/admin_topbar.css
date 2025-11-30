@@ -1,0 +1,121 @@
+/* ============================
+   Admin Topbar (fixed)
+   File: assets/css/admin_topbar.css
+   ============================ */
+
+/* Tunables to match your layout */
+:root{
+  --sidebar-w: 260px;  /* must match .admin-sidebar width */
+  --topbar-h: 56px;    /* visual height of the header */
+}
+
+/* Fixed header (keeps search pill fixed too) */
+.admin-topbar{
+  position: fixed;                 /* was: sticky */
+  top: 0;
+  left: var(--sidebar-w);          /* align to the right of sidebar */
+  right: 0;
+  height: var(--topbar-h);
+  z-index: 1200;
+
+  background: #fff;
+  border-bottom: 1px solid #dbe2ea;
+
+  display: flex;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  column-gap: 16px;
+  padding: 12px 20px;
+}
+
+/* Make room for the fixed bar so content doesn't hide underneath */
+.admin-main{
+  padding-top: var(--topbar-h);
+}
+
+/* Slots */
+.admin-topbar__left{  display:flex; align-items:center; gap:10px; min-width:0; }
+.admin-topbar__center{
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  /* keep it from overlapping the sides on normal screens */
+  width: min(520px, calc(100% - 320px)); /* ~160px safety each side */
+  display: flex;
+  justify-content: center;
+}
+.admin-topbar__right{ display:flex;margin-left:auto; gap:6px; }
+
+.admin-topbar__page{
+  font-size:14px;
+  font-weight:600;
+  color:#1a1f2e;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+/* Right-side icon buttons */
+.topbar-icon-btn{
+  background:transparent;
+  border:0;
+  cursor:pointer;
+  padding:6px 8px;
+  border-radius:6px;
+  font-size:16px;
+  line-height:1;
+  color:#1a1f2e;
+}
+.topbar-icon-btn:hover{ background:#f1f4f9; }
+
+/* -------- Unified Search Pill (.ac-search) -------- */
+.ac-search{
+  position:relative;
+  display:flex; align-items:center;
+  width:100%; max-width:520px; margin:0 auto;
+
+  background:#f1f4f9;
+  border:1px solid #d5dce7;
+  border-radius:999px;
+  padding-left:36px;   /* space for icon */
+}
+.ac-search input[type="text"]{
+  flex:1;
+  border:0; background:transparent;
+  padding:10px 12px;
+  font-size:13px; color:#1a1f2e;
+  outline:none; min-width:0;
+}
+.ac-search button[type="submit"]{
+  position:absolute; left:6px; top:50%; transform:translateY(-50%);
+  width:26px; height:26px;
+  border:0; background:transparent; padding:0; margin:0;
+  border-radius:6px; cursor:pointer; color:#1a1f2e;
+  display:grid; place-items:center;
+}
+.ac-search button[type="submit"]:hover{ background:#e9eef6; }
+
+/* ---------- Responsive tweaks ---------- */
+@media (max-width: 900px){
+  /* If your sidebar collapses on mobile, let the topbar span full width */
+  .admin-topbar{ left: 0; grid-template-columns: 1fr auto; row-gap: 8px; height:auto; padding:10px 12px; }
+  .admin-topbar__left{ grid-column: 1 / -1; }
+  .admin-topbar__center{ justify-content: stretch; }
+  :root{ --topbar-h: 60px; } /* ensure enough padding for taller mobile bar */
+}
+
+/* Optional helper if you toggle a collapsed sidebar via class */
+.admin-shell.sidebar-collapsed .admin-topbar{ left:0; }
+.admin-shell.sidebar-collapsed{ --sidebar-w: 0px; }
+.admin-topbar__center .ac-search{
+  margin: 0;
+}
+
+/* Mobile: fall back to normal flow */
+@media (max-width: 900px){
+  .admin-topbar{ left: 0; }
+  .admin-topbar__center{
+    position: static;
+    transform: none;
+    width: 100%;
+    justify-content: stretch;
+  }
+}

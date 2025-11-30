@@ -1,70 +1,122 @@
 <?php
 // app/router.php
 
-
-
 require_once __DIR__ . '/db.php';
 
+/* ------------------------------ DB bootstrap ------------------------------ */
 global $conn;
 if (!isset($conn) || !($conn instanceof mysqli)) {
   if (class_exists('Database') && method_exists('Database', 'get_instance')) {
-    $conn = Database::get_instance();   // must return mysqli
+    $conn = Database::get_instance(); // must return mysqli
   }
 }
-/* ========= Routing: which page ========= */
+
+/* ------------------------------- Page & ACL ------------------------------- */
 $page = $_GET['page'] ?? 'home';
 
-/* ---- Allow-list ---- */
-$allowed = [
+/** Allow-list of pages users can navigate to (non-API). */
+$allowedPages = [
+  // public
   'home',
   'login',
   'register',
-  'dashboard',
-  'appointments',
-  'profile',
-  'logout',
   'clinics',
   'clinic',
   'doctor',
-  'confirm',
   'doctors',
-  // Google OAuth flow
+  'confirm',
+  // oauth
   'google_login',
   'google_callback',
   'google_choose_role',
   'google_begin',
-  // JSON endpoint
-  'api.search',
-  // admin/office
+  // user area
+  'dashboard',
+  'appointments',
+  'profile',
+  'logout',
+  'book',
+  // admin
   'admin_dashboard',
+  'admin_clinics',
+  'admin_clinics_api',
   'clinic_setup',
   'office_dashboard',
   'doctor_schedule',
-  'book',
+  'clinic_edit',
+  'admin_users',
+  // json search endpoint
+  'api.search',
+  // in $allowed
+  'admin_specialties',
+  'admin_specialties_api',
+  'admin_specialty_edit',
+  'admin_user',
+  'admin_doctors',
+  'admin_doctors_office',
+  'admin_doctor_edit',
+  'admin_doctor_slots_api',
+  'admin_appointments',
 ];
-if (!in_array($page, $allowed, true))
+
+if (!in_array($page, $allowedPages, true)) {
   $page = 'home';
+}
 
-/* ---- Route groups ---- */
-$adminOnly = ['admin_dashboard'];
-$protected = ['dashboard', 'appointments', 'profile', 'office_dashboard', 'clinic_setup', 'doctor_schedule'];
+/* Route groups for guards */
+// in $adminOnly
+$adminOnly = [
+  'admin_dashboard',
+  'admin_clinics',
+  'admin_clinics_api',
+  'clinic_edit',
+  'admin_specialties',
+  'admin_specialties_api',
+  'admin_specialty_edit',
+  'admin_users',
+  'admin_user',
+  'admin_doctors',
+  'admin_doctors_office',
+  'admin_doctor_edit',
+  'admin_doctor_slots_api',
+  'admin_appointments',
+];
+$protected = ['dashboard', 'appointments', 'profile', 'office_dashboard', 'clinic_setup', 'doctor_schedule',];
 
-/* ---- Guards ---- */
+/* ------------------------------ Auth guards ------------------------------ */
 if (in_array($page, $adminOnly, true)) {
   require_auth_or_redirect();
-  require_role(['admin']); // or ['admin','webstaff']
+  require_role(['admin']); // only admins
 } elseif (in_array($page, $protected, true)) {
   require_auth_or_redirect();
 }
+if ($page === 'confirm' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+  require_auth_or_redirect();
+}
 
-/* ========= Special routes (no layout) ========= */
+/* --------------------------- Special routes (early) ----------------------- */
+/* JSON search (no layout) */
 if ($page === 'api.search') {
   require_once __DIR__ . '/controller/SearchController.php';
   SearchController::suggest();
   exit;
 }
 
-/* ---- OAuth begin ---- */
+/* Admin clinics API (no layout) */
+if (($_GET['page'] ?? '') === 'admin_clinics_api') {
+  require_once __DIR__ . '/controller/AdminClinicsController.php';
+  AdminClinicsController::api();
+  exit;
+}
+
+/* Admin specialties API (no layout) */
+if (($_GET['page'] ?? '') === 'admin_specialties_api') {
+  require_once __DIR__ . '/controller/AdminSpecialtiesController.php';
+  AdminSpecialtiesController::api();
+  exit;
+}
+
+/* OAuth begin */
 if ($page === 'google_begin') {
   $role = $_POST['role'] ?? '';
   if ($role === 'webstaff') {
@@ -82,7 +134,7 @@ if ($page === 'google_begin') {
   exit;
 }
 
-/* ---- OAuth login ---- */
+/* OAuth login */
 if ($page === 'google_login') {
   $_SESSION['oauth_flow'] = 'login';
   unset($_SESSION['oauth_role']);
@@ -91,7 +143,7 @@ if ($page === 'google_login') {
   exit;
 }
 
-/* ---- OAuth callback ---- */
+/* OAuth callback */
 if ($page === 'google_callback') {
   require_once __DIR__ . '/function/google_oauth.php';
   $ok = google_handle_callback_login_or_register();
@@ -99,7 +151,7 @@ if ($page === 'google_callback') {
   exit;
 }
 
-/* ---- Role selection guard ---- */
+/* OAuth role choose guard */
 if ($page === 'google_choose_role') {
   $flow = $_SESSION['oauth_flow'] ?? null;
   $hasPending = isset($_SESSION['pending_google_user']);
@@ -109,14 +161,14 @@ if ($page === 'google_choose_role') {
   }
 }
 
-/* ---- Logout ---- */
+/* Logout */
 if ($page === 'logout') {
   session_destroy();
   header('Location: ' . BASE_URL . 'index.php?page=home');
   exit;
 }
 
-/* ========= Labels & CSS ========= */
+/* ------------------------------- Labels & CSS ----------------------------- */
 $labels = [
   'home' => 'Home',
   'login' => 'Login',
@@ -125,57 +177,131 @@ $labels = [
   'appointments' => 'Appointments',
   'profile' => 'My Profile',
   'clinics' => 'Clinics',
+  'clinic' => 'Clinic',
+  'doctor' => 'Doctor Visit',
+  'doctors' => 'Doctors',
+  'confirm' => 'Confirm',
+  'book' => 'Choose Date',
   'admin_dashboard' => 'Admin',
+  'admin_clinics' => 'Clinics',
   'clinic_setup' => 'Clinic Setup',
   'office_dashboard' => 'Office',
   'doctor_schedule' => 'Schedule',
-  'doctor' => 'Doctor Visit',
-  'book' => 'Choose Date',
 ];
+
 $title = 'MEDIBOOK — ' . ($labels[$page] ?? 'MediBook');
 
-/* ---- No-chrome pages (no header/footer) ---- */
-$noChromePages = ['admin_dashboard'];
+/* Pages with admin chrome hidden (we use a blank layout) */
+$noChromePages = [
+  'admin_dashboard',
+  'admin_clinics',
+  'clinic_edit',
+  'admin_specialties',
+  'admin_specialty_edit',
+  'admin_users',
+  'admin_user',
+  'admin_doctors',
+  'admin_doctors_office',
+  'admin_doctor_edit',
+  'admin_appointments',
+];
 $noChrome = in_array($page, $noChromePages, true);
 
-/* ---- CSS list ---- */
+/* CSS pipeline */
 $css = [STYLE_PATH . '/base.css'];
 if (!$noChrome) {
   $css[] = STYLE_PATH . '/header.css';
 }
-if ($page === 'clinics')
-  $css[] = STYLE_PATH . '/clinics.css';
-elseif ($page === 'clinic')
-  $css[] = STYLE_PATH . '/clinic.css';
-elseif ($page === 'doctor') {
-  $css[] = STYLE_PATH . '/clinic.css';    // hero + base
-  $css[] = STYLE_PATH . '/doctors.css';   // ⬅️ reuse the left card + grid styles
-  $css[] = STYLE_PATH . '/doctor.css';    // calendar-specific polish
-} elseif ($page === 'doctors') {
-  $css[] = STYLE_PATH . '/clinic.css';   // reuse hero + layout spacing
-  $css[] = STYLE_PATH . '/doctors.css';  // only style the list itself
+if (
+  in_array($page, [
+    'admin_dashboard',
+    'admin_clinics',
+    'clinic_edit',
+    'admin_specialties',
+    'admin_specialty_edit',
+    'admin_users',
+    'admin_user',
+    'admin_doctors',
+    'admin_doctors_office',
+    'admin_doctor_edit',
+    'admin_appointments',
+  ], true)
+) {
+  $css[] = STYLE_PATH . '/admin_sidebar.css';
+  $css[] = STYLE_PATH . '/admin_topbar.css';
+}
 
-} elseif ($page === 'appointments')
-  $css[] = STYLE_PATH . '/appointments.css';
-elseif ($page === 'confirm')
-  $css[] = STYLE_PATH . '/confirm.css';
-elseif ($page === 'admin_dashboard')
-  $css[] = STYLE_PATH . '/admin_dashboard.css';
-elseif ($page === 'office_dashboard')
-  $css[] = STYLE_PATH . '/office_dashboard.css';
-elseif ($page === 'doctor_schedule')
-  $css[] = STYLE_PATH . '/doctor_schedule.css';
-elseif ($page === 'clinic_setup')
-  $css[] = STYLE_PATH . '/clinic_setup.css';
-elseif ($page === 'home' || $page === 'dashboard')
-  $css[] = STYLE_PATH . '/home.css';
-else
-  $css[] = STYLE_PATH . '/login.css';
+/* Page-specific CSS */
+switch ($page) {
+  case 'clinics':
+    $css[] = STYLE_PATH . '/clinics.css';
+    break;
+  case 'clinic':
+    $css[] = STYLE_PATH . '/clinic.css';
+    break;
+  case 'admin_clinics':
+    $css[] = STYLE_PATH . '/admin_clinics.css';
+    break;
+  case 'clinic_edit':
+    $css[] = STYLE_PATH . '/clinic_edit.css';
+    break;
+  case 'doctor':
+    $css[] = STYLE_PATH . '/clinic.css';
+    $css[] = STYLE_PATH . '/doctors.css';
+    $css[] = STYLE_PATH . '/doctor.css';
+    break;
+  case 'doctors':
+    $css[] = STYLE_PATH . '/clinic.css';
+    $css[] = STYLE_PATH . '/doctors.css';
+    break;
+  case 'appointments':
+    $css[] = STYLE_PATH . '/appointments.css';
+    break;
+  case 'confirm':
+    $css[] = STYLE_PATH . '/confirm.css';
+    break;
+  case 'admin_doctors':
+    $css[] = STYLE_PATH . '/admin_doctors.css';
+    break;
+  case 'admin_doctors_office':
+    $css[] = STYLE_PATH . '/admin_doctors.css';
+    break;
+  case 'admin_dashboard':
+    $css[] = STYLE_PATH . '/admin_dashboard.css';
+    break;
+  case 'admin_specialty_edit':
+    $css[] = STYLE_PATH . '/admin_specialty_edit.css';
+    break;
+  case 'admin_specialties':
+    $css[] = STYLE_PATH . '/admin_specialties.css';
+    break;
+  case 'office_dashboard':
+    $css[] = STYLE_PATH . '/office_dashboard.css';
+    break;
+  case 'doctor_schedule':
+    $css[] = STYLE_PATH . '/doctor_schedule.css';
+    break;
+  case 'admin_users':
+    $css[] = STYLE_PATH . '/admin_users.css';
+    break;
+  case 'clinic_setup':
+    $css[] = STYLE_PATH . '/clinic_setup.css';
+    break;
+  case 'admin_user':
+    $css[] = STYLE_PATH . '/admin_user.css';
+    break;
+  case 'home':
+  case 'dashboard':
+    $css[] = STYLE_PATH . '/home.css';
+    break;
+  default:
+    $css[] = STYLE_PATH . '/login.css';
+}
 if (!$noChrome) {
   $css[] = STYLE_PATH . '/footer.css';
 }
 
-/* ========= Views map ========= */
+/* ------------------------------- View map -------------------------------- */
 $views = [
   'home' => __DIR__ . '/views/home.php',
   'login' => __DIR__ . '/views/auth/login.php',
@@ -194,38 +320,118 @@ $views = [
   'clinic_setup' => __DIR__ . '/views/clinic/clinic_setup.php',
   'office_dashboard' => __DIR__ . '/views/clinic/office_dashboard.php',
   'doctor_schedule' => __DIR__ . '/views/clinic/doctor_schedule.php',
+  'admin_clinics' => __DIR__ . '/views/admin/clinics.php',
+  'clinic_edit' => __DIR__ . '/views/admin/clinic_edit.php',
+  'admin_specialties' => __DIR__ . '/views/admin/admin_specialties.php',
+  'admin_specialty_edit' => __DIR__ . '/views/admin/specialty_edit.php',
+  'admin_users' => __DIR__ . '/views/admin/users.php',
+  'admin_user' => __DIR__ . '/views/admin/admin_user.php',
+  'admin_doctors' => __DIR__ . '/views/admin/doctors.php',
+  'admin_doctors_office' => __DIR__ . '/views/admin/doctors_office.php',
+  'admin_doctor_edit' => __DIR__ . '/views/admin/doctor_edit.php',
+  'admin_appointments' => __DIR__ . '/views/admin/admin_appointments.php',
 ];
 
+/* ----------------------------- Controller flow ---------------------------- */
 $brandTarget = current_user() ? 'dashboard' : 'home';
-$view = $views[$page] ?? null;
 $data = null;
 
-if ($page === 'clinics') {
-  require_once __DIR__ . '/controller/ClinicsController.php';
-  $data = ClinicsController::index();  // already working
-} elseif ($page === 'clinic') {
-  require_once __DIR__ . '/controller/ClinicController.php';
-  $data = ClinicController::show();    // <-- returns ['clinic'=>..., 'doctors'=>...]
-} elseif ($page === 'doctors') {
-  require_once __DIR__ . '/controller/DoctorController.php';
-  $data = DoctorController::listByClinic();  // ⬅️ new
-} 
-// --- AJAX for doctor calendar ---
-if ($page === 'doctor' && isset($_GET['ajax'])) {
-  require_once __DIR__ . '/controller/DoctorController.php';
-  header('Content-Type: application/json; charset=utf-8');
-  echo json_encode(DoctorController::calendarData(), JSON_UNESCAPED_UNICODE);
-  exit;
+switch ($page) {
+  case 'clinics':
+    require_once __DIR__ . '/controller/ClinicsController.php';
+    $data = ClinicsController::index();
+    break;
+
+  case 'clinic':
+    require_once __DIR__ . '/controller/ClinicController.php';
+    $data = ClinicController::show();
+    break;
+
+  case 'doctors':
+    require_once __DIR__ . '/controller/DoctorController.php';
+    $data = DoctorController::listByClinic();
+    break;
+
+  case 'doctor':
+    require_once __DIR__ . '/controller/DoctorController.php';
+    if (isset($_GET['ajax'])) {
+      header('Content-Type: application/json; charset=utf-8');
+      echo json_encode(DoctorController::calendarData(), JSON_UNESCAPED_UNICODE);
+      exit;
+    }
+    $data = DoctorController::visit();
+    break;
+
+  case 'confirm':
+    require_once __DIR__ . '/controller/ConfirmController.php';
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' || (($_GET['do'] ?? '') === 'confirm')) {
+      $data = ConfirmController::confirm(); // usually redirects
+    } else {
+      $data = ConfirmController::show();
+    }
+    break;
+
+  case 'appointments':
+    require_once __DIR__ . '/controller/AppointmentsController.php';
+    $data = AppointmentsController::index();
+    break;
+
+  case 'admin_clinics':
+    require_once __DIR__ . '/controller/AdminClinicsController.php';
+    $data = AdminClinicsController::index();
+    break;
+
+  case 'clinic_edit':
+    require_once __DIR__ . '/controller/AdminClinicEditController.php';
+    $data = AdminClinicEditController::index(); // GET shows form, POST saves then redirects
+    break;
+
+  case 'admin_specialties':
+    require_once __DIR__ . '/controller/AdminSpecialtiesController.php';
+    $data = AdminSpecialtiesController::index();
+    break;
+
+  case 'admin_specialty_edit':
+    require_once __DIR__ . '/controller/AdminSpecialtyEditController.php';
+    $data = AdminSpecialtyEditController::index();
+    break;
+  case 'admin_users':
+    require_once __DIR__ . '/controller/AdminUsersController.php';
+    $data = AdminUsersController::index();
+    break;
+  // index.php or your front controller
+  case 'admin_user':
+    require_once __DIR__ . '/controller/AdminUserController.php';
+    $data = AdminUserController::index();
+    break;
+  // Admin: Doctors
+  case 'admin_doctors':
+    require_once __DIR__ . '/controller/AdminDoctorsController.php';
+    $data = AdminDoctorsController::index();
+    break;
+
+  case 'admin_doctors_office':
+    require_once __DIR__ . '/controller/AdminDoctorsOfficeController.php';
+    $data = AdminDoctorsOfficeController::index();
+    break;
+  case 'admin_doctor_edit':
+    require_once __DIR__ . '/controller/AdminDoctorEditController.php';
+    $data = AdminDoctorEditController::index();
+    break;
+  case 'admin_doctor_slots_api':
+    require_once __DIR__ . '/../app/controller/AdminDoctorSlotsApiController.php';
+    AdminDoctorSlotsApiController::index();
+    exit;
+  case 'admin_appointments':
+    require_once __DIR__ . '/../app/controller/AdminAppointmentsController.php';
+    AdminAppointmentsController::index();
+    break;
+  default:
+    // pages without controllers simply fall through with $data === null
+    break;
 }
 
-elseif ($page === 'doctor') {
-  require_once __DIR__ . '/controller/DoctorController.php';
-  $data = DoctorController::visit();
-}
-elseif ($page === 'confirm') {
-  require_once __DIR__ . '/controller/ConfirmController.php';
-  $data = ConfirmController::show();
-}
-/* ========= Choose layout ========= */
+/* ------------------------------ Render layout ---------------------------- */
+$view = $views[$page] ?? null;
 $layout = __DIR__ . '/views/layout/' . ($noChrome ? 'blank.php' : 'app.php');
 require $layout;

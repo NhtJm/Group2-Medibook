@@ -90,13 +90,18 @@ class DoctorController
 
         // Count available slots per day in month
         $counts = [];
+        // If you have duration_min column:
         $sqlC = "SELECT DATE(start_time) AS d, COUNT(*) AS c
-             FROM Appointment_slot
-             WHERE doctor_id = ?
-               AND status = 'available'
-               AND start_time >= ?
-               AND start_time <  ?
-             GROUP BY DATE(start_time)";
+         FROM Appointment_slot
+         WHERE doctor_id = ?
+           AND status = 'available'
+           AND start_time >= ?
+           AND start_time <  ?
+           AND (
+                DATE(start_time) > CURDATE()
+             OR DATE_ADD(start_time, INTERVAL 30 MINUTE) > NOW()
+           )
+         GROUP BY DATE(start_time)";
         $st = $conn->prepare($sqlC);
         $from = $first->format('Y-m-d 00:00:00');
         $to = $next->format('Y-m-d 00:00:00');
@@ -114,12 +119,14 @@ class DoctorController
         if ($dateSel && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateSel)) {
             if ($dateSel >= $first->format('Y-m-01') && $dateSel < $next->format('Y-m-01')) {
                 $selected = $dateSel;
+                // Only future (not-ended) slots for that date:
                 $sqlS = "SELECT slot_id, start_time
-                           FROM Appointment_slot
-                          WHERE doctor_id = ?
-                            AND status = 'available'
-                            AND DATE(start_time) = ?
-                          ORDER BY start_time ASC";
+         FROM Appointment_slot
+         WHERE doctor_id = ?
+           AND status = 'available'
+           AND DATE(start_time) = ?
+           AND DATE_ADD(start_time, INTERVAL 30 MINUTE) > NOW()
+         ORDER BY start_time ASC";
                 $st = $conn->prepare($sqlS);
                 $st->bind_param('is', $docId, $selected);
                 $st->execute();
@@ -168,12 +175,18 @@ class DoctorController
 
         // Counts per day in [first, next)
         $counts = [];
+        // If you have duration_min column:
         $sqlC = "SELECT DATE(start_time) AS d, COUNT(*) AS c
-             FROM Appointment_slot
-             WHERE doctor_id = ?
-               AND status = 'available'
-               AND start_time >= ? AND start_time < ?
-             GROUP BY DATE(start_time)";
+         FROM Appointment_slot
+         WHERE doctor_id = ?
+           AND status = 'available'
+           AND start_time >= ?
+           AND start_time <  ?
+           AND (
+                DATE(start_time) > CURDATE()
+             OR DATE_ADD(start_time, INTERVAL 30 MINUTE) > NOW()
+           )
+         GROUP BY DATE(start_time)";
         $st = $conn->prepare($sqlC);
         $from = $first->format('Y-m-d H:i:s');
         $to = $next->format('Y-m-d H:i:s');
@@ -193,12 +206,14 @@ class DoctorController
             && $dateSel >= $first->format('Y-m-01') && $dateSel < $next->format('Y-m-01')
         ) {
             $sel = $dateSel;
+            // Only future (not-ended) slots for that date:
             $sqlS = "SELECT slot_id, start_time
-                       FROM Appointment_slot
-                      WHERE doctor_id = ?
-                        AND status = 'available'
-                        AND DATE(start_time) = ?
-                      ORDER BY start_time ASC";
+         FROM Appointment_slot
+         WHERE doctor_id = ?
+           AND status = 'available'
+           AND DATE(start_time) = ?
+           AND DATE_ADD(start_time, INTERVAL 30 MINUTE) > NOW()
+         ORDER BY start_time ASC";
             $st = $conn->prepare($sqlS);
             $st->bind_param('is', $docId, $sel);
             $st->execute();

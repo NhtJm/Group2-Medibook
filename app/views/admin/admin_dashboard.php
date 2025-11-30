@@ -1,100 +1,37 @@
-<?php // app/views/admin/dashboard.php ?>
+<?php if (!function_exists('e')) {
+  function e($s)
+  {
+    return htmlspecialchars((string) $s, ENT_QUOTES, 'UTF-8');
+  }
+}
+$admin = current_user() ?? [];
+$logoutUrl = BASE_URL . 'index.php?page=logout';
+$fullFromParts = trim(($admin['first_name'] ?? '') . ' ' . ($admin['last_name'] ?? ''));
+$adminName =
+  ($admin['full_name'] ?? null)
+  ?? ($fullFromParts !== '' ? $fullFromParts : null)
+  ?? ($admin['name'] ?? null)
+  ?? ($admin['display_name'] ?? null)
+  ?? ($admin['username'] ?? null)
+  ?? ($admin['email'] ?? 'Administrator');
+?>
 
 <section class="admin-shell">
-  <!-- Sidebar -->
-  <aside class="admin-sidebar">
-    <div class="admin-sidebar__brand">
-      <div class="brand-icon">
-        <img src="<?= IMAGE_PATH ?>/Logo.svg" alt="MediBook">
-      </div>
-      <div class="brand-copy">
-        <div class="brand-name">MediBook Admin</div>
-        <div class="brand-user">Alexander Pierce</div>
-      </div>
-    </div>
+  <?php
+  $active = 'admin_dashboard';
+  require __DIR__ . '/partials/sidebar.php';
+  ?>
 
-    <nav class="admin-nav">
-      <div class="admin-nav__section">
-        <div class="admin-nav__label">MAIN</div>
-        <a class="admin-nav__item is-active" href="#">
-          <span class="admin-nav__icon">📊</span>
-          <span class="admin-nav__text">Dashboard</span>
-          <span class="admin-nav__badge">v2</span>
-        </a>
-        <a class="admin-nav__item" href="#">
-          <span class="admin-nav__icon">👨‍⚕️</span>
-          <span class="admin-nav__text">Doctors</span>
-        </a>
-        <a class="admin-nav__item" href="#">
-          <span class="admin-nav__icon">🏥</span>
-          <span class="admin-nav__text">Clinics</span>
-        </a>
-        <a class="admin-nav__item" href="#">
-          <span class="admin-nav__icon">🧑</span>
-          <span class="admin-nav__text">Patients</span>
-        </a>
-        <a class="admin-nav__item" href="#">
-          <span class="admin-nav__icon">📅</span>
-          <span class="admin-nav__text">Appointments</span>
-        </a>
-        <a class="admin-nav__item" href="#">
-          <span class="admin-nav__icon">💳</span>
-          <span class="admin-nav__text">Payments</span>
-        </a>
-      </div>
+  <div class="admin-main admin-dashboard">
+    <?php
+    $title = 'Dashboard v2';
+    $search = $_GET['q'] ?? '';
+    $searchAction = BASE_URL . 'index.php';
+    $searchHidden = ['page' => 'admin_clinics']; // or whatever your router expects
+    require __DIR__ . '/partials/topbar.php';
+    ?>
 
-      <div class="admin-nav__section">
-        <div class="admin-nav__label">REPORTS</div>
-        <a class="admin-nav__item" href="#">
-          <span class="admin-nav__icon">📈</span>
-          <span class="admin-nav__text">Analytics</span>
-        </a>
-        <a class="admin-nav__item" href="#">
-          <span class="admin-nav__icon">⚙️</span>
-          <span class="admin-nav__text">System Logs</span>
-        </a>
-      </div>
-
-      <div class="admin-nav__section">
-        <div class="admin-nav__label">ACCOUNT</div>
-        <a class="admin-nav__item" href="#">
-          <span class="admin-nav__icon">👤</span>
-          <span class="admin-nav__text">My Account</span>
-        </a>
-        <a class="admin-nav__item" href="#">
-          <span class="admin-nav__icon">🚪</span>
-          <span class="admin-nav__text">Sign Out</span>
-        </a>
-      </div>
-    </nav>
-  </aside>
-
-
-  <!-- Main column -->
-  <div class="admin-main">
-
-    <!-- Top bar -->
-    <header class="admin-topbar">
-      <div class="admin-topbar__left">
-        <span class="admin-topbar__page">Dashboard v2</span>
-      </div>
-
-      <div class="admin-topbar__center">
-        <div class="admin-search">
-          <input class="admin-search__input" type="text" placeholder="Search...">
-          <button class="admin-search__btn" type="button">🔍</button>
-        </div>
-      </div>
-
-      <div class="admin-topbar__right">
-        <button class="topbar-icon-btn" title="Messages">✉️</button>
-        <button class="topbar-icon-btn" title="Notifications">🔔</button>
-        <button class="topbar-icon-btn" title="Settings">⚙️</button>
-      </div>
-    </header>
-
-
-    <!-- KPI cards row -->
+    <!-- KPI cards row (unchanged) -->
     <section class="admin-kpis">
       <div class="kpi-card">
         <div class="kpi-card__icon kpi-card__icon--blue">👨‍⚕️</div>
@@ -129,10 +66,8 @@
       </div>
     </section>
 
-
-    <!-- First big row: Recap + Stats -->
+    <!-- First big row: Recap + Stats (unchanged) -->
     <section class="admin-row">
-      <!-- Monthly Recap -->
       <div class="panel panel--wide">
         <div class="panel__head">
           <div class="panel__title">Monthly Recap Report</div>
@@ -208,7 +143,6 @@
         </div>
       </div>
 
-      <!-- Stacked stat tiles -->
       <div class="panel panel--stats">
         <div class="stat-tile stat-tile--yellow">
           <div class="stat-tile__label">Inventory</div>
@@ -229,10 +163,8 @@
       </div>
     </section>
 
-
-    <!-- Second row: Latest users + Browser usage -->
+    <!-- Second row (unchanged) -->
     <section class="admin-row">
-      <!-- Latest Members -->
       <div class="panel">
         <div class="panel__head">
           <div class="panel__title">Latest Clinics</div>
@@ -248,7 +180,6 @@
             </div>
             <div class="latest-time">2h ago</div>
           </li>
-
           <li class="latest-item">
             <div class="latest-avatar"><span>C</span></div>
             <div class="latest-info">
@@ -257,7 +188,6 @@
             </div>
             <div class="latest-time">5h ago</div>
           </li>
-
           <li class="latest-item">
             <div class="latest-avatar"><span>S</span></div>
             <div class="latest-info">
@@ -269,7 +199,6 @@
         </ul>
       </div>
 
-      <!-- Browser Usage / traffic mix -->
       <div class="panel">
         <div class="panel__head">
           <div class="panel__title">Traffic Split</div>

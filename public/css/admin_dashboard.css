@@ -1,112 +1,17 @@
 /* overall layout */
+/* ONE source of truth */
 .admin-shell {
-  display: grid;
-  grid-template-columns: 240px 1fr;
+  display: grid;                 /* keep grid */
+  grid-template-columns: 260px 1fr;
   min-height: 100vh;
-  background: #ecf0f4;
-  color: #1a1f2e;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background:#ecf0f4;
 }
 
-/* SIDEBAR */
-.admin-sidebar {
-  background: #1f2833;
-  color: #fff;
-  display: flex;
-  flex-direction: column;
-  padding: 16px;
-  gap: 24px;
-}
+/* Sidebar matches the grid column */
+.admin-sidebar { width: 260px; }
 
-.admin-sidebar__brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: #fff;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  padding-bottom: 16px;
-}
-.brand-icon img {
-  width: 36px;
-  height: 36px;
-  border-radius: 4px;
-  background: #fff;
-  object-fit: contain;
-}
-.brand-copy {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.3;
-}
-.brand-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: #fff;
-}
-.brand-user {
-  font-size: 12px;
-  color: #9fb1c8;
-}
 
-.admin-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  flex: 1;
-}
 
-.admin-nav__section {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.admin-nav__label {
-  font-size: 11px;
-  color: #9fb1c8;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-  font-weight: 500;
-}
-
-.admin-nav__item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: transparent;
-  color: #dfe7f5;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.3;
-  padding: 10px 12px;
-  border-radius: 6px;
-  text-decoration: none;
-}
-.admin-nav__item:hover {
-  background: rgba(255,255,255,0.08);
-}
-.admin-nav__item.is-active {
-  background: #2f3d51;
-  color: #fff;
-}
-
-.admin-nav__icon {
-  width: 20px;
-  text-align: center;
-  font-size: 14px;
-}
-.admin-nav__text {
-  flex: 1;
-}
-.admin-nav__badge {
-  background: #2563eb;
-  color: #fff;
-  font-size: 11px;
-  line-height: 1.2;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-weight: 500;
-}
 
 /* MAIN AREA */
 .admin-main {
@@ -116,62 +21,8 @@
   min-height: 100vh;
 }
 
-/* top bar */
-.admin-topbar {
-  background: #fff;
-  border-bottom: 1px solid #dbe2ea;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  column-gap: 16px;
-  padding: 12px 20px;
-}
 
-.admin-topbar__page {
-  font-size: 14px;
-  font-weight: 600;
-  color: #1a1f2e;
-}
 
-.admin-search {
-  background: #f1f4f9;
-  border: 1px solid #d5dce7;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  max-width: 360px;
-  width: 100%;
-  margin: 0 auto;
-}
-.admin-search__input {
-  flex: 1;
-  border: 0;
-  background: transparent;
-  padding: 8px 10px;
-  font-size: 13px;
-  color: #1a1f2e;
-  outline: none;
-}
-.admin-search__btn {
-  border: 0;
-  background: none;
-  padding: 8px 10px;
-  font-size: 14px;
-  cursor: pointer;
-  color: #1a1f2e;
-}
-
-.topbar-icon-btn {
-  background: none;
-  border: 0;
-  font-size: 16px;
-  cursor: pointer;
-  padding: 6px 8px;
-  border-radius: 4px;
-}
-.topbar-icon-btn:hover {
-  background: #f1f4f9;
-}
 
 /* KPI CARDS */
 .admin-kpis {

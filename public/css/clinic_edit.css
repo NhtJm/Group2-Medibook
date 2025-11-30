@@ -1,0 +1,54 @@
+/* ===== Clinic Edit (scoped) ===== */
+.admin-clinic-edit .alert{margin:12px 16px;padding:10px 12px;border-radius:10px;font-size:.92rem}
+.admin-clinic-edit .alert.is-success{background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0}
+.admin-clinic-edit .alert.is-error{background:#fef2f2;color:#7f1d1d;border:1px solid #fecaca}
+
+.admin-clinic-edit .form{padding:0}
+.admin-clinic-edit .panel__head{padding:16px 20px;border-bottom:1px solid #e5e7eb;font-weight:600}
+
+.admin-clinic-edit .form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:16px;
+  padding:20px;
+}
+.admin-clinic-edit .form-grid label{display:flex;flex-direction:column;gap:8px}
+.admin-clinic-edit .form-grid .span-2{grid-column:span 2}
+.admin-clinic-edit .form-grid input[type="text"],
+.admin-clinic-edit .form-grid input[type="number"],
+.admin-clinic-edit .form-grid textarea{
+  border:1px solid #d5dce7;border-radius:8px;padding:10px;font:inherit
+}
+.admin-clinic-edit .form-grid .err{color:#b91c1c}
+
+.admin-clinic-edit .logo-field{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:16px;
+  align-items:start
+}
+.admin-clinic-edit .logo-preview{grid-column:span 2}
+.admin-clinic-edit .logo-preview img{
+  max-height:64px;border:1px solid #e5e7eb;border-radius:8px;padding:6px;background:#fff
+}
+
+/* Footer action bar */
+.admin-clinic-edit .form-actions{
+  position:sticky; bottom:0;
+  display:flex; justify-content:space-between; align-items:center; gap:12px;
+  padding:16px 20px; border-top:1px solid #e5e7eb; background:#fff; z-index:10;
+  box-shadow:0 -2px 8px rgba(16,24,40,.04);
+}
+.admin-clinic-edit .form-actions .fa-left,
+.admin-clinic-edit .form-actions .fa-right{display:inline-flex; gap:10px}
+
+/* Optional: light polish for buttons on this page only.
+   Remove if you already have global .btn styles. */
+.admin-clinic-edit .btn{
+  border:1px solid #d5dce7; border-radius:10px; padding:8px 14px; font-weight:500; background:#fff;
+}
+.admin-clinic-edit .btn:hover{background:#f8fafc}
+.admin-clinic-edit .btn-primary{color:#fff;background:#2563eb;border-color:#2563eb}
+.admin-clinic-edit .btn-primary:hover{background:#1e4fd1;border-color:#1e4fd1}
+.admin-clinic-edit .btn-ghost{background:transparent;border-color:transparent;color:#475569}
+.admin-clinic-edit .btn-ghost:hover{background:#f8fafc;border-color:#e5e7eb}
