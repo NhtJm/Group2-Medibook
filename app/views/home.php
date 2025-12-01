@@ -78,7 +78,7 @@ if ($res = $conn->query($sql)) {
   </div>
 </section>
 
-<section class="home-specialties container" id="specialties">
+<section class="home-specialties" id="specialties">
   <h2 class="block-title">Popular Specialties</h2>
 
   <?php if (empty($specialties)): ?>
@@ -190,7 +190,17 @@ if ($res = $conn->query($sql)) {
   }
 
   .home-specialties {
-    margin-top: 24px;
+    max-width: var(--container);
+    margin: 24px auto 0;
+    padding: 0 16px;
+    text-align: center;
+  }
+
+  .home-specialties .block-title {
+    font-size: 36px;
+    line-height: 1.2;
+    font-weight: 700;
+    margin: 0 0 24px;
   }
 
   .home-specialties .specialty-grid {

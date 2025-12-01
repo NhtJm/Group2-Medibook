@@ -52,11 +52,6 @@
     <div class="footer__bar">
         <div class="footer__bar-inner">
             <span>© <?= date('Y') ?> MediBook. All rights reserved.</span>
-            <div class="footer__social">
-                <a aria-label="Facebook" href="#" rel="noopener">Fb</a>
-                <a aria-label="X" href="#" rel="noopener">X</a>
-                <a aria-label="LinkedIn" href="#" rel="noopener">In</a>
-            </div>
         </div>
     </div>
 </footer>

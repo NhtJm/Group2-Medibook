@@ -114,26 +114,6 @@
   opacity:.95;
 }
 
-/* social */
-.site-footer .footer__social{
-  display:flex; gap:10px;
-}
-.site-footer .footer__social a{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  width:28px;
-  height:28px;
-  border-radius:8px;
-  background:rgba(255,255,255,.12);
-  color:#fff;
-  text-decoration:none;
-  font-weight:700;
-}
-.site-footer .footer__social a:hover{
-  background:rgba(255,255,255,.18);
-}
-
 /* responsive */
 @media (max-width: 900px){
   .site-footer .footer__inner{ grid-template-columns:1fr; }
