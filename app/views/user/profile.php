@@ -10,7 +10,7 @@
       <label class="form__label">Email
         <input type="email" value="<?= htmlspecialchars(current_user()['email']) ?>" />
       </label>
-      <button class="btn btn--primary btn--xl" type="button">Save (stub)</button>
+      <button class="btn btn--primary btn--xl" type="button">Save</button>
     </form>
   </div>
 </section>
