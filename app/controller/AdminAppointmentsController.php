@@ -9,13 +9,13 @@ class AdminAppointmentsController
         if (session_status() === PHP_SESSION_NONE) session_start();
         $conn = Database::get_instance();
 
-        // --- inline DELETE handler ---
+        // --- inline DELETE handler (POST) ---
         if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && ($_POST['act'] ?? '') === 'delete') {
             self::handleDelete($conn);
-            return; // redirect happens inside
+            return null; // redirect happens inside
         }
-        // --- list view below ---
 
+        // --------- LIST VIEW ----------
         $office_id = isset($_GET['office']) ? (int)$_GET['office'] : 0;
         $status    = isset($_GET['status']) ? trim($_GET['status']) : '';
         $q         = isset($_GET['q']) ? trim($_GET['q']) : '';
@@ -32,29 +32,32 @@ class AdminAppointmentsController
         }
 
         // WHERE builder
-        $where = [];
-        $types = '';
+        $where  = [];
+        $types  = '';
         $params = [];
 
         if ($office_id > 0) { $where[] = 'o.office_id=?'; $types.='i'; $params[]=$office_id; }
+
         if ($status !== '') {
             $ok = ['booked','canceled','completed','no-show'];
-            if (in_array($status,$ok,true)) { $where[]='a.status=?'; $types.='s'; $params[]=$status; }
+            if (in_array($status, $ok, true)) { $where[]='a.status=?'; $types.='s'; $params[]=$status; }
         }
+
         if ($q !== '') {
             $where[] = "("
-                ."u.full_name LIKE CONCAT('%',?,'%') OR "
-                ."u.username  LIKE CONCAT('%',?,'%') OR "
-                ."u.email     LIKE CONCAT('%',?,'%') OR "
-                ."d.doctor_name LIKE CONCAT('%',?,'%')"
-                .")";
+                . "u.full_name  LIKE CONCAT('%',?,'%') OR "
+                . "u.username   LIKE CONCAT('%',?,'%') OR "
+                . "u.email      LIKE CONCAT('%',?,'%') OR "
+                . "d.doctor_name LIKE CONCAT('%',?,'%')"
+                . ")";
             $types .= 'ssss';
             array_push($params, $q, $q, $q, $q);
         }
-        if ($from !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/',$from)) { $where[]='DATE(s.start_time)>=?'; $types.='s'; $params[]=$from; }
-        if ($to   !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/',$to))   { $where[]='DATE(s.start_time)<=?'; $types.='s'; $params[]=$to; }
 
-        $W = $where ? 'WHERE '.implode(' AND ',$where) : '';
+        if ($from !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $from)) { $where[]='DATE(s.start_time)>=?'; $types.='s'; $params[]=$from; }
+        if ($to   !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $to))   { $where[]='DATE(s.start_time)<=?'; $types.='s'; $params[]=$to; }
+
+        $W = $where ? 'WHERE '.implode(' AND ', $where) : '';
 
         // Count
         $sqlCount = "SELECT COUNT(*) AS n
@@ -71,7 +74,7 @@ class AdminAppointmentsController
         $total = (int)($stc->get_result()->fetch_assoc()['n'] ?? 0);
         $stc->close();
 
-        // Rows (per-office grouping)
+        // Rows
         $sql = "SELECT
                     a.appointment_id,
                     a.status AS appt_status,
@@ -79,7 +82,8 @@ class AdminAppointmentsController
                     s.start_time, s.end_time,
                     d.doctor_id, d.doctor_name,
                     o.office_id, o.name AS office_name,
-                    p.patient_id, u.user_id AS patient_user_id,
+                    p.patient_id,
+                    u.user_id AS patient_user_id,
                     COALESCE(u.full_name, u.username, u.email) AS patient_name
                 FROM Appointment a
                 JOIN Appointment_slot s ON a.slot_id = s.slot_id
@@ -91,30 +95,34 @@ class AdminAppointmentsController
                 ORDER BY o.name, s.start_time
                 LIMIT ? OFFSET ?";
         $st = $conn->prepare($sql);
-        $typesRows = $types . 'ii';
+        $typesRows  = $types . 'ii';
         $paramsRows = $params; $paramsRows[] = $perPage; $paramsRows[] = $offset;
         $st->bind_param($typesRows, ...$paramsRows);
         $st->execute();
         $rows = $st->get_result()->fetch_all(MYSQLI_ASSOC);
         $st->close();
 
-        // Count rows per office (for the current page)
+        // Count rows per office (current page)
         $officeCounts = [];
         foreach ($rows as $r) {
             $officeCounts[$r['office_name']] = ($officeCounts[$r['office_name']] ?? 0) + 1;
         }
 
-        $data = [
-            'rows'=>$rows, 'total'=>$total, 'page'=>$page, 'perPage'=>$perPage,
-            'offices'=>$offices, 'officeCounts'=>$officeCounts,
-            'filters'=>['office'=>$office_id,'status'=>$status,'q'=>$q,'from'=>$from,'to'=>$to]
+        return [
+            'rows'         => $rows,
+            'total'        => $total,
+            'page'         => $page,
+            'perPage'      => $perPage,
+            'offices'      => $offices,
+            'officeCounts' => $officeCounts,
+            'filters'      => ['office'=>$office_id,'status'=>$status,'q'=>$q,'from'=>$from,'to'=>$to]
         ];
-
-        require __DIR__ . '/../views/admin/admin_appointments.php';
     }
 
     private static function handleDelete(mysqli $conn): void
     {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+
         // CSRF
         $csrf = $_POST['csrf'] ?? '';
         if (!isset($_SESSION['csrf']) || !$csrf || !hash_equals($_SESSION['csrf'], $csrf)) {
@@ -130,8 +138,7 @@ class AdminAppointmentsController
 
         $conn->begin_transaction();
         try {
-            // lock & fetch slot
-            $slot_id = 0;
+            // Lock & fetch slot id
             $st = $conn->prepare("SELECT slot_id FROM Appointment WHERE appointment_id=? FOR UPDATE");
             $st->bind_param('i', $appointment_id);
             $st->execute();
@@ -140,14 +147,14 @@ class AdminAppointmentsController
             if (!$row) throw new Exception('Appointment not found');
             $slot_id = (int)$row['slot_id'];
 
-            // delete appt
+            // Delete appointment
             $st = $conn->prepare("DELETE FROM Appointment WHERE appointment_id=?");
             $st->bind_param('i', $appointment_id);
             $st->execute();
             $deleted = $st->affected_rows > 0;
             $st->close();
 
-            // free slot
+            // Free slot
             if ($deleted && $slot_id > 0) {
                 $st = $conn->prepare("UPDATE Appointment_slot SET status='available' WHERE slot_id=?");
                 $st->bind_param('i', $slot_id);
@@ -167,9 +174,8 @@ class AdminAppointmentsController
 
     private static function redirectBack(): void
     {
-        $back = $_POST['back'] ?? '';
+        $back   = $_POST['back'] ?? '';
         $target = BASE_URL.'index.php?page=admin_appointments';
-        // keep current filters if provided
         if ($back && strpos($back, 'page=admin_appointments') === 0) {
             $target = BASE_URL.'index.php?'.$back;
         }

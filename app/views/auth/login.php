@@ -98,8 +98,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <section class="wall">
   <div class="card">
+    <?php
+    $u = current_user();
+    $targetPage = ($u && (($u['role'] ?? '') === 'admin')) ? 'admin_dashboard' : ($u ? 'dashboard' : 'home');
+    ?>
     <div class="card__logo">
-      <img src="<?= IMAGE_PATH ?>/Logo.svg" alt="Medibook" />
+      <a class="auth-logo" href="<?= e(BASE_URL . 'index.php?page=' . $targetPage) ?>" aria-label="Back to Dashboard">
+        <img src="<?= IMAGE_PATH ?>/Logo.png" alt="MediBook" width="56" height="56" decoding="async" loading="eager">
+      </a>
     </div>
 
     <h1 class="title">Welcome Back!</h1>

@@ -398,3 +398,23 @@
 .admin-footer__ver {
   color:#6b7380;
 }
+/* First row = full width */
+.admin-row--recap { 
+  grid-template-columns: 1fr;         /* no right column reserved */
+}
+
+/* (optional) give the right subpanel in the recap a bit more room */
+.recap-chart { 
+  grid-template-columns: 1fr 320px;   /* was 1fr 260px */
+}
+@media (min-width: 1400px){
+  .recap-chart { grid-template-columns: 1fr 360px; }
+}
+.latest-actions { display:flex; gap:8px; }
+.mod-btn{
+  padding:6px 10px; font-size:12px; border-radius:8px; border:1px solid #dbe2ea;
+  background:#fff; cursor:pointer;
+}
+.mod-btn.approve{ background:#eaf6ee; border-color:#c9ead3; color:#0f5a32; }
+.mod-btn.danger { background:#fff5f5; border-color:#ffd3d1; color:#8a1d1d; }
+.mod-btn[disabled]{ opacity:.6; cursor:not-allowed; }

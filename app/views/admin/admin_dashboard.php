@@ -31,12 +31,21 @@ $adminName =
     require __DIR__ . '/partials/topbar.php';
     ?>
 
-    <!-- KPI cards row (unchanged) -->
+    <?php
+    $k = $data['kpis'] ?? [];
+    if (!function_exists('e')) {
+      function e($s)
+      {
+        return htmlspecialchars((string) $s, ENT_QUOTES, 'UTF-8');
+      }
+    }
+    $nf = fn($n) => number_format((int) ($n ?? 0));
+    ?>
     <section class="admin-kpis">
       <div class="kpi-card">
         <div class="kpi-card__icon kpi-card__icon--blue">👨‍⚕️</div>
         <div class="kpi-card__content">
-          <div class="kpi-card__value">128</div>
+          <div class="kpi-card__value"><?= e($nf($k['doctors_active'])) ?></div>
           <div class="kpi-card__label">Active Doctors</div>
         </div>
       </div>
@@ -44,7 +53,7 @@ $adminName =
       <div class="kpi-card">
         <div class="kpi-card__icon kpi-card__icon--red">❤️</div>
         <div class="kpi-card__content">
-          <div class="kpi-card__value">41,410</div>
+          <div class="kpi-card__value"><?= e($nf($k['patients_total'])) ?></div>
           <div class="kpi-card__label">Patients</div>
         </div>
       </div>
@@ -52,151 +61,75 @@ $adminName =
       <div class="kpi-card">
         <div class="kpi-card__icon kpi-card__icon--green">📅</div>
         <div class="kpi-card__content">
-          <div class="kpi-card__value">760</div>
-          <div class="kpi-card__label">Appointments Today</div>
+          <div class="kpi-card__value"><?= e($nf($k['appointments_week'])) ?></div>
+          <div class="kpi-card__label">Appointments This Week</div>
         </div>
       </div>
 
       <div class="kpi-card">
-        <div class="kpi-card__icon kpi-card__icon--yellow">⭐</div>
+        <div class="kpi-card__icon kpi-card__icon--yellow">🏥</div>
         <div class="kpi-card__content">
-          <div class="kpi-card__value">2,000</div>
-          <div class="kpi-card__label">New Signups</div>
+          <div class="kpi-card__value"><?= e($nf($k['offices_total'])) ?></div>
+          <div class="kpi-card__label">Offices</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card__icon kpi-card__icon--indigo">👥</div>
+        <div class="kpi-card__content">
+          <div class="kpi-card__value"><?= e($nf($k['users_total'])) ?></div>
+          <div class="kpi-card__label">Users</div>
+        </div>
+      </div>
+
+      <!-- Medical Specialties -->
+      <div class="kpi-card">
+        <div class="kpi-card__icon kpi-card__icon--teal">🩺</div>
+        <div class="kpi-card__content">
+          <div class="kpi-card__value"><?= e($nf($k['specialties_total'])) ?></div>
+          <div class="kpi-card__label">Medical Specialties</div>
         </div>
       </div>
     </section>
 
     <!-- First big row: Recap + Stats (unchanged) -->
-    <section class="admin-row">
-      <div class="panel panel--wide">
-        <div class="panel__head">
-          <div class="panel__title">Monthly Recap Report</div>
-          <div class="panel__actions">
-            <button class="panel__action-btn">—</button>
-            <button class="panel__action-btn">✕</button>
-          </div>
-        </div>
-
-        <div class="recap-chart">
-          <div class="recap-chart__fakegraph">
-            <div class="fake-line fake-line--a"></div>
-            <div class="fake-line fake-line--b"></div>
-            <div class="fake-line fake-line--c"></div>
-          </div>
-
-          <div class="recap-goals">
-            <div class="goal-row">
-              <span class="goal-label">Completed Appointments</span>
-              <span class="goal-meter">
-                <span class="goal-bar goal-bar--blue" style="width:80%"></span>
-              </span>
-              <span class="goal-num">160/200</span>
-            </div>
-
-            <div class="goal-row">
-              <span class="goal-label">Paid Consultations</span>
-              <span class="goal-meter">
-                <span class="goal-bar goal-bar--red" style="width:60%"></span>
-              </span>
-              <span class="goal-num">310/400</span>
-            </div>
-
-            <div class="goal-row">
-              <span class="goal-label">Online Check-ins</span>
-              <span class="goal-meter">
-                <span class="goal-bar goal-bar--yellow" style="width:90%"></span>
-              </span>
-              <span class="goal-num">480/500</span>
-            </div>
-
-            <div class="goal-row">
-              <span class="goal-label">New Patient Leads</span>
-              <span class="goal-meter">
-                <span class="goal-bar goal-bar--green" style="width:50%"></span>
-              </span>
-              <span class="goal-num">250/500</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="recap-stats">
-          <div class="recap-stat">
-            <div class="recap-stat__value">$35,230.43</div>
-            <div class="recap-stat__label">TOTAL REVENUE</div>
-            <div class="recap-stat__delta recap-stat__delta--green">+17%</div>
-          </div>
-          <div class="recap-stat">
-            <div class="recap-stat__value">$10,390.90</div>
-            <div class="recap-stat__label">TOTAL COST</div>
-            <div class="recap-stat__delta recap-stat__delta--yellow">+9%</div>
-          </div>
-          <div class="recap-stat">
-            <div class="recap-stat__value">$24,813.53</div>
-            <div class="recap-stat__label">TOTAL PROFIT</div>
-            <div class="recap-stat__delta recap-stat__delta--green">+20%</div>
-          </div>
-          <div class="recap-stat">
-            <div class="recap-stat__value">1,200</div>
-            <div class="recap-stat__label">GOAL COMPLETIONS</div>
-            <div class="recap-stat__delta recap-stat__delta--red">-18%</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="panel panel--stats">
-        <div class="stat-tile stat-tile--yellow">
-          <div class="stat-tile__label">Inventory</div>
-          <div class="stat-tile__value">5,200</div>
-        </div>
-        <div class="stat-tile stat-tile--green">
-          <div class="stat-tile__label">Messages</div>
-          <div class="stat-tile__value">92,050</div>
-        </div>
-        <div class="stat-tile stat-tile--red">
-          <div class="stat-tile__label">Downloads</div>
-          <div class="stat-tile__value">114,381</div>
-        </div>
-        <div class="stat-tile stat-tile--blue">
-          <div class="stat-tile__label">Direct Messages</div>
-          <div class="stat-tile__value">163,921</div>
-        </div>
-      </div>
-    </section>
 
     <!-- Second row (unchanged) -->
     <section class="admin-row">
       <div class="panel">
         <div class="panel__head">
-          <div class="panel__title">Latest Clinics</div>
-          <div class="panel__meta">+ 3 new this week</div>
+          <div class="panel__title">Pending Clinics</div>
+          <div class="panel__meta">
+            <?= isset($data['pending_offices']) ? count($data['pending_offices']) : 0 ?> awaiting review
+          </div>
         </div>
 
-        <ul class="latest-list">
-          <li class="latest-item">
-            <div class="latest-avatar"><span>A</span></div>
-            <div class="latest-info">
-              <div class="latest-name">Alpha Health Group</div>
-              <div class="latest-meta">Dermatology • NY, USA</div>
-            </div>
-            <div class="latest-time">2h ago</div>
-          </li>
-          <li class="latest-item">
-            <div class="latest-avatar"><span>C</span></div>
-            <div class="latest-info">
-              <div class="latest-name">City Heart Clinic</div>
-              <div class="latest-meta">Cardiology • London, UK</div>
-            </div>
-            <div class="latest-time">5h ago</div>
-          </li>
-          <li class="latest-item">
-            <div class="latest-avatar"><span>S</span></div>
-            <div class="latest-info">
-              <div class="latest-name">Sunrise Pediatrics</div>
-              <div class="latest-meta">Pediatrics • Sydney, AU</div>
-            </div>
-            <div class="latest-time">1d ago</div>
-          </li>
-        </ul>
+        <?php
+        $pend = $data['pending_offices'] ?? [];
+        if (session_status() === PHP_SESSION_NONE)
+          session_start();
+        if (empty($_SESSION['csrf']))
+          $_SESSION['csrf'] = bin2hex(random_bytes(16));
+        $csrf = $_SESSION['csrf'];
+        ?>
+
+        <?php if (!$pend): ?>
+          <div style="padding:16px; color:#6b7380;">No pending clinics 🎉</div>
+        <?php else: ?>
+          <ul class="latest-list" id="pendingClinics">
+            <?php foreach ($pend as $o):
+              $letter = mb_strtoupper(mb_substr($o['name'], 0, 1));
+              $meta = trim(($o['city'] ? $o['city'] : '') . ($o['country'] ? ' • ' . $o['country'] : ''));
+              ?>
+              <li class="latest-item" data-id="<?= (int) $o['office_id'] ?>">
+                <div class="latest-avatar"><span><?= e($letter) ?></span></div>
+                <div class="latest-info">
+                  <div class="latest-name"><?= e($o['name']) ?></div>
+                  <div class="latest-meta"><?= e($meta !== '' ? $meta : 'Pending review') ?></div>
+                </div>
+              </li>
+            <?php endforeach; ?>
+          </ul>
+        <?php endif; ?>
       </div>
 
       <div class="panel">
@@ -229,3 +162,55 @@ $adminName =
 
   </div><!-- /admin-main -->
 </section>
+<script>
+(function(){
+  const list = document.getElementById('pendingClinics');
+  if (!list) return;
+
+  const API  = "<?= e(BASE_URL.'index.php?page=admin_clinics_api') ?>";
+  const CSRF = "<?= e($csrf) ?>";
+
+  async function moderate(li, to){
+    const id = li.getAttribute('data-id');
+    const btns = li.querySelectorAll('.mod-btn');
+    btns.forEach(b => b.disabled = true);
+
+    try{
+      const resp = await fetch(API, {
+        method: 'POST',
+        headers: {'Content-Type':'application/x-www-form-urlencoded'},
+        body: new URLSearchParams({
+          action: 'moderate',
+          office_id: id,
+          to: to,
+          csrf: CSRF
+        })
+      });
+      const json = await resp.json();
+      if (json && json.ok){
+        li.remove(); // gone from the list
+      } else {
+        alert('Action failed' + (json && json.error ? ': ' + json.error : ''));
+        btns.forEach(b => b.disabled = false);
+      }
+    } catch(e){
+      alert('Network error');
+      btns.forEach(b => b.disabled = false);
+    }
+  }
+
+  list.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('.mod-btn');
+    if (!btn) return;
+    const li = ev.target.closest('li.latest-item');
+    const to = btn.getAttribute('data-to');
+    if (!li || !to) return;
+
+    const name = li.querySelector('.latest-name')?.textContent?.trim() || 'this clinic';
+    const ok = confirm(`Are you sure to set "${name}" to ${to}?`);
+    if (!ok) return;
+
+    moderate(li, to);
+  });
+})();
+</script>

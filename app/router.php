@@ -43,9 +43,9 @@ $allowedPages = [
   'clinic_setup',
   'office_dashboard',
   'doctor_schedule',
-  'help', 
-  'contact', 
-  'privacy', 
+  'help',
+  'contact',
+  'privacy',
   'terms',
   'clinic_edit',
   'admin_users',
@@ -212,6 +212,8 @@ $noChromePages = [
   'admin_doctors_office',
   'admin_doctor_edit',
   'admin_appointments',
+  'login',
+  'register',
 ];
 $noChrome = in_array($page, $noChromePages, true);
 
@@ -340,10 +342,10 @@ $views = [
   'admin_doctors_office' => __DIR__ . '/views/admin/doctors_office.php',
   'admin_doctor_edit' => __DIR__ . '/views/admin/doctor_edit.php',
   'admin_appointments' => __DIR__ . '/views/admin/admin_appointments.php',
-  'help'               => __DIR__ . '/views/static/help.php',
-  'contact'            => __DIR__ . '/views/static/contact.php',
-  'privacy'            => __DIR__ . '/views/static/privacy.php',
-  'terms'              => __DIR__ . '/views/static/terms.php'
+  'help' => __DIR__ . '/views/static/help.php',
+  'contact' => __DIR__ . '/views/static/contact.php',
+  'privacy' => __DIR__ . '/views/static/privacy.php',
+  'terms' => __DIR__ . '/views/static/terms.php'
 ];
 
 /* ----------------------------- Controller flow ---------------------------- */
@@ -437,8 +439,12 @@ switch ($page) {
     AdminDoctorSlotsApiController::index();
     exit;
   case 'admin_appointments':
-    require_once __DIR__ . '/../app/controller/AdminAppointmentsController.php';
-    AdminAppointmentsController::index();
+    require_once __DIR__ . '/controller/AdminAppointmentsController.php'; // fixed path
+    $data = AdminAppointmentsController::index(); // returns array
+    break;
+  case 'admin_dashboard':
+    require_once __DIR__ . '/controller/AdminDashboardController.php';
+    $data = AdminDashboardController::index();
     break;
   default:
     // pages without controllers simply fall through with $data === null

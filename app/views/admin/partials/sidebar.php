@@ -72,11 +72,7 @@ $active = $active ?? ''; // set by the view using this partial
       <div class="admin-nav__label">REPORTS</div>
       <a class="admin-nav__item" href="#">
         <span class="admin-nav__icon">📈</span>
-        <span class="admin-nav__text">Analytics</span>
-      </a>
-      <a class="admin-nav__item" href="#">
-        <span class="admin-nav__icon">⚙️</span>
-        <span class="admin-nav__text">System Logs</span>
+        <span class="admin-nav__text">Complains</span>
       </a>
     </div>
 

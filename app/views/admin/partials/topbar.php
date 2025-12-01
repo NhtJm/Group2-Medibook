@@ -32,8 +32,6 @@ $searchHidden = $searchHidden ?? [];        // e.g. ['page'=>'admin_clinics']
     </div>
 
     <div class="admin-topbar__right">
-        <button class="topbar-icon-btn" title="Messages">✉️</button>
         <button class="topbar-icon-btn" title="Notifications">🔔</button>
-        <button class="topbar-icon-btn" title="Settings">⚙️</button>
     </div>
 </header>
