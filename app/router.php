@@ -43,6 +43,10 @@ $allowedPages = [
   'clinic_setup',
   'office_dashboard',
   'doctor_schedule',
+  'help', 
+  'contact', 
+  'privacy', 
+  'terms',
   'clinic_edit',
   'admin_users',
   // json search endpoint
@@ -187,6 +191,10 @@ $labels = [
   'clinic_setup' => 'Clinic Setup',
   'office_dashboard' => 'Office',
   'doctor_schedule' => 'Schedule',
+  'help' => 'Help',
+  'contact' => 'Contact',
+  'privacy' => 'Privacy',
+  'terms' => 'Terms'
 ];
 
 $title = 'MEDIBOOK — ' . ($labels[$page] ?? 'MediBook');
@@ -229,6 +237,8 @@ if (
 ) {
   $css[] = STYLE_PATH . '/admin_sidebar.css';
   $css[] = STYLE_PATH . '/admin_topbar.css';
+} elseif (in_array($page, ['help', 'contact', 'privacy', 'terms'], true)) {
+  $css[] = STYLE_PATH . '/static.css';
 }
 
 /* Page-specific CSS */
@@ -330,6 +340,10 @@ $views = [
   'admin_doctors_office' => __DIR__ . '/views/admin/doctors_office.php',
   'admin_doctor_edit' => __DIR__ . '/views/admin/doctor_edit.php',
   'admin_appointments' => __DIR__ . '/views/admin/admin_appointments.php',
+  'help'               => __DIR__ . '/views/static/help.php',
+  'contact'            => __DIR__ . '/views/static/contact.php',
+  'privacy'            => __DIR__ . '/views/static/privacy.php',
+  'terms'              => __DIR__ . '/views/static/terms.php'
 ];
 
 /* ----------------------------- Controller flow ---------------------------- */
