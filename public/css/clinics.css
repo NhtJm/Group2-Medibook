@@ -40,12 +40,12 @@
 .search__btn:active{transform:translateY(1px)}
 
 /* Suggestions (identical to Home) */
-.search--has-suggest{position:relative;z-index:1000}
+.search--has-suggest{position:relative;z-index:100}
 .search__suggest{
   position:absolute;left:24px;right:24px;top:calc(100% + 12px);
   background:#fff;border:1px solid #e7eaf3;border-radius:16px;
   box-shadow:0 18px 40px rgba(16,24,40,.12);max-height:420px;overflow:auto;
-  z-index:10000;padding:6px;color:#1c2430;
+  z-index:101;padding:6px;color:#1c2430;
 }
 .search__suggest.hidden{display:none}
 .search__suggest .s-head{

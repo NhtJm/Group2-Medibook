@@ -89,7 +89,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'role' => $user['role'],
         'profile_id' => $profileId,
       ];
-      header('Location: ' . BASE_URL . 'index.php?page=dashboard');
+      
+      $redirectPage = 'dashboard';
+      if ($user['role'] === 'admin') {
+        $redirectPage = 'admin_dashboard';
+      } elseif ($user['role'] === 'office') {
+        $redirectPage = 'office_dashboard';
+      }
+      
+      header('Location: ' . BASE_URL . 'index.php?page=' . $redirectPage);
       exit;
     }
   }
