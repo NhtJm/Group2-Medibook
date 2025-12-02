@@ -143,7 +143,13 @@ $ratingPct = $rating > 0 ? ($rating / 5) * 100 : 0;
                             <article class="dv-doc" data-name="<?= e(mb_strtolower($name)) ?>" data-spec="<?= e($spec) ?>"
                                 data-degree="<?= e($degree) ?>" data-gender="<?= e($gender) ?>">
                                 <div class="dv-doc-left">
+                                    <?php if (!empty($d['photo']) && str_starts_with($d['photo'], 'uploads/')): ?>
+                                    <div class="dv-doc-avatar" style="padding: 0; overflow: hidden;">
+                                        <img src="<?= BASE_URL ?><?= e($d['photo']) ?>" alt="<?= e($name) ?>" style="width: 100%; height: 100%; object-fit: cover;">
+                                    </div>
+                                    <?php else: ?>
                                     <div class="dv-doc-avatar"><?= e($d['init'] ?? 'Dr') ?></div>
+                                    <?php endif; ?>
                                 </div>
 
                                 <div class="dv-doc-main">

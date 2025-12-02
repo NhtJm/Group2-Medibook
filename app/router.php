@@ -62,6 +62,8 @@ $allowedPages = [
   'admin_doctor_slots_api',
   'admin_appointments',
   'appointment_api',
+  'office_api',
+  'doctor_schedule_api',
 ];
 
 if (!in_array($page, $allowedPages, true)) {
@@ -86,7 +88,7 @@ $adminOnly = [
   'admin_doctor_slots_api',
   'admin_appointments',
 ];
-$protected = ['dashboard', 'appointments', 'profile', 'office_dashboard', 'clinic_setup', 'doctor_schedule',];
+$protected = ['dashboard', 'appointments', 'profile', 'office_dashboard', 'clinic_setup', 'doctor_schedule', 'office_api', 'doctor_schedule_api'];
 
 /* ------------------------------ Auth guards ------------------------------ */
 if (in_array($page, $adminOnly, true)) {
@@ -454,6 +456,32 @@ switch ($page) {
     require_once __DIR__ . '/controller/AdminDashboardController.php';
     $data = AdminDashboardController::index();
     break;
+
+  case 'clinic_setup':
+    require_once __DIR__ . '/controller/ClinicSetupController.php';
+    $data = ClinicSetupController::index();
+    break;
+
+  case 'office_dashboard':
+    require_once __DIR__ . '/controller/OfficeDashboardController.php';
+    $data = OfficeDashboardController::index();
+    break;
+
+  case 'office_api':
+    require_once __DIR__ . '/controller/OfficeDashboardController.php';
+    OfficeDashboardController::api();
+    exit;
+
+  case 'doctor_schedule':
+    require_once __DIR__ . '/controller/DoctorScheduleController.php';
+    $data = DoctorScheduleController::index();
+    break;
+
+  case 'doctor_schedule_api':
+    require_once __DIR__ . '/controller/DoctorScheduleController.php';
+    DoctorScheduleController::api();
+    exit;
+
   default:
     // pages without controllers simply fall through with $data === null
     break;

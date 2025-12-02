@@ -469,12 +469,19 @@ class Office
         if (self::colExists($conn, 'Doctor', 'degree')) {
             $degreeExpr = "COALESCE(d.degree, '')";
         }
+        
+        $photoExpr = "NULL";
+        if (self::colExists($conn, 'Doctor', 'photo')) {
+            $photoExpr = "d.photo";
+        }
+        
         // ----- Fetch doctors -----
         $sql = "SELECT 
                 d.doctor_id,
                 $nameExpr   AS doc_name,
                 $specExpr   AS specialty,
-                $degreeExpr AS degree
+                $degreeExpr AS degree,
+                $photoExpr  AS photo
             FROM Doctor d
             $joinSpec
             WHERE d.office_id = ?

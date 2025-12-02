@@ -11,7 +11,12 @@
         <nav class="topbar__nav">
             <?php if (current_user()): ?>
                 <a class="btn" href="<?= BASE_URL ?>index.php?page=clinics">All Clinics</a>
+                <?php if ((current_user()['role'] ?? null) !== 'office'): ?>
                 <a class="btn" href="<?= BASE_URL ?>index.php?page=appointments">My Appointments</a>
+                <?php endif; ?>
+                <?php if ((current_user()['role'] ?? null) === 'office'): ?>
+                <a class="btn" href="<?= BASE_URL ?>index.php?page=office_dashboard">My Clinic</a>
+                <?php endif; ?>
 
                 <div class="dropdown">
                     <button id="accountBtn" class="dropbtn">
@@ -21,6 +26,9 @@
                     <div id="accountMenu" class="dropdown-content">
                         <?php if (current_user() && (current_user()['role'] ?? null) === 'admin'): ?>
                             <a href="<?= BASE_URL ?>index.php?page=admin_dashboard">Admin</a>
+                        <?php endif; ?>
+                        <?php if ((current_user()['role'] ?? null) === 'office'): ?>
+                            <a href="<?= BASE_URL ?>index.php?page=clinic_setup">Edit Clinic</a>
                         <?php endif; ?>
                         <a href="<?= BASE_URL ?>index.php?page=profile">Profile</a>
                         <a href="<?= BASE_URL ?>index.php?page=logout">Sign out</a>
