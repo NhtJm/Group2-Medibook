@@ -61,6 +61,7 @@ $allowedPages = [
   'admin_doctor_edit',
   'admin_doctor_slots_api',
   'admin_appointments',
+  'appointment_api',
 ];
 
 if (!in_array($page, $allowedPages, true)) {
@@ -117,6 +118,13 @@ if (($_GET['page'] ?? '') === 'admin_clinics_api') {
 if (($_GET['page'] ?? '') === 'admin_specialties_api') {
   require_once __DIR__ . '/controller/AdminSpecialtiesController.php';
   AdminSpecialtiesController::api();
+  exit;
+}
+
+/* Appointment API (cancel, reschedule) */
+if (($_GET['page'] ?? '') === 'appointment_api') {
+  require_once __DIR__ . '/controller/AppointmentApiController.php';
+  AppointmentApiController::index();
   exit;
 }
 
