@@ -18,6 +18,27 @@ class Appointment
     }
 
     /**
+     * Find appointment by ID for a specific office (clinic)
+     * Verifies the appointment belongs to a doctor of this office
+     */
+    public static function findByIdForOffice(int $appointmentId, int $officeId): ?array
+    {
+        $conn = self::getConnection();
+        $stmt = $conn->prepare("
+            SELECT a.appointment_id, a.slot_id, a.status, s.doctor_id 
+            FROM Appointment a 
+            JOIN Appointment_slot s ON s.slot_id = a.slot_id 
+            JOIN Doctor d ON d.doctor_id = s.doctor_id
+            WHERE a.appointment_id = ? AND d.office_id = ?
+        ");
+        $stmt->bind_param('ii', $appointmentId, $officeId);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        return $result ?: null;
+    }
+
+    /**
      * Create a new appointment
      */
     public static function create(int $patientId, int $slotId): int

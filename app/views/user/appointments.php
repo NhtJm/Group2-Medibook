@@ -5,10 +5,18 @@ if (!function_exists('e')) {
 $stats    = $data['stats']    ?? ['upcoming'=>0,'completed'=>0];
 $upcoming = $data['upcoming'] ?? [];
 $past     = $data['past']     ?? [];
+$isOffice = $data['is_office'] ?? false;
+$pageTitle = $isOffice ? 'Clinic Appointments' : 'My Appointments';
 ?>
 <section class="appt-hero">
   <div class="appt-wrap">
-    <h1 class="appt-title">My Appointments</h1>
+    <h1 class="appt-title"><?= e($pageTitle) ?></h1>
+    
+    <?php if ($isOffice): ?>
+    <p style="color:#666; margin-bottom:1.5rem;">
+      <a href="<?= BASE_URL ?>index.php?page=office_dashboard" style="color:#1f3b72;">← Back to Dashboard</a>
+    </p>
+    <?php endif; ?>
 
     <!-- Stats -->
     <div class="stat-grid">
@@ -53,6 +61,11 @@ $past     = $data['past']     ?? [];
               <div class="doc">
                 <h4><?= e($a['doctor_name']) ?></h4>
                 <small><?= e($a['specialty'] ?: 'Doctor') ?></small>
+                <?php if ($isOffice && !empty($a['patient_name'])): ?>
+                  <div style="margin-top:4px; color:#666; font-size:0.85em;">
+                    <strong>Patient:</strong> <?= e($a['patient_name']) ?>
+                  </div>
+                <?php endif; ?>
               </div>
             </div>
 
@@ -90,6 +103,11 @@ $past     = $data['past']     ?? [];
               <div class="doc">
                 <h4><?= e($a['doctor_name']) ?></h4>
                 <small><?= e($a['specialty'] ?: 'Doctor') ?></small>
+                <?php if ($isOffice && !empty($a['patient_name'])): ?>
+                  <div style="margin-top:4px; color:#666; font-size:0.85em;">
+                    <strong>Patient:</strong> <?= e($a['patient_name']) ?>
+                  </div>
+                <?php endif; ?>
               </div>
             </div>
             <div class="appt-mid">

@@ -30,13 +30,8 @@ class AppointmentApiController
                 throw new Exception('Not authenticated');
             }
 
-            // Get patient ID via Model
             $userId = (int) ($user['user_id'] ?? $user['id'] ?? 0);
-            $patientId = Patient::getPatientId($userId);
-            
-            if (!$patientId) {
-                throw new Exception('No patient profile');
-            }
+            $role = $user['role'] ?? 'patient';
 
             // Parse input
             $input = json_decode(file_get_contents('php://input'), true) ?: [];
@@ -47,8 +42,24 @@ class AppointmentApiController
                 throw new Exception('Invalid appointment ID');
             }
 
-            // Verify appointment belongs to patient via Model
-            $appointment = Appointment::findByIdForPatient($appointmentId, $patientId);
+            // Find appointment based on user role
+            $appointment = null;
+            
+            if ($role === 'office') {
+                // Office user - verify appointment belongs to their clinic
+                $officeId = (int) ($user['profile_id'] ?? 0);
+                if ($officeId <= 0) {
+                    throw new Exception('No office profile');
+                }
+                $appointment = Appointment::findByIdForOffice($appointmentId, $officeId);
+            } else {
+                // Patient user - verify appointment belongs to them
+                $patientId = Patient::getPatientId($userId);
+                if (!$patientId) {
+                    throw new Exception('No patient profile');
+                }
+                $appointment = Appointment::findByIdForPatient($appointmentId, $patientId);
+            }
             
             if (!$appointment) {
                 throw new Exception('Appointment not found');

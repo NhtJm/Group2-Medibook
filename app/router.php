@@ -33,6 +33,7 @@ $allowedPages = [
   // user area
   'dashboard',
   'appointments',
+  'appointment_api',
   'profile',
   'logout',
   'book',
@@ -139,6 +140,14 @@ if (($_GET['page'] ?? '') === 'office_doctor_slots_api') {
   OfficeDoctorSlotsApiController::index();
   exit;
 }
+
+/* Appointment API (cancel, reschedule) */
+if (($_GET['page'] ?? '') === 'appointment_api') {
+  require_once __DIR__ . '/controller/AppointmentApiController.php';
+  AppointmentApiController::index();
+  exit;
+}
+
 /* OAuth begin */
 if ($page === 'google_begin') {
   $role = $_POST['role'] ?? '';
@@ -499,6 +508,10 @@ switch ($page) {
   case 'doctor_schedule':
     require_once __DIR__ . '/controller/DoctorScheduleController.php';
     $data = DoctorScheduleController::index();
+    break;
+  case 'clinic_setup':
+    require_once __DIR__ . '/controller/ClinicSetupController.php';
+    $data = ClinicSetupController::index();
     break;
   default:
     // pages without controllers simply fall through with $data === null
