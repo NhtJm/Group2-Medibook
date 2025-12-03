@@ -2,6 +2,7 @@
 // app/controller/ClinicController.php
 require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../models/Office.php';
+require_once __DIR__ . '/../models/Doctor.php';
 
 class ClinicController
 {
@@ -23,7 +24,7 @@ class ClinicController
         $clinic  = Office::findOne($conn, $officeId);
         if (!$clinic) return ['clinic' => null, 'doctors' => []];
 
-        $doctors = Office::doctorsWithNext($conn, $officeId); // all doctors in this clinic
+        $doctors = Doctor::findByOffice($officeId);
         return ['clinic' => $clinic, 'doctors' => $doctors];
     }
 }

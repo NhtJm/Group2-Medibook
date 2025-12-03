@@ -1,7 +1,7 @@
 
 /* Top Bar (shared across pages) */
 .topbar{
-  position: sticky; top: 0; z-index: 10;
+  position: sticky; top: 0; z-index: 1100;
   background: #fff; border-bottom: 1px solid var(--border);
 }
 .topbar__inner{

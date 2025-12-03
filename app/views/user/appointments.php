@@ -102,10 +102,52 @@ $past     = $data['past']     ?? [];
                 <span><?= e($a['time_label']) ?></span>
               </div>
             </div>
-            <button class="btn-edit" type="button" data-id="<?= (int)$a['appointment_id'] ?>">Edit</button>
+            <span class="appt-status appt-status--past"><?= e(ucfirst($a['status'])) ?></span>
           </div>
         <?php endforeach; endif; ?>
       </div>
     </div>
   </div>
 </section>
+
+<!-- Modal Edit Appointment -->
+<div class="modal-overlay" id="editModal" hidden>
+  <div class="modal">
+    <button class="modal__close" type="button" aria-label="Close">&times;</button>
+    <h2 class="modal__title">Edit Appointment</h2>
+    <p class="modal__subtitle">
+      <span id="modalDoctor"></span><br>
+      <small id="modalDate"></small>
+    </p>
+    
+    <div class="modal__actions">
+      <button class="btn-action btn-action--reschedule" id="btnReschedule" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/>
+        </svg>
+        Reschedule
+      </button>
+      <button class="btn-action btn-action--cancel" id="btnCancel" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6M9 9l6 6"/>
+        </svg>
+        Cancel Appointment
+      </button>
+    </div>
+
+    <!-- Reschedule panel -->
+    <div class="modal__reschedule" id="reschedulePanel" hidden>
+      <h3>Select a new time slot</h3>
+      <div class="slot-list" id="slotList">
+        <p class="loading">Loading available slots...</p>
+      </div>
+      <div class="modal__btns">
+        <button class="btn-back" type="button" id="btnBack">Back</button>
+        <button class="btn-confirm" type="button" id="btnConfirmReschedule" disabled>Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>window.BASE_URL = '<?= BASE_URL ?>';</script>
+<script src="<?= BASE_URL ?>js/appointments.js"></script>

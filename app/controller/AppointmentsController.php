@@ -80,7 +80,7 @@ class AppointmentsController
             LEFT JOIN Office o             ON o.office_id = d.office_id
            WHERE a.patient_id = ?
              AND s.start_time >= NOW()
-             AND a.status IN ('booked','rescheduled','confirmed')
+             AND a.status = 'booked'
            ORDER BY s.start_time ASC";
         if ($st = $conn->prepare($sql)) {
             $st->bind_param('i', $patientId);

@@ -1,8 +1,12 @@
 <?php 
 require_once __DIR__ . '/../../db.php';  // db.php nằm trong app/
+require_once __DIR__ . '/../../../config/config.php';
+
 $conn = Database::get_instance();
 
 if (!$conn) { die('DB not connected'); }
+
+$errors = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $username = trim($_POST['username'] ?? '');
@@ -11,7 +15,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $confirm  = $_POST['password_confirm'] ?? '';
   $full_name = trim($_POST['full_name'] ?? $username);
 
-  $errors = [];
   if ($username === '') $errors[] = 'Username is required';
   if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'Valid email is required';
   if ($pass === '' || strlen($pass) < 8) $errors[] = 'Password must be at least 8 characters';
@@ -30,9 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $allowed_types = ['patient','webstaff','office','admin'];
   if (!in_array($account_type, $allowed_types, true)) $account_type = 'patient';
 
-  if ($errors) {
-    // render lại form + $errors (giữ nguyên phần view của bạn)
-  } else {
+  if (!$errors) {
     $hash = password_hash($pass, PASSWORD_DEFAULT);
 
     $conn->begin_transaction();
@@ -61,8 +62,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
 
       } elseif ($account_type === 'office') {
-        $stmt = $conn->prepare("INSERT INTO Office (user_id, name, status) VALUES (?, ?, 'pending')");
-        $stmt->bind_param('is', $user_id, $full_name);
+        $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $full_name), '-'));
+        $slug = $slug ?: 'office';
+        $slug = $slug . '-' . $user_id;
+        
+        $stmt = $conn->prepare("INSERT INTO Office (user_id, name, slug, status) VALUES (?, ?, ?, 'pending')");
+        $stmt->bind_param('iss', $user_id, $full_name, $slug);
         if (!$stmt->execute()) throw new Exception($stmt->error);
         $stmt->close();
 
@@ -74,14 +79,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       }
 
       $conn->commit();
-      header('Location: ' . rtrim(BASE_URL, '/') . '/index.php?page=login');
+      
+      if (session_status() === PHP_SESSION_NONE) session_start();
+      session_regenerate_id(true);
+      $_SESSION['user'] = [
+        'id' => $user_id,
+        'email' => $email,
+        'username' => $username,
+        'name' => $full_name,
+        'role' => $account_type,
+      ];
+      
+      $redirectPage = 'dashboard';
+      if ($account_type === 'admin') {
+        $redirectPage = 'admin_dashboard';
+      } elseif ($account_type === 'office') {
+        $redirectPage = 'office_dashboard';
+      }
+      
+      header('Location: ' . rtrim(BASE_URL, '/') . '/index.php?page=' . $redirectPage);
       exit;
 
     } catch (Throwable $e) {
       $conn->rollback();
       $errors[] = 'Register failed. Please try again.';
-      // error_log($e->getMessage());
-      // render lại form + $errors
+      error_log('Registration error: ' . $e->getMessage());
     }
   }
 }
@@ -173,13 +195,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <label><input type="radio" name="account_type" value="webstaff"> Web staff</label>
           <label><input type="radio" name="account_type" value="office"> Office</label>
         </div>
-      </div>
-
-      <div class="form__row" style="justify-content:flex-start; gap:8px;">
-        <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:#5c6b80;">
-          <input type="checkbox" name="is_professional" style="width:16px;height:16px;">
-          Signing up for your healthcare facility?
-        </label>
       </div>
 
       <!-- Submit -->
