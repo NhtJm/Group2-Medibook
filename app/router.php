@@ -61,6 +61,10 @@ $allowedPages = [
   'admin_doctor_edit',
   'admin_doctor_slots_api',
   'admin_appointments',
+  'forbidden',
+  'office_doctor_new',
+  'doctor_schedule',
+  'office_doctor_slots_api',
 ];
 
 if (!in_array($page, $allowedPages, true)) {
@@ -70,10 +74,6 @@ if (!in_array($page, $allowedPages, true)) {
 /* Route groups for guards */
 // in $adminOnly
 $adminOnly = [
-  'admin_dashboard',
-  'admin_clinics',
-  'admin_clinics_api',
-  'clinic_edit',
   'admin_specialties',
   'admin_specialties_api',
   'admin_specialty_edit',
@@ -83,21 +83,35 @@ $adminOnly = [
   'admin_doctors_office',
   'admin_doctor_edit',
   'admin_doctor_slots_api',
-  'admin_appointments',
 ];
-$protected = ['dashboard', 'appointments', 'profile', 'office_dashboard', 'clinic_setup', 'doctor_schedule',];
+// Pages that *moderators* (webstaff) can access alongside admins
+$staffPages = [
+  'admin_dashboard',
+  'admin_clinics',
+  'admin_clinics_api',
+  'admin_appointments',
+  'clinic_edit',
+];
+$officePages = ['office_dashboard', 'clinic_setup', 'doctor_schedule', 'office_doctor_new', 'office_doctor_slots_api'];
+$protected = ['dashboard', 'appointments', 'profile', 'office_dashboard', 'clinic_setup', 'doctor_schedule', 'doctor_new'];
 
 /* ------------------------------ Auth guards ------------------------------ */
-if (in_array($page, $adminOnly, true)) {
+if (in_array($page, $staffPages, true)) {
   require_auth_or_redirect();
-  require_role(['admin']); // only admins
+  require_role(['admin', 'webstaff']);       // moderators + admins
+} elseif (in_array($page, $adminOnly, true)) {
+  require_auth_or_redirect();
+  require_role(['admin']);                  // admins only
 } elseif (in_array($page, $protected, true)) {
-  require_auth_or_redirect();
+  require_auth_or_redirect();               // any signed-in user
 }
 if ($page === 'confirm' && $_SERVER['REQUEST_METHOD'] === 'POST') {
   require_auth_or_redirect();
 }
-
+if (in_array($page, $officePages, true)) {
+  require_auth_or_redirect();
+  require_role(['office', 'admin']);
+}
 /* --------------------------- Special routes (early) ----------------------- */
 /* JSON search (no layout) */
 if ($page === 'api.search') {
@@ -119,7 +133,12 @@ if (($_GET['page'] ?? '') === 'admin_specialties_api') {
   AdminSpecialtiesController::api();
   exit;
 }
-
+/* Office slots API (no layout) */
+if (($_GET['page'] ?? '') === 'office_doctor_slots_api') {
+  require_once __DIR__ . '/controller/OfficeDoctorSlotsApiController.php';
+  OfficeDoctorSlotsApiController::index();
+  exit;
+}
 /* OAuth begin */
 if ($page === 'google_begin') {
   $role = $_POST['role'] ?? '';
@@ -194,7 +213,8 @@ $labels = [
   'help' => 'Help',
   'contact' => 'Contact',
   'privacy' => 'Privacy',
-  'terms' => 'Terms'
+  'terms' => 'Terms',
+  'forbidden' => '403',
 ];
 
 $title = 'MEDIBOOK — ' . ($labels[$page] ?? 'MediBook');
@@ -235,6 +255,7 @@ if (
     'admin_doctors_office',
     'admin_doctor_edit',
     'admin_appointments',
+    'forbidden',
   ], true)
 ) {
   $css[] = STYLE_PATH . '/admin_sidebar.css';
@@ -345,11 +366,15 @@ $views = [
   'help' => __DIR__ . '/views/static/help.php',
   'contact' => __DIR__ . '/views/static/contact.php',
   'privacy' => __DIR__ . '/views/static/privacy.php',
-  'terms' => __DIR__ . '/views/static/terms.php'
+  'terms' => __DIR__ . '/views/static/terms.php',
+  'forbidden' => __DIR__ . '/views/errors/403.php',
+  'office_doctor_new' => __DIR__ . '/views/clinic/doctor_new.php',
 ];
 
 /* ----------------------------- Controller flow ---------------------------- */
-$brandTarget = current_user() ? 'dashboard' : 'home';
+$brandTarget = (current_user()
+  ? ((current_user()['role'] ?? null) === 'office' ? 'office_dashboard' : 'dashboard')
+  : 'home');
 $data = null;
 
 switch ($page) {
@@ -397,10 +422,21 @@ switch ($page) {
     $data = AdminClinicsController::index();
     break;
 
-  case 'clinic_edit':
+  case 'clinic_edit': {
+    // Let staff reach the URL, but only admin may edit.
+    $role = current_user()['role'] ?? '';
+    if ($role !== 'admin') {
+      http_response_code(403);
+      // render a friendly 403 page inside admin chrome
+      $page = 'forbidden';
+      $data = ['message' => 'Web staff cannot edit clinic info.'];
+      break;
+    }
+
     require_once __DIR__ . '/controller/AdminClinicEditController.php';
     $data = AdminClinicEditController::index(); // GET shows form, POST saves then redirects
     break;
+  }
 
   case 'admin_specialties':
     require_once __DIR__ . '/controller/AdminSpecialtiesController.php';
@@ -445,6 +481,24 @@ switch ($page) {
   case 'admin_dashboard':
     require_once __DIR__ . '/controller/AdminDashboardController.php';
     $data = AdminDashboardController::index();
+    break;
+  // app/router.php  (inside the big switch)
+  case 'office_dashboard':
+    require_once __DIR__ . '/controller/OfficeDashboardController.php';
+    $data = OfficeDashboardController::index();
+    if (isset($data['redirect'])) {
+      header('Location: ' . BASE_URL . 'index.php?page=' . $data['redirect']);
+      exit;
+    }
+    break;
+  // app/router.php  (inside the big switch)
+  case 'office_doctor_new':
+    require_once __DIR__ . '/controller/OfficeDoctorNewController.php';
+    $data = OfficeDoctorNewController::index();   // GET shows form, POST creates doctor
+    break;
+  case 'doctor_schedule':
+    require_once __DIR__ . '/controller/DoctorScheduleController.php';
+    $data = DoctorScheduleController::index();
     break;
   default:
     // pages without controllers simply fall through with $data === null

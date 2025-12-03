@@ -89,7 +89,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'role' => $user['role'],
         'profile_id' => $profileId,
       ];
-      header('Location: ' . BASE_URL . 'index.php?page=dashboard');
+      switch ($user['role']) {
+        case 'admin':
+        case 'webstaff':
+          $landing = 'admin_dashboard';
+          break;
+        case 'office':
+          $landing = 'office_dashboard';
+          break;
+        default:
+          $landing = 'dashboard'; // patients and others
+      }
+      header('Location: ' . BASE_URL . 'index.php?page=' . $landing);
       exit;
     }
   }
@@ -100,7 +111,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <div class="card">
     <?php
     $u = current_user();
-    $targetPage = ($u && (($u['role'] ?? '') === 'admin')) ? 'admin_dashboard' : ($u ? 'dashboard' : 'home');
+    $u = current_user();
+    if ($u) {
+      $role = $u['role'] ?? '';
+      if ($role === 'admin' || $role === 'webstaff') {
+        $targetPage = 'admin_dashboard';
+      } elseif ($role === 'office') {
+        $targetPage = 'office_dashboard';
+      } else {
+        $targetPage = 'dashboard';
+      }
+    } else {
+      $targetPage = 'home';
+    }
     ?>
     <div class="card__logo">
       <a class="auth-logo" href="<?= e(BASE_URL . 'index.php?page=' . $targetPage) ?>" aria-label="Back to Dashboard">

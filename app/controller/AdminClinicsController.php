@@ -90,7 +90,8 @@ class AdminClinicsController
             // Optional: role guard (let it pass if helpers are absent)
             if (function_exists('current_user')) {
                 $u = current_user();
-                if (!$u || (($u['role'] ?? '') !== 'admin')) {
+                $role = $u['role'] ?? '';
+                if (!$u || !in_array($role, ['admin', 'webstaff'], true)) {   // <- allow moderators
                     http_response_code(403);
                     echo json_encode(['ok' => false, 'error' => 'forbidden']);
                     exit;
