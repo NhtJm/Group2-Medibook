@@ -1,0 +1,139 @@
+<?php
+require_once __DIR__ . '/../app/model/OfficeModel.php';
+
+$officeModel = new OfficeModel();
+$conn = Database::get_instance();
+
+echo "<h2>=== TEST OFFICE MODEL ===</h2>";
+
+/* =============================
+   STEP 0: Setup User & Specialty
+   ============================= */
+
+// Tạo user office để test
+echo "<h3>== Test 0.1: Create Test User (role=office) ==</h3>";
+$conn->query("INSERT INTO Users (email, username, password_hash, full_name, role)
+              VALUES ('office_test@example.com', 'office_test', 'hashed123', 'Office Test User', 'office')");
+$user_id = $conn->insert_id;
+echo "Created test user_id = $user_id<br>";
+
+// Tạo specialty để liên kết office sau này
+echo "<h3>== Test 0.2: Create Test Specialty ==</h3>";
+$conn->query("INSERT INTO Medical_specialty (name, description)
+              VALUES ('Test Specialty', 'Used for Office Test')");
+$specialty_id = $conn->insert_id;
+echo "Created specialty_id = $specialty_id<br>";
+
+/* =============================
+   TEST 1: Thêm office mới
+   ============================= */
+echo "<h3>== Test 1: Add Office ==</h3>";
+$officeRes = $officeModel->addOffice(
+    $user_id,
+    "Test Office ABC",
+    "123 Test Street",
+    "https://testoffice.com",
+    "logo.png",
+    "This is a test office",
+    "pending"
+);
+print_r($officeRes);
+$office_id = $officeRes['office_id'] ?? null;
+if (!$office_id) die("❌ Cannot create office. Stop testing.");
+
+/* =============================
+   TEST 2: Lấy thông tin office theo ID
+   ============================= */
+echo "<h3>== Test 2: Get Office By ID ==</h3>";
+$office = $officeModel->getOfficeById($office_id);
+print_r($office);
+
+/* =============================
+   TEST 3: Lấy tất cả office
+   ============================= */
+echo "<h3>== Test 3: Get All Offices ==</h3>";
+$allOffices = $officeModel->getAllOffices();
+print_r($allOffices);
+
+/* =============================
+   TEST 4: Cập nhật office
+   ============================= */
+echo "<h3>== Test 4: Update Office ==</h3>";
+$updateOffice = $officeModel->updateOffice($office_id, [
+    "name" => "Updated Office ABC",
+    "address" => "456 Updated Street",
+    "website" => "https://updatedoffice.com",
+    "status" => "approved"
+]);
+print_r($updateOffice);
+
+/* =============================
+   TEST 5: Thêm số điện thoại
+   ============================= */
+echo "<h3>== Test 5: Add Office Phone ==</h3>";
+$phoneRes = $officeModel->addPhone($office_id, "0988123456");
+print_r($phoneRes);
+
+/* =============================
+   TEST 6: Lấy danh sách số điện thoại
+   ============================= */
+echo "<h3>== Test 6: Get Phones By Office ==</h3>";
+$phones = $officeModel->getPhonesByOffice($office_id);
+print_r($phones);
+
+/* =============================
+   TEST 7: Cập nhật số điện thoại
+   ============================= */
+echo "<h3>== Test 7: Update Phone ==</h3>";
+$updatePhone = $officeModel->updatePhone($office_id, "0988123456", "0999888777");
+print_r($updatePhone);
+echo "After update:<br>";
+print_r($officeModel->getPhonesByOffice($office_id));
+
+/* =============================
+   TEST 8: Xóa số điện thoại
+   ============================= */
+echo "<h3>== Test 8: Delete Phone ==</h3>";
+$deletedPhone = $officeModel->deletePhone($office_id, "0999888777");
+print_r($deletedPhone);
+echo "After deletion:<br>";
+print_r($officeModel->getPhonesByOffice($office_id));
+
+/* =============================
+   TEST 9: Thêm Office-Specialty
+   ============================= */
+echo "<h3>== Test 9: Add Office Specialty ==</h3>";
+$officeSpecRes = $officeModel->addOfficeSpecialty($office_id, $specialty_id);
+print_r($officeSpecRes);
+
+/* =============================
+   TEST 10: Lấy danh sách Specialty của Office
+   ============================= */
+echo "<h3>== Test 10: Get Specialties By Office ==</h3>";
+$officeSpecs = $officeModel->getSpecialtiesByOffice($office_id);
+print_r($officeSpecs);
+
+/* =============================
+   TEST 11: Xóa Office-Specialty
+   ============================= */
+echo "<h3>== Test 11: Delete Office Specialty ==</h3>";
+$delOfficeSpec = $officeModel->deleteOfficeSpecialty($office_id, $specialty_id);
+print_r($delOfficeSpec);
+
+/* =============================
+   TEST 12: Xóa Office
+   ============================= */
+echo "<h3>== Test 12: Delete Office ==</h3>";
+$deletedOffice = $officeModel->deleteOffice($office_id);
+print_r($deletedOffice);
+
+/* =============================
+   TEST 13: Dọn dẹp Specialty và User
+   ============================= */
+echo "<h3>== Test 13: Cleanup Specialty & User ==</h3>";
+$conn->query("DELETE FROM Medical_specialty WHERE specialty_id = $specialty_id");
+$conn->query("DELETE FROM Users WHERE user_id = $user_id");
+echo "✅ Cleanup completed.<br>";
+
+echo "<h2>=== ALL TESTS COMPLETED SUCCESSFULLY ===</h2>";
+?>

@@ -1,0 +1,179 @@
+<?php
+require_once __DIR__ . '/../app/model/UserModel.php';
+
+$userModel = new UserModel();
+
+// =============================
+// TEST 1: Thêm user mới
+// =============================
+echo "<h3>== Test 1: Add User ==</h3>";
+$userRes = $userModel->addUser("john_test_full", "123456", "John Full Test", "patient", "john@example.com");
+print_r($userRes);
+$user_id = $userRes['user_id'] ?? null;
+
+if (!$user_id) {
+    die("Cannot create user. Stop testing.");
+}
+
+// =============================
+// TEST 2: Lấy tất cả user
+// =============================
+echo "<h3>== Test 2: Get All Users ==</h3>";
+$allUsers = $userModel->getAllUsers();
+print_r($allUsers);
+
+// =============================
+// TEST 3: Lấy thông tin user theo ID
+// =============================
+echo "<h3>== Test 3: Get User By ID ==</h3>";
+$user = $userModel->getUserById($user_id);
+print_r($user);
+
+// =============================
+// TEST 4: Lấy thông tin user theo username
+// =============================
+echo "<h3>== Test 4: Get User By Username ==</h3>";
+$userByName = $userModel->getUserByUsername("john_test_full");
+print_r($userByName);
+
+// =============================
+// TEST 5: Cập nhật user
+// =============================
+echo "<h3>== Test 5: Update User ==</h3>";
+$updateRes = $userModel->updateUser($user_id, [
+    "full_name" => "John Updated",
+    "email" => "john_new@example.com",
+    "role" => "webstaff"
+]);
+print_r($updateRes);
+
+$userUpdated = $userModel->getUserById($user_id);
+print_r($userUpdated);
+
+// =============================
+// TEST 6: Thêm số điện thoại
+// =============================
+echo "<h3>== Test 6: Add Phone ==</h3>";
+$phoneRes = $userModel->addPhone($user_id, "0909000001");
+print_r($phoneRes);
+
+$phones = $userModel->getPhonesByUser($user_id);
+echo "Current Phones: ";
+print_r($phones);
+
+// =============================
+// TEST 7: Cập nhật số điện thoại
+// =============================
+echo "<h3>== Test 7: Update Phone ==</h3>";
+$updatePhone = $userModel->updatePhone($user_id, "0909000001", "0909111111");
+print_r($updatePhone);
+
+$phones = $userModel->getPhonesByUser($user_id);
+echo "Updated Phones: ";
+print_r($phones);
+
+// =============================
+// TEST 8: Xóa số điện thoại
+// =============================
+echo "<h3>== Test 8: Delete Phone ==</h3>";
+$deletedPhone = $userModel->deletePhone($user_id, "0909111111");
+print_r($deletedPhone);
+
+$phones = $userModel->getPhonesByUser($user_id);
+echo "Phones after deletion: ";
+print_r($phones);
+
+// =============================
+// TEST 9: Thêm staff
+// =============================
+echo "<h3>== Test 9: Add Staff ==</h3>";
+$staffRes = $userModel->addStaff($user_id, "support", "offline");
+print_r($staffRes);
+$staff_id = $staffRes['staff_id'] ?? null;
+
+// =============================
+// TEST 10: Lấy thông tin staff
+// =============================
+echo "<h3>== Test 10: Get Staff By User ==</h3>";
+$staff = $userModel->getStaffByUser($user_id);
+print_r($staff);
+
+// =============================
+// TEST 11: Cập nhật staff
+// =============================
+echo "<h3>== Test 11: Update Staff ==</h3>";
+if ($staff_id) {
+    $updateStaff = $userModel->updateStaff($staff_id, [
+        "status" => "online",
+        "position" => "developer"
+    ]);
+    print_r($updateStaff);
+    $staffUpdated = $userModel->getStaffByUser($user_id);
+    print_r($staffUpdated);
+}
+
+// =============================
+// TEST 12: Thêm patient
+// =============================
+echo "<h3>== Test 12: Add Patient ==</h3>";
+$patientRes = $userModel->addPatient($user_id, "2000-05-05", "VNPay", "active");
+print_r($patientRes);
+$patient_id = $patientRes['patient_id'] ?? null;
+
+// =============================
+// TEST 13: Lấy thông tin patient
+// =============================
+echo "<h3>== Test 13: Get Patient By User ==</h3>";
+$patient = $userModel->getPatientByUser($user_id);
+print_r($patient);
+
+// =============================
+// TEST 14: Cập nhật patient
+// =============================
+echo "<h3>== Test 14: Update Patient ==</h3>";
+if ($patient_id) {
+    $updatePatient = $userModel->updatePatient($patient_id, [
+        "status" => "inactive",
+        "payment" => "Momo"
+    ]);
+    print_r($updatePatient);
+    $patientUpdated = $userModel->getPatientByUser($user_id);
+    print_r($patientUpdated);
+}
+
+// =============================
+// TEST 15: Xóa staff
+// =============================
+echo "<h3>== Test 15: Delete Staff ==</h3>";
+if ($staff_id) {
+    $deletedStaff = $userModel->deleteStaff($staff_id);
+    print_r($deletedStaff);
+}
+
+// =============================
+// TEST 16: Xóa patient
+// =============================
+echo "<h3>== Test 16: Delete Patient ==</h3>";
+if ($patient_id) {
+    $deletedPatient = $userModel->deletePatient($patient_id);
+    print_r($deletedPatient);
+}
+
+// =============================
+// TEST 17: Xóa user
+// =============================
+echo "<h3>== Test 17: Delete User ==</h3>";
+if ($user_id) {
+    $deletedUser = $userModel->deleteUser($user_id);
+    print_r($deletedUser);
+}
+
+// =============================
+// TEST 18: Kiểm tra xóa thành công
+// =============================
+echo "<h3>== Test 18: Confirm Deletion ==</h3>";
+$deletedCheck = $userModel->getUserById($user_id);
+var_dump($deletedCheck);
+
+echo "<h3>All tests completed successfully.</h3>";
+?>
