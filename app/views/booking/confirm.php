@@ -1,74 +1,134 @@
 <?php
-// Read query values
-$clinicId = (int)($_GET['clinic'] ?? 1);
-$docId    = (int)($_GET['doc'] ?? 101);
-$dateStr  = $_GET['date'] ?? '';
-$timeStr  = $_GET['time'] ?? '';
+// app/views/booking/confirm.php
+if (!function_exists('e')) {
+  function e($s)
+  {
+    return htmlspecialchars((string) $s, ENT_QUOTES, 'UTF-8');
+  }
+}
+$flash = $data['flash'] ?? null;
+$flashType = $data['flash_type'] ?? 'info';
+$redirectTo = $data['redirect_to'] ?? null;
+$redirectAfter = (int) ($data['redirect_after'] ?? 0);
+$user = current_user();
+$clinic = $data['clinic'] ?? null;
+$doctor = $data['doctor'] ?? null;
+$when = $data['when'] ?? null;
+$slotId = $data['slot_id'] ?? null;
 
-// Demo lookup (same ids as earlier pages)
-$clinics = [
-  1 => ['name'=>'Blue Horizon Medical Center','addr'=>"142 King's Road, London, UK",'phone'=>'+44 20 7132 5542','site'=>'www.bluehorizonmed.co.uk'],
-  2 => ['name'=>'Green Health Clinic','addr'=>'25 Elm Street, London, UK','phone'=>'+44 20 7000 0000','site'=>'example.com'],
-  3 => ['name'=>'Sunrise Family Care','addr'=>'78 Maple Avenue, London, UK','phone'=>'+44 20 7000 0001','site'=>'example.com'],
-  4 => ['name'=>'Riverside Medical Practice','addr'=>'310 Bridge Street, London, UK','phone'=>'+44 20 7000 0002','site'=>'example.com'],
-];
-$doctors = [
-  101 => ['name'=>'Dr. Michael Lee','spec'=>'General Practitioner','initials'=>'ML'],
-  102 => ['name'=>'Dr. Anna Rodriguez','spec'=>'General Practitioner','initials'=>'AR'],
-  103 => ['name'=>'Dr. Emma Collins','spec'=>'General Practitioner','initials'=>'EC'],
-];
+// ✅ use the same login state as the rest of the app
+$me = function_exists('current_user') ? current_user() : ($_SESSION['user'] ?? null);
+$isLoggedIn = !empty($me);
 
-$clinic = $clinics[$clinicId] ?? $clinics[1];
-$doc    = $doctors[$docId]    ?? $doctors[101];
+// back link
+$back = BASE_URL . 'index.php?page=doctor'
+  . '&clinic=' . (int) ($clinic['office_id'] ?? $_GET['clinic'] ?? 0)
+  . '&doc=' . (int) ($doctor['doctor_id'] ?? $_GET['doc'] ?? 0);
 
-// Back link
-$back = BASE_URL."index.php?page=doctor&clinic=$clinicId&doc=$docId";
+// where to land after successful insert
+$appointmentsUrl = BASE_URL . 'index.php?page=appointments';
+
+// confirm endpoint (+slot)
+$confirmUrl = BASE_URL . 'index.php?page=confirm' . ($slotId ? '&slot=' . (int) $slotId : '');
+$confirmAction = $confirmUrl . '&next=' . rawurlencode($appointmentsUrl);
+
+// 🔁 not-logged-in bounce: login -> return to confirm with do=confirm -> auto insert -> appointments
+$loginNext = $confirmUrl . '&do=confirm&next=' . rawurlencode($appointmentsUrl);
+$loginUrl = BASE_URL . 'index.php?page=login&next=' . rawurlencode($loginNext);
+
+// avatar initials
+$ini = $doctor ? ($doctor['initials'] ?? 'DR') : 'DR';
 ?>
 <section class="conf-wrap">
-  <a class="conf-back" href="<?= htmlspecialchars($back) ?>">← Back to time selection</a>
+  <a class="conf-back" href="<?= e($back) ?>">Back to time selection</a>
 
   <div class="conf-card">
-    <div class="conf-logo">
-      <img src="<?= IMAGE_PATH ?>/Logo.svg" alt="MediBook">
-    </div>
+    <div class="conf-logo"><img src="<?= IMAGE_PATH ?>/logo.png" alt="MediBook"></div>
     <h1 class="conf-title">Appointment Summary</h1>
 
     <div class="conf-grid">
-      <!-- Doctor tile -->
+      <!-- Doctor -->
       <div class="conf-tile">
         <div class="tile-left">
-          <div class="avatar-lg"><?= htmlspecialchars($doc['initials']) ?></div>
+          <div class="avatar-lg"><?= e($ini) ?></div>
           <div>
-            <div class="tile-title"><?= htmlspecialchars($doc['name']) ?></div>
-            <div class="tile-sub"><?= htmlspecialchars($doc['spec']) ?></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Clinic tile -->
-      <div class="conf-tile">
-        <div class="tile-left">
-          <div class="avatar-img"></div>
-          <div>
-            <div class="tile-title"><?= htmlspecialchars($clinic['name']) ?></div>
-            <div class="tile-sub"><?= htmlspecialchars($clinic['addr']) ?></div>
-            <div class="tile-links">
-              <a href="tel:<?= preg_replace('/\s+/', '', $clinic['phone']) ?>"><?= htmlspecialchars($clinic['phone']) ?></a><br>
-              <a target="_blank" rel="noopener" href="//<?= htmlspecialchars($clinic['site']) ?>"><?= htmlspecialchars($clinic['site']) ?></a>
+            <div class="tile-title">
+              <?= e($doctor['name'] ?? 'Doctor') ?>
+              <?php if (!empty($doctor['degree'])): ?> - <?= e($doctor['degree']) ?><?php endif; ?>
             </div>
+            <div class="tile-sub"><?= e($doctor['specialty'] ?? 'Medical Doctor') ?></div>
           </div>
         </div>
       </div>
 
-      <!-- Date/Time tile -->
+      <!-- Clinic -->
+      <div class="conf-tile">
+        <div class="tile-left">
+          <?php if (!empty($clinic['logo'])): ?>
+            <img class="avatar-img" src="<?= e($clinic['logo']) ?>" alt="<?= e($clinic['name'] ?? 'Clinic') ?>">
+          <?php else: ?>
+            <div class="avatar-img"></div>
+          <?php endif; ?>
+          <div>
+            <div class="tile-title"><?= e($clinic['name'] ?? 'Clinic') ?></div>
+            <div class="tile-sub"><?= e($clinic['address'] ?? '') ?></div>
+            <?php if (!empty($clinic['phone'])): ?>
+              <div class="tile-links">
+                <a href="tel:<?= e(preg_replace('/[^\d+]/', '', $clinic['phone'])) ?>"><?= e($clinic['phone']) ?></a>
+              </div>
+            <?php endif; ?>
+          </div>
+        </div>
+      </div>
+
       <div class="conf-tile conf-tile--wide">
-        <div class="tile-title"><?= htmlspecialchars($dateStr ?: 'Select a date') ?></div>
-        <div class="tile-sub"><?= htmlspecialchars($timeStr ?: '') ?></div>
+        <div class="tile-title">Your time</div>
+        <div class="chips">
+          <?php if (!empty($when['date_label'])): ?>
+            <span class="chip chip--date"><?= e($when['date_label']) ?></span>
+          <?php endif; ?>
+          <?php if (!empty($when['time_label'])): ?>
+            <span class="chip chip--time"><?= e($when['time_label']) ?></span>
+          <?php endif; ?>
+        </div>
       </div>
     </div>
 
-    <form class="conf-actions" method="post" action="#">
-      <button class="btn-confirm" type="submit">Confirm</button>
-    </form>
+    <?php if (current_user()): ?>
+      <?php
+      $confirmUrl = BASE_URL . 'index.php?page=confirm'
+        . ($slotId ? '&slot=' . (int) $slotId : '');
+      $go = $confirmUrl . '&do=confirm&next='
+        . rawurlencode(BASE_URL . 'index.php?page=appointments');
+      ?>
+      <div class="conf-actions">
+        <a class="btn-confirm" href="<?= e($go) ?>">Confirm</a>
+      </div>
+    <?php else: ?>
+      <?php
+      $confirmUrl = BASE_URL . 'index.php?page=confirm'
+        . ($slotId ? '&slot=' . (int) $slotId : '');
+      $loginNext = $confirmUrl . '&do=confirm&next='
+        . rawurlencode(BASE_URL . 'index.php?page=appointments');
+      $loginUrl = BASE_URL . 'index.php?page=login&next=' . rawurlencode($loginNext);
+      ?>
+      <div class="conf-actions">
+        <a class="btn-confirm" href="<?= e($loginUrl) ?>">Confirm</a>
+      </div>
+    <?php endif; ?>
+
+
+    <?php if ($flash): ?>
+      <p class="notice notice--<?= e($flashType) ?>" role="status"><?= e($flash) ?></p>
+      <?php if ($redirectTo && $redirectAfter > 0): ?>
+        <script>
+          setTimeout(function () { window.location.href = "<?= e($redirectTo) ?>"; }, <?= (int) $redirectAfter ?>);
+        </script>
+      <?php endif; ?>
+    <?php endif; ?>
+
+    <?php if (!empty($data['error'])): ?>
+      <p class="notice notice--error" role="alert"><?= e($data['error']) ?></p>
+    <?php endif; ?>
   </div>
 </section>

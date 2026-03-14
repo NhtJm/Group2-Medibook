@@ -1,0 +1,177 @@
+/* ===== Shell & Header (page-only) ===== */
+.schedule-shell {
+  background: radial-gradient(circle at 20% 20%, #1a3c62 0%, #2f6fb0 60%, #68afd8 100%);
+  min-height: calc(100vh - 80px);
+  padding: 24px;
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #0d1726;
+}
+
+.schedule-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto 16px;
+  color: #0d1726;
+}
+
+.schedule-header__left .brand {
+  display: flex; align-items: center; gap: 8px;
+  font-weight: 600; font-size: 14px; color: #0d1726;
+}
+.schedule-header .brand__icon { width: 28px; height: 28px; }
+.schedule-header .brand__name { font-size: 14px; font-weight: 600; color: #0d1726; }
+
+.schedule-header__right .facility-switcher {
+  display: flex; align-items: center; gap: 4px;
+  color: #0d1726; font-size: 12px; line-height: 1.3;
+}
+.facility-switcher__name { color: #0d1726; font-size: 12px; }
+.facility-switcher__chevron { font-size: 12px; line-height: 1; }
+
+/* ===== White card container ===== */
+.schedule-card {
+  background: #fff;
+  border-radius: 12px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 32px 28px;
+  box-shadow: 0 24px 48px rgba(0,0,0,0.35);
+  box-sizing: border-box;
+}
+
+/* Top row: doc + save + user bubble */
+.schedule-docrow {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: "doc save user";
+  align-items: center;
+  column-gap: 24px;
+  row-gap: 16px;
+  margin-bottom: 16px;
+}
+
+.schedule-docrow__info { grid-area: doc; display: flex; align-items: center; gap: 16px; }
+.doc-avatar img { width:64px; height:64px; border-radius:8px; object-fit:cover; background:#d9dfe8; }
+.doc-meta__name { font-size:16px; font-weight:600; color:#0d1726; margin-bottom:4px; }
+.doc-meta__role { font-size:13px; color:#6b7380; }
+
+.save-btn {
+  grid-area: save;
+  background:#274686; border:none; color:#fff; font-size:14px; font-weight:600;
+  padding:10px 16px; border-radius:10px; cursor:pointer; min-width:120px; justify-self:start;
+}
+.save-btn:hover { filter:brightness(1.05); }
+
+.user-badge { grid-area: user; justify-self: end; }
+.user-badge__circle {
+  width:64px; height:64px; border-radius:50%;
+  background: radial-gradient(circle at 30% 30%, #ffffff 0%, #dfe3ef 70%);
+  border:4px solid #fff; box-shadow:0 12px 24px rgba(0,0,0,0.18);
+  display:grid; place-items:center; font-size:24px; font-weight:500; color:#1a1f2e; position:relative;
+}
+.user-badge__circle::after {
+  content:""; position:absolute; right:-8px; bottom:10px; width:14px; height:14px;
+  background:#fff; box-shadow:2px 4px 6px rgba(0,0,0,0.08); transform:rotate(45deg); border-radius:2px;
+}
+
+/* ===== Schedule-only buttons (scoped; won't touch site header) ===== */
+.de-schedule .btn,
+.schedule-card .btn {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid #dbe2ea;
+  background: #fff;
+  cursor: pointer;
+}
+.de-schedule .btn:hover,
+.schedule-card .btn:hover { box-shadow: 0 2px 10px rgba(32,56,103,.08); }
+.de-schedule .btn-primary,
+.schedule-card .btn-primary { background:#274686; border-color:#274686; color:#fff; }
+.de-schedule .btn-danger,
+.schedule-card .btn-danger { color:#a11b1b; border-color:#ffd3d1; background:#fff5f5; }
+.de-schedule .btn[disabled],
+.schedule-card .btn[disabled] { opacity:.6; cursor:not-allowed; }
+
+/* ===== Admin-style WEEK CALENDAR GRID (scoped under .de-schedule) ===== */
+.de-schedule .cal{ --rowH:24px; --cols:7; --gutterW:70px; --colGap:1px; --lineColor:#eef2f7; margin-top:10px; }
+
+.de-schedule .cal-header{ display:grid; grid-template-columns:var(--gutterW) 1fr; border-bottom:1px solid #e9edf5; }
+.de-schedule .cal-gutter{ background:#fff; }
+.de-schedule .cal-days{ display:grid; grid-template-columns:repeat(var(--cols),1fr); gap:var(--colGap); background:#fff; }
+.de-schedule .cal-days .day{ padding:8px 6px; font-weight:700; color:#1f315c; text-align:center; font-size:13px; }
+
+.de-schedule .cal-wrap{
+  display:grid; grid-template-columns:var(--gutterW) 1fr; height:640px; overflow:auto;
+  border-top:1px solid #e9edf5; border-bottom-left-radius:12px; border-bottom-right-radius:12px;
+}
+.de-schedule .cal-times{ background:#fff; border-right:1px solid #e9edf5; position:relative; }
+.de-schedule .cal-grid{ position:relative; background:#fff; }
+
+/* 15-minute ticks; each row is --rowH high */
+.de-schedule .cal-times .tick{
+  height:var(--rowH); border-bottom:1px solid var(--lineColor);
+  font-size:.86rem; color:#6b7280; display:flex; align-items:flex-start; justify-content:flex-end; padding:2px 8px 0 0;
+}
+.de-schedule .cal-times .tick.quarter{ opacity:.55; }
+
+.de-schedule .cal-cols{ position:absolute; inset:0; display:grid; grid-template-columns:repeat(var(--cols),1fr); gap:var(--colGap); }
+.de-schedule .cal-cols .col{ position:relative; border-right:1px solid #e9edf5; }
+
+/* horizontal grid lines */
+.de-schedule .cal-grid::before{
+  content:""; position:absolute; inset:0;
+  background:repeating-linear-gradient(to bottom, var(--lineColor), var(--lineColor) 1px, transparent 1px, transparent calc(var(--rowH)));
+  pointer-events:none;
+}
+
+/* Layer for slots */
+.de-schedule .cal-slots{ position:relative; inset:0; }
+
+/* Slot blocks */
+.de-schedule .slot{
+  position:absolute; left:0; right:0; margin:0 4px; border-radius:8px; border:1px solid;
+  padding:6px 8px; font-size:.86rem; line-height:1.2; cursor:pointer;
+  box-shadow:0 2px 10px rgba(32,56,103,.08); user-select:none; display:flex; align-items:center; justify-content:center; font-weight:600;
+}
+.de-schedule .slot.available{ background:#eaf6ee; border-color:#c9ead3; color:#0f5a32; }
+.de-schedule .slot.unavailable{ background:#fff5f5; border-color:#ffd3d1; color:#8a1d1d; }
+
+.de-schedule .cal-drag{ position:absolute; background:rgba(39,70,134,.12); border:1px solid rgba(39,70,134,.35); border-radius:8px; pointer-events:none; }
+
+/* Context menu (right-click) */
+.de-schedule .slot-menu{
+  position:fixed; z-index:3000; min-width:180px; padding:6px;
+  border:1px solid #e6ebf5; border-radius:10px; background:#fff; box-shadow:0 12px 30px rgba(32,56,103,.18);
+}
+.de-schedule .slot-menu .mitem{
+  width:100%; text-align:left; border:0; background:transparent; cursor:pointer; border-radius:8px; padding:8px 10px; color:#1f315c;
+}
+.de-schedule .slot-menu .mitem:hover{ background:#f5f7fb; }
+
+/* Popover editor (left-click) */
+.de-schedule .slot-pop{
+  position:fixed; z-index:3001; min-width:240px; padding:10px;
+  border:1px solid #e6ebf5; border-radius:10px; background:#fff; box-shadow:0 12px 30px rgba(32,56,103,.18);
+}
+.de-schedule .slot-pop .sp-head{ font-weight:700; color:#1f315c; margin-bottom:6px; }
+.de-schedule .slot-pop .sp-row{ display:flex; align-items:center; gap:10px; margin:8px 0; }
+.de-schedule .slot-pop label{ color:#4b587c; font-size:.92rem; display:flex; flex-direction:column; gap:6px; }
+.de-schedule .slot-pop .sp-note{ color:#6b7280; font-size:.85rem; }
+.de-schedule .slot-pop .sp-actions{ display:flex; gap:8px; justify-content:flex-end; margin-top:6px; }
+.de-schedule .slot-pop .sp-hr{ border:none; border-top:1px solid #edf1f7; margin:10px 0; }
+
+/* ===== Responsive ===== */
+@media (max-width: 900px) {
+  .schedule-shell{ padding:16px; }
+  .schedule-header{ flex-direction:column; align-items:flex-start; gap:8px; }
+  .schedule-card{ padding:20px; }
+  .schedule-docrow{
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "doc user" "save save";
+  }
+  .user-badge{ justify-self:end; }
+  .de-schedule .cal-wrap{ height:520px; }
+}

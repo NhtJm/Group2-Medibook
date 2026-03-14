@@ -1,0 +1,131 @@
+/* ========= Doctor Visit (doctor.css) ========= */
+
+/* Page wrap inherited from clinic.css: .clv-hero, .clv-white, .clv-wrap, .clv-main */
+
+/* ---------- Calendar card ---------- */
+.dv-schedule {
+  background:#fff;
+  border:1px solid var(--border, #e6e9ef);
+  border-radius:16px;
+  box-shadow:0 8px 24px rgba(13,23,38,.06);
+  overflow:hidden;
+}
+
+/* Header bar like the screenshot */
+.dv-schedule .calbar {
+  display:flex; align-items:center; justify-content:center;
+  gap:14px;
+  padding:14px 16px;
+  background:linear-gradient(90deg,#43a6dd 0%, #2f80d0 100%);
+  color:#fff; font-weight:800; font-size:18px;
+}
+
+/* Month nav buttons */
+.dv-schedule .calbar .nav {
+  display:grid; place-items:center;
+  width:32px; height:32px; border-radius:999px;
+  border:1px solid rgba(255,255,255,.55);
+  background:transparent; color:#fff;
+  cursor:pointer; text-decoration:none; font-size:18px;
+}
+.dv-schedule .calbar .nav:hover { background:rgba(255,255,255,.12); }
+
+/* Title */
+.dv-schedule .calbar .title { margin:0; }
+
+/* ---------- Calendar grid ---------- */
+.dv-schedule .cal {
+  padding:14px 16px 18px;
+}
+
+.dv-schedule .cal-head {
+  display:grid; grid-template-columns:repeat(7, 1fr); gap:8px;
+  color:#5b687a; font-weight:700; margin-bottom:8px;
+}
+.dv-schedule .cal-head > div {
+  text-align:center; padding:8px 0;
+}
+
+/* 5 rows x 7 columns cells */
+.dv-schedule .cal-body {
+  display:grid; grid-template-columns:repeat(7, 1fr); gap:8px;
+}
+
+.dv-schedule .cell {
+  display:block;
+  min-height:96px;
+  padding:12px;
+  border:1px solid var(--border, #e5e9f2);
+  border-radius:12px;
+  background:#fff;
+  text-decoration:none;
+  color:#0d1726;
+  position:relative;
+  transition:box-shadow .15s ease, border-color .15s ease, transform .02s;
+}
+.dv-schedule .cell:hover {
+  border-color:#cfe0ff;
+  box-shadow:0 6px 16px rgba(13,23,38,.06);
+}
+
+/* day number */
+.dv-schedule .cell .dnum { font-weight:800; font-size:16px; }
+
+/* sub text (e.g., "3 slots") */
+.dv-schedule .cell .dsub { margin-top:10px; font-size:12px; color:#2a5f3e; }
+
+/* empty cells */
+.dv-schedule .cell.empty {
+  background:#fafcff;
+  border:1px dashed transparent;
+  pointer-events:none;
+}
+
+/* today ring */
+.dv-schedule .cell.today { outline:2px solid #4c8dff; outline-offset:-2px; }
+
+/* selected day */
+.dv-schedule .cell.sel { box-shadow:0 0 0 3px #387cf7 inset; border-color:#9fc3ff; }
+
+/* has-availability dot */
+.dv-schedule .cell.has::after{
+  content:""; position:absolute; right:10px; top:10px;
+  width:8px; height:8px; border-radius:999px; background:#2e7df6;
+}
+
+/* ---------- Slots list card ---------- */
+.slots-card{
+  background:#fff;
+  border:1px solid var(--border, #e6e9ef);
+  border-radius:16px;
+  box-shadow:0 8px 24px rgba(13,23,38,.06);
+  padding:16px;
+}
+
+.slot-grid{ display:flex; flex-wrap:wrap; gap:10px; }
+.slot{
+  display:inline-block; padding:8px 12px; border-radius:999px;
+  background:#eaf1ff; border:1px solid #d5e1ff; color:#0d1726;
+  font-weight:700; text-decoration:none;
+}
+.slot:hover{ filter:brightness(.97); }
+
+/* ---------- Right info card stays from clinic.css ---------- */
+
+/* Responsive tweaks */
+@media (max-width:980px){
+  .dv-schedule .cal { padding:12px; }
+  .dv-schedule .cell { min-height:86px; }
+}
+/* past dates look disabled */
+.dv-schedule .cell.past{
+  color:#98a3b8;
+  background:#f6f8fc;
+  border-color:#e6eaf3;
+  border-style:dashed;
+  cursor:default;
+  pointer-events:none;          /* not clickable */
+  box-shadow:none;
+}
+.dv-schedule .cell.past .dsub{ color:#b9c3d3; }
+.dv-schedule .cell.past.has::after{ display:none; } /* hide blue dot */

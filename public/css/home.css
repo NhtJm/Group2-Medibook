@@ -1,0 +1,393 @@
+/* ============== Container ============== */
+.section__inner,
+.why__inner {
+  max-width: var(--container);
+  margin-inline: auto;
+  padding: 24px 16px;
+}
+
+.hero__inner {
+  max-width: var(--container);
+  margin-inline: auto;
+  padding: 5.7px 13px;
+}
+
+/* ============== Hero ============== */
+.hero {
+  background: linear-gradient(
+    100deg,
+    #0b1e3b 0%,
+    #1c3f78 45%,
+    #2f6fb0 75%,
+    #68afd8 100%
+  );
+  color: #fff;
+  position: relative;
+  min-height: clamp(520px, 70vh, 720px);
+  padding: 0 0 12px;
+  overflow: hidden; /* crop overflow from image glow */
+}
+.hero__title {
+  font-size: clamp(32px, 5vw, 64px);
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  margin: 6px 0 8px;
+}
+.hero__title span { opacity: 0.9; }
+.hero__lead {
+  max-width: 860px;
+  font-size: clamp(15px, 1.8vw, 20px);
+  opacity: 0.95;
+}
+
+/* ============== Search bar (responsive) ============== */
+.search {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 12px;
+  align-items: center;
+  --control-h: 56px;
+
+  background: #fff;
+  border: 1px solid #e6edf5;
+  border-radius: 28px;
+  padding: 18px;
+  width: clamp(320px, 92vw, 980px);
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow:
+    0 18px 40px rgba(20,30,70,.16),
+    0 2px 8px rgba(20,30,70,.08);
+}
+
+/* Anchor the search pill to the hero bottom and overlap */
+.hero .search {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  margin: 0;
+  z-index: 5;
+}
+.hero + .section {           /* section ngay sau hero */
+  padding-top: 30px;         /* was 120px */
+}
+
+.search__field label {
+  display: block;
+  font-weight: 700;
+  font-size: clamp(12px, 1.6vw, 13px);
+  color: #082b3a;
+  margin: 0 0 6px;
+}
+.search__field input {
+  width: 100%;
+  height: clamp(38px, 4.8vw, 44px);
+  border-radius: 999px;
+  border: 1px solid #dbe3ef;
+  background: #f7f9fc;
+  outline: none;
+  padding: 10px 14px;
+  color: #0d1726;
+  font-size: clamp(14px, 1.8vw, 16px);
+}
+.search__btn {
+  height: clamp(38px, 4.8vw, 44px);
+  padding: 0 clamp(16px, 3vw, 28px);
+  border: none;
+  border-radius: 999px;
+  background: #2f5bf0;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  align-self: end;
+  margin-top: -22px;
+  box-shadow: 0 6px 14px rgba(47, 91, 240, 0.28);
+}
+.search__btn:hover { filter: brightness(1.05); }
+.search__btn:active { transform: translateY(1px); }
+
+/* make room in the first white section so content doesn't sit under the pill */
+.section { background: #fff; }
+
+/* ============== Section ============== */
+.section__title {
+  font-size: clamp(22px, 2.4vw, 28px);
+  text-align: center;
+  margin: 6px 0 6px;
+}
+.section__bar {
+  width: 120px;
+  height: 10px;
+  border-radius: 8px;
+  background: #2f4b7f1a;
+  border: 2px solid #2f4b7f33;
+  margin: 8px auto 18px;
+}
+
+/* ============== Specialties cards ============== */
+.spec-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.spec-card {
+  background: #f6f7fb;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: 0 6px 18px rgba(13, 23, 38, 0.06);
+  overflow: hidden;
+}
+.spec-card__img {
+  display: block;
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+}
+.spec-card__body { padding: 12px 14px; }
+.spec-card__body h3 { margin: 4px 0; }
+.spec-card__body p {
+  margin: 0 0 8px;
+  color: #5c6b80;
+}
+.spec-card__link {
+  font-size: 13px;
+  color: #2456f0;
+  text-decoration: underline;
+}
+
+/* ============== Why choose ============== */
+/* GIỮ MÀU CŨ – KHÔNG đổi palette */
+  .why { padding: 64px 0 72px; }                  /* không dùng gradient */
+  .why__inner { max-width: 1100px; margin: 0 auto; padding: 0 16px; text-align: center; }
+
+  .why .section__title {                          /* giữ màu mặc định */
+    font-size: 36px; line-height: 1.2; font-weight: 700;
+    margin: 0 0 10px;
+  }
+  .why .section__bar {                            /* GIỮ màu #2563eb như trước */
+    width: 80px; height: 8px; background: #2563eb;
+    border-radius: 999px; margin: 0 auto 36px;
+  }
+
+  .why-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px; align-items: stretch;
+  }
+  @media (max-width: 960px){ .why-grid { grid-template-columns: 1fr; gap: 16px; } }
+
+  .why-card {
+    background: #fff;                             /* giữ nền trắng */
+    border: 1px solid #eef2f7;                    /* giữ viền cũ */
+    border-radius: 26px;                          /* bo lớn như hình */
+    padding: 28px 22px 26px;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.08);      /* bóng nhẹ */
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .why-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,0.10); }
+
+  .why-card__icon {
+    width: 76px; height: 76px; border-radius: 50%;
+    background: #eef6ff;                          /* GIỮ màu icon circle cũ */
+    position: relative; margin: 4px auto 16px; flex: none;
+  }
+  .why-card__icon::before {
+    content: ""; position: absolute; inset: 0; margin: auto;
+    width: 36px; height: 36px;                    /* icon to hơn */
+    background-image: var(--icon-url);
+    background-repeat: no-repeat; background-position: center; background-size: contain;
+  }
+
+  .why-card h3 { margin: 0 0 8px; font-size: 20px; font-weight: 700; }   /* giữ màu chữ mặc định */
+  .why-card p  { margin: 0; color: #4b5563; line-height: 1.55; font-size: 15px; }  /* GIỮ màu #4b5563 */
+
+/* ============== Companion ============== */
+/* (Đã sửa để 3 card luôn đều hàng ngang) */
+.companion {
+  background: #fff;
+  padding: 24px 0 48px;
+}
+.companion-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  align-items: stretch;               /* các ô bằng chiều cao */
+}
+.companion-item {
+  /* card feel + equal height layout */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+
+  /* nếu muốn plain (không viền) thì bỏ 4 dòng dưới */
+  background: #fff;
+  border: 1px solid #eef2f7;
+  border-radius: 26px;
+  box-shadow: 0 8px 22px rgba(0,0,0,.08);
+
+  padding: 22px 18px;
+  height: 100%;
+}
+.companion-item__img {
+  width: 120px;
+  height: 120px;          /* cố định để không nhảy bố cục */
+  object-fit: contain;
+  display: block;
+  margin: 0 auto 12px;
+  flex: none;
+}
+.companion-item h4 {
+  margin: 6px 0 8px;
+  font-weight: 700;
+  line-height: 1.25;
+  min-height: calc(1.25em * 2);   /* ~2 dòng để các card thẳng hàng */
+}
+.companion-item p {
+  color: #5c6b80;
+  margin: 4px auto 0;
+  max-width: 320px;
+  line-height: 1.55;
+  font-size: 15px;
+  margin-top: auto;               /* đẩy p xuống đáy card */
+}
+
+/* ============== Responsive ============== */
+@media (max-width: 960px) {
+  .spec-grid,
+  .why-grid,
+  .companion-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 900px){
+  /* keep hero tall, slightly less bottom room */
+  .hero{
+    min-height: 520px;
+    padding-bottom: 90px;
+  }
+
+  /* pill overlap a bit less */
+  .hero .search{ bottom: -100px; }
+
+  /* smaller, tighter pill */
+  .search{
+    grid-template-columns: 1fr;     /* stack fields */
+    row-gap: 12px;
+    width: min(88vw, 640px);
+    padding: 12px;
+    border-radius: 18px;
+  }
+
+  .search .search__field label{
+    text-align: center;
+    width: 100%;
+    display: block;
+    font-size: 13px;
+    margin: 0 0 6px;
+  }
+
+  .search__field input{
+    height: 42px;
+    font-size: 15px;
+  }
+
+  .search__btn{
+    grid-column: 1;
+    width: 100%;
+    height: 42px;
+    font-size: 15px;
+    margin-top: 0;
+    border-radius: 12px;
+    box-shadow: 0 6px 14px rgba(47,91,240,.24);
+  }
+
+  /* move the next section down just enough to clear the pill */
+  .hero + .section{ padding-top: 120px; }
+
+  /* Ẩn art, rơi về layout 1 cột */
+  .hero__inner{ grid-template-columns: 1fr; }
+  .hero__art{ display: none; }
+}
+
+@media (max-width: 640px) {
+  /* compact hero, disable overlap for stacked layout */
+  .hero {
+    min-height: auto;
+    padding: 36px 0 24px;
+  }
+
+  .search {
+    position: absolute;
+    grid-template-columns: 1fr;
+    bottom: -20px;
+    width: 92vw;
+  }
+
+  .search .search__field label {
+    text-align: center;
+    width: 100%;
+    display: block;
+    margin: 0 0 6px;
+  }
+  .search__btn {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: 100%;
+    min-width: 0;
+    margin-top: 0;
+  }
+  .section:first-of-type { padding-top: 90px; }
+}
+
+/* ============== Two-column hero layout ============== */
+.hero__inner{
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;  /* left copy, right art */
+  align-items: center;
+  gap: clamp(16px, 3vw, 32px);
+  position: relative;
+}
+
+/* Keep text block a comfortable width */
+.hero__copy{
+  z-index: 2;
+  max-width: 720px;
+}
+
+/* Right-side art */
+.hero__art{
+  justify-self: end;
+  align-self: end;
+  position: relative;
+  z-index: 1;
+}
+
+/* Image sizing and soft shadow */
+.hero__art img{
+  width: clamp(380px, 42vw, 560px);
+  height: auto;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 22px 40px rgba(13,23,38,.28));
+  transform: translateY(6px);
+}
+
+/* Optional soft glow behind the doctor */
+.hero__art::before{
+  content:"";
+  position:absolute;
+  right: -6%;
+  bottom: 2%;
+  width: clamp(420px, 44vw, 560px);
+  height: clamp(420px, 44vw, 560px);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255,255,255,.22), rgba(255,255,255,0));
+  z-index: -1;
+}
+
+/* Make the search pill span the whole hero width under both columns */
+.hero .search{ grid-column: 1 / -1; }

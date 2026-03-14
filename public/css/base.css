@@ -1,0 +1,51 @@
+/* Reset + tokens (shared) */
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  color:#0d1726;
+  background:#f7f9fc;
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+}
+main{
+  flex:1 0 auto;
+  display:flex;
+  flex-direction:column;
+}
+main > section,
+main > div{
+  flex:1 0 auto;
+}
+.site-footer{
+  flex-shrink:0;
+}
+:root{
+  --brand:#1663f9; --brand-600:#0b4fe3;
+  --ink:#0d1726; --muted:#5c6b80;
+  --border:#e5eaf2; --bg:#ffffff;
+  --radius:22px; --shadow:0 14px 40px rgba(13,23,38,.10);
+  --container:1120px;
+  --card-width: 560px;
+  --card-height: 620px;
+  --logo-size:40px;
+  --topbar-h: 56px;      /* header height */
+  --ctrl-h: 44px;        /* button/select height */
+}
+
+/* Shared buttons */
+.btn{
+  appearance:none; border:1px solid transparent; background:transparent;
+  color:var(--ink); padding:10px 14px; border-radius:12px; font-weight:600;
+  text-decoration:none; display:inline-flex; align-items:center; justify-content:center;
+}
+.btn--ghost{border-color:transparent}
+.btn--dark{background:#0b0b0b; border-color:#0b0b0b; color:#fff}
+.btn--dark:hover{filter:brightness(.94)}
+.btn--primary{background:var(--brand); border-color:var(--brand); color:#fff}
+.btn--primary:hover{background:var(--brand-600); border-color:var(--brand-600)}
+.btn--xl{height:46px; width:100%; border-radius:999px}
+
+
